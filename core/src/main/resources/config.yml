@@ -1,0 +1,37 @@
+prefix: '&6[AdvancedGift]'
+# No need to add a space at the end of the prefix. The plugin adds it automatically.
+
+enable-cooldown: false
+
+cooldown-time: 10
+# The amount of time in SECONDS before the players can use the gift command again.
+
+allow-gift-message: true
+# If false, the messaging feature will not be available to any and all players.
+
+message-censorship: false
+# If true, gifts with messages will be checked for any words from "word-filter" list below.
+
+send-censored-message: BLOCK
+# Whether to send the gift with censored message, or without, or don't send the gift at all.
+# Accepted variables are: WITH, WITHOUT, and BLOCK.
+
+word-filter:
+  # List of words that will be censored in the gift message. Wildcards "*" are supported.
+  # Usage and placement of wildcards will affect how the words are compared.
+  # Please refer to AdvancedGift resource page for information on how to use wildcards.
+  - fuck*
+  - shit*
+  - ass
+  - dumbass
+  - bitch
+  - bastard
+
+restrict-interworld-gift: false
+
+world-group-list:
+  # Gift exchanges will not go between worlds not in the same group as set below.
+  # Any world not listed will be considered as being blacklisted, and all gift activities will be blocked in these worlds.
+  - 'test1'
+  - 'test2, test3'
+  - 'world, world_nether, world_the_end'

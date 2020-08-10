@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.TrekkieEnderman</groupId>
+    <artifactId>advancedgift-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>parent</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <modules>
+        <module>core</module>
+        <module>API</module>
+        <module>spigot_1_8_R1</module>
+        <module>spigot_1_8_R2</module>
+        <module>spigot_1_8_R3</module>
+        <module>spigot_1_9_R1</module>
+        <module>spigot_1_9_R2</module>
+        <module>spigot_1_10_R1</module>
+        <module>spigot_1_13_R2</module>
+        <module>spigot_1_11_R1</module>
+        <module>spigot_1_12_R1</module>
+        <module>spigot_1_13_R1</module>
+        <module>spigot_1_14_R1</module>
+        <module>spigot_1_15_R1</module>
+        <module>spigot_1_16_R1</module>
+    </modules>
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.15-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>
