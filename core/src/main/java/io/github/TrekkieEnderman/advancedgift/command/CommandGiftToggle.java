@@ -1,7 +1,8 @@
-package io.github.TrekkieEnderman.advancedgift;
+package io.github.TrekkieEnderman.advancedgift.command;
 
 import java.util.UUID;
 
+import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,7 +13,7 @@ public class CommandGiftToggle implements CommandExecutor {
     private final AdvancedGift plugin;
     private String prefix;
 
-    CommandGiftToggle(AdvancedGift plugin) {
+    public CommandGiftToggle(AdvancedGift plugin) {
         this.plugin = plugin;
         this.prefix = this.plugin.prefix;
     }

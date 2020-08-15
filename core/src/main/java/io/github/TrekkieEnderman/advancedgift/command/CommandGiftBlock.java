@@ -1,7 +1,8 @@
-package io.github.TrekkieEnderman.advancedgift;
+package io.github.TrekkieEnderman.advancedgift.command;
 
 import java.util.UUID;
 
+import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -15,7 +16,7 @@ public class CommandGiftBlock implements CommandExecutor {
     private final AdvancedGift plugin;
     private String prefix;
 
-    CommandGiftBlock(AdvancedGift plugin) {
+    public CommandGiftBlock(AdvancedGift plugin) {
         this.plugin = plugin;
         this.prefix = this.plugin.prefix;
     }

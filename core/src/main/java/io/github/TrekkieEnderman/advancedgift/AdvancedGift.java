@@ -1,5 +1,8 @@
 package io.github.TrekkieEnderman.advancedgift;
 
+import io.github.TrekkieEnderman.advancedgift.command.CommandGift;
+import io.github.TrekkieEnderman.advancedgift.command.CommandGiftBlock;
+import io.github.TrekkieEnderman.advancedgift.command.CommandGiftToggle;
 import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,15 +33,15 @@ public class AdvancedGift extends JavaPlugin {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private ArrayList<String> togglePlayers;
     private HashMap<String, ArrayList<String>> blockPlayers = new HashMap<>();
-    ArrayList<String> spyPlayers;
+    public ArrayList<String> spyPlayers;
     private HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
-    String prefix, extLib;
-    static NMSInterface nms;
-    boolean canUseTooltips;
-    boolean isBefore1_9 = false;
-    boolean isBefore1_11 = false;
-    boolean isBefore1_13 = false;
-    boolean hasArtMap = false;
+    public String prefix, extLib;
+    public static NMSInterface nms;
+    public boolean canUseTooltips;
+    public boolean isBefore1_9 = false;
+    public boolean isBefore1_11 = false;
+    public boolean isBefore1_13 = false;
+    public boolean hasArtMap = false;
 
     @Override
     public void onEnable() {
@@ -153,7 +156,7 @@ public class AdvancedGift extends JavaPlugin {
         return this.giftBlockData;
     }
 
-    FileConfiguration getConfigFile() {
+    public FileConfiguration getConfigFile() {
         return this.configData;
     }
 
@@ -227,7 +230,7 @@ public class AdvancedGift extends JavaPlugin {
         }
     }
 
-    void addUUID(UUID playerUUID, String var, String secondUUID) {
+    public void addUUID(UUID playerUUID, String var, String secondUUID) {
         String uuid = playerUUID.toString();
         switch (var) {
             case "tg":
@@ -246,7 +249,7 @@ public class AdvancedGift extends JavaPlugin {
         }
     }
 
-    boolean containsUUID(UUID playerUUID, String var, String secondUUID) {
+    public boolean containsUUID(UUID playerUUID, String var, String secondUUID) {
         boolean bool = false;
         String uuid = playerUUID.toString();
         switch (var) {
@@ -265,7 +268,7 @@ public class AdvancedGift extends JavaPlugin {
         return bool;
     }
 
-    void removeUUID(UUID playerUUID, String var, String secondUUID) {
+    public void removeUUID(UUID playerUUID, String var, String secondUUID) {
         String uuid = playerUUID.toString();
         switch (var) {
             case "tg":
@@ -281,7 +284,7 @@ public class AdvancedGift extends JavaPlugin {
         }
     }
 
-    String getBlockList(UUID playerUUID) {
+    public String getBlockList(UUID playerUUID) {
         ArrayList<String> blockList = blockPlayers.get(playerUUID.toString());
         String playerBlockList = "";
         if (blockList != null) {
@@ -293,7 +296,7 @@ public class AdvancedGift extends JavaPlugin {
         return playerBlockList;
     }
 
-    boolean clearBlockList(UUID playerUUID) {
+    public boolean clearBlockList(UUID playerUUID) {
         String uuid = playerUUID.toString();
         if (blockPlayers.containsKey(uuid)) {
             blockPlayers.keySet().remove(uuid);
@@ -312,7 +315,7 @@ public class AdvancedGift extends JavaPlugin {
         }
     }
 
-    int getPlayerWorldGroup(Player player) {
+    public int getPlayerWorldGroup(Player player) {
         //int playerWorldGroup = -1;
         for (int key : worldList.keySet()) {
             ArrayList<String> values = worldList.get(key);
@@ -339,6 +342,7 @@ public class AdvancedGift extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        //TODO Move this part to a new class in command package.
         if (cmd.getName().equalsIgnoreCase("agreload")) {
             if (!(sender instanceof Player)) {
                 if (loadConfig()) getServer().getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Reloaded the config.");

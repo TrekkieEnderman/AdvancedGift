@@ -1,7 +1,8 @@
-package io.github.TrekkieEnderman.advancedgift;
+package io.github.TrekkieEnderman.advancedgift.command;
 
 import java.util.*;
 
+import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import me.Fupery.ArtMap.ArtMap;
 import me.Fupery.ArtMap.Painting.ArtistHandler;
 import org.bukkit.Bukkit;
@@ -30,7 +31,7 @@ public class CommandGift implements CommandExecutor {
     private boolean enableMessage;
     private String usage;
 
-    CommandGift(AdvancedGift plugin) {
+    public CommandGift(AdvancedGift plugin) {
         this.plugin = plugin;
         this.prefix = this.plugin.prefix;
         this.enableMessage = this.plugin.getConfigFile().getBoolean("allow-gift-message");
