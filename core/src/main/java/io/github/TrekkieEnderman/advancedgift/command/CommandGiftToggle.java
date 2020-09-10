@@ -4,12 +4,10 @@ import java.util.UUID;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class CommandGiftToggle implements CommandExecutor {
+public class CommandGiftToggle{
     private final AdvancedGift plugin;
     private String prefix;
 
@@ -18,12 +16,7 @@ public class CommandGiftToggle implements CommandExecutor {
         this.prefix = this.plugin.prefix;
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be run by a player.");
-            return true;
-        }
+    public void onCommand(CommandSender sender, String[] args) {
         String usage = ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/togglegift " + ChatColor.GRAY + "<on/off>";
         Player s = (Player) sender;
         UUID senderUUID = s.getUniqueId();
@@ -55,6 +48,6 @@ public class CommandGiftToggle implements CommandExecutor {
                 s.sendMessage(usage);
             }
         }
-        return true;
+        return;
     }
 }

@@ -1,13 +1,9 @@
 package io.github.TrekkieEnderman.advancedgift;
 
-import io.github.TrekkieEnderman.advancedgift.command.CommandGift;
-import io.github.TrekkieEnderman.advancedgift.command.CommandGiftBlock;
-import io.github.TrekkieEnderman.advancedgift.command.CommandGiftToggle;
+import io.github.TrekkieEnderman.advancedgift.command.CommandHandler;
 import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -84,10 +80,14 @@ public class AdvancedGift extends JavaPlugin {
             getLogger().info("Using Spigot's material enum instead.");
             extLib = "none";
         }
-        this.getCommand("gift").setExecutor(new CommandGift(this));
-        this.getCommand("togglegift").setExecutor(new CommandGiftToggle(this));
-        this.getCommand("giftblock").setExecutor(new CommandGiftBlock(this));
-        this.getCommand("giftblocklist").setExecutor(new CommandGiftBlock(this));
+        CommandHandler commandHandler = new CommandHandler(this);
+        this.getCommand("gift").setExecutor(commandHandler);
+        this.getCommand("togglegift").setExecutor(commandHandler);
+        this.getCommand("giftblock").setExecutor(commandHandler);
+        this.getCommand("giftblocklist").setExecutor(commandHandler);
+        this.getCommand("agreload").setExecutor(commandHandler);
+        this.getCommand("giftspy").setExecutor(commandHandler);
+        //todo register tab completer for the commands
         getLogger().info("===================================================");
         if (Bukkit.getPluginManager().getPlugin("ArtMap") != null) hasArtMap = true;
     }
@@ -311,7 +311,7 @@ public class AdvancedGift extends JavaPlugin {
             String[] array = world.split(", ");
             ArrayList<String> list = new ArrayList<>(Arrays.asList(array));
             worldList.put(key, list);
-            key += 1; //Previously "key = key + 1". If world restriction breaks, revert to this.
+            key += 1;
         }
     }
 
@@ -328,7 +328,7 @@ public class AdvancedGift extends JavaPlugin {
         return -1;
     }
 
-    private boolean loadConfig() {
+    public boolean loadConfig() {
         try {
             configData.load(configFile);
         } catch (IOException | InvalidConfigurationException e) {
@@ -337,65 +337,6 @@ public class AdvancedGift extends JavaPlugin {
         }
         loadWorldGroupList();
         prefix = ChatColor.translateAlternateColorCodes('&', this.getConfigFile().getString("prefix") + " ");
-        return true;
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        //TODO Move this part to a new class in command package.
-        if (cmd.getName().equalsIgnoreCase("agreload")) {
-            if (!(sender instanceof Player)) {
-                if (loadConfig()) getServer().getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Reloaded the config.");
-                else getServer().getConsoleSender().sendMessage(prefix + ChatColor.RED + "Failed to reload the config.");
-            } else {
-                if (sender.hasPermission("advancedgift.reload")) {
-                    if (loadConfig()) sender.sendMessage(prefix + ChatColor.GREEN + "Reloaded the config.");
-                    else sender.sendMessage(prefix + ChatColor.RED + "Failed to reload the config. Check the console for errors.");
-                } else sender.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this command!");
-            }
-        }
-        if (cmd.getName().equalsIgnoreCase("giftspy")) {
-            if (!(sender instanceof Player)) sender.sendMessage("This command can only be run by a player.");
-            else {
-                if (sender.hasPermission("advancedgift.gift.spy")) {
-                    String usage = ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/giftspy " + ChatColor.GRAY + "<on/off>";
-                    Player s = (Player) sender;
-                    UUID senderUUID = s.getUniqueId();
-                    String spyEnabled = prefix + ChatColor.GREEN + "Gift Spy enabled.";
-                    String spyDisabled = prefix + ChatColor.RED + "Gift Spy disabled.";
-                    if (args.length == 0) {
-                        if (!containsUUID(senderUUID, "spy", "")) {
-                            addUUID(senderUUID, "spy", "");
-                            s.sendMessage(spyEnabled);
-                        } else {
-                            removeUUID(senderUUID, "spy", "");
-                            s.sendMessage(spyDisabled);
-                        }
-                    } else {
-                        if (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("enable")) {
-                            if (!containsUUID(senderUUID, "spy", "")) {
-                                addUUID(senderUUID, "spy", "");
-                                s.sendMessage(spyEnabled);
-                            } else {
-                                s.sendMessage(prefix + ChatColor.GRAY + "Gift Spy is already enabled.");
-                            }
-                        } else if (args[0].equalsIgnoreCase("off") || args [0].equalsIgnoreCase("disable")) {
-                            if (containsUUID(senderUUID, "spy", "")) {
-                                removeUUID(senderUUID, "spy", "");
-                                s.sendMessage(spyDisabled);
-                            } else {
-                                s.sendMessage(prefix + ChatColor.GRAY + "Gift Spy is already disabled.");
-                            }
-                        } else {
-                            s.sendMessage(prefix + ChatColor.RED + "Cannot understand " + args[0] + "!");
-                            s.sendMessage(usage);
-                        }
-                    }
-                } else {
-                    sender.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this!");
-                }
-            }
-        }
         return true;
     }
 }

@@ -8,8 +8,6 @@ import me.Fupery.ArtMap.Painting.ArtistHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -25,7 +23,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 
 import com.meowj.langutils.lang.LanguageHelper;
 
-public class CommandGift implements CommandExecutor {
+public class CommandGift{
     private final AdvancedGift plugin;
     private String prefix;
     private boolean enableMessage;
@@ -42,53 +40,48 @@ public class CommandGift implements CommandExecutor {
     private String agLog = "[AG LOG] > ";
     private long diff;
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be run by a player.");
+    public void onCommand(CommandSender sender, String[] args) {
+        Player s = (Player) sender;
+        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
+            s.sendMessage(prefix + ChatColor.YELLOW + "Send your friend or foe a gift, anywhere and anytime, in an instant!");
+            s.sendMessage(ChatColor.YELLOW + "Hold something in your hand and use the following command. White text is required, and gray text is optional.");
+            s.sendMessage(usage);
         } else {
-            Player s = (Player) sender;
-            if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-                s.sendMessage(prefix + ChatColor.YELLOW + "Send your friend or foe a gift, anywhere and anytime, in an instant!");
-                s.sendMessage(ChatColor.YELLOW + "Hold something in your hand and use the following command. White text is required, and gray text is optional.");
-                s.sendMessage(usage);
+            Player target = (Bukkit.getServer().getPlayer(args[0]));
+            PlayerInventory sinv = s.getInventory();
+            @SuppressWarnings("deprecation")
+            ItemStack itemstack = (plugin.isBefore1_9 ? sinv.getItemInHand() : sinv.getItemInMainHand());
+            if (!(s.hasPermission("advancedgift.gift.send"))) {
+                s.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this command!");
+            } else if (target == null) {
+                s.sendMessage(prefix + ChatColor.RED + args[0] + " is not online!");
+            } else if (target == s.getPlayer()) {
+                s.sendMessage(prefix + ChatColor.RED + "You can't send yourself a gift!");
+            } else if (itemstack.getType() == Material.AIR) {
+                s.sendMessage(prefix + ChatColor.RED + "You need to hold something in your hand!");
             } else {
-                Player target = (Bukkit.getServer().getPlayer(args[0]));
-                PlayerInventory sinv = s.getInventory();
-                @SuppressWarnings("deprecation")
-                ItemStack itemstack = (plugin.isBefore1_9 ? sinv.getItemInHand() : sinv.getItemInMainHand());
-                if (!(s.hasPermission("advancedgift.gift.send"))) {
-                    s.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this command!");
-                } else if (target == null) {
-                    s.sendMessage(prefix + ChatColor.RED + args[0] + " is not online!");
-                } else if (target == s.getPlayer()) {
-                    s.sendMessage(prefix + ChatColor.RED + "You can't send yourself a gift!");
-                } else if (itemstack.getType() == Material.AIR) {
-                    s.sendMessage(prefix + ChatColor.RED + "You need to hold something in your hand!");
+                PlayerInventory tinv = target.getInventory();
+                if (args.length == 1) {
+                    if (canSendGift(s, target, tinv, itemstack, args)) {
+                        sendItem(s, target, sinv, tinv, itemstack, itemstack.getAmount(), "");
+                    }
                 } else {
-                    PlayerInventory tinv = target.getInventory();
-                    if (args.length == 1) {
-                        if (canSendGift(s, target, tinv, itemstack, args)) {
-                            sendItem(s, target, sinv, tinv, itemstack, itemstack.getAmount(), "");
-                        }
+                    if (args.length == 2) {
+                        check2ndArgument(s, target, sinv, tinv, itemstack, args, false);
                     } else {
-                        if (args.length == 2) {
+                        if (!enableMessage) {
                             check2ndArgument(s, target, sinv, tinv, itemstack, args, false);
+                        } else if (!(s.hasPermission("advancedgift.gift.message"))) {
+                            s.sendMessage(prefix + ChatColor.RED + "You don't have permission to send messages!");
+                            logDenied(s.getName(), s.getName() + "is missing permission node 'advancedgift.gift.message'.");
                         } else {
-                            if (!enableMessage) {
-                                check2ndArgument(s, target, sinv, tinv, itemstack, args, false);
-                            } else if (!(s.hasPermission("advancedgift.gift.message"))) {
-                                s.sendMessage(prefix + ChatColor.RED + "You don't have permission to send messages!");
-                                logDenied(s.getName(), s.getName() + "is missing permission node 'advancedgift.gift.message'.");
-                            } else {
-                                check2ndArgument(s, target, sinv, tinv, itemstack, args, true);
-                            }
+                            check2ndArgument(s, target, sinv, tinv, itemstack, args, true);
                         }
                     }
                 }
             }
         }
-        return true;
+        return;
     }
 
     private int getAmountHas(PlayerInventory sinv, ItemStack itemstack) {
@@ -306,7 +299,7 @@ public class CommandGift implements CommandExecutor {
             }
         }
         ItemStack[] itemToSend = itemList.toArray(new ItemStack[0]);
-        HashMap<Integer, ItemStack> excess = tinv.addItem(itemToSend); //TODO If returning excess screwed up during testing, fix this part.
+        HashMap<Integer, ItemStack> excess = tinv.addItem(itemToSend);
         if (!excess.isEmpty()) {
             for (Map.Entry<Integer, ItemStack> me : excess.entrySet()) {
                 int itemAmount = me.getValue().getAmount();

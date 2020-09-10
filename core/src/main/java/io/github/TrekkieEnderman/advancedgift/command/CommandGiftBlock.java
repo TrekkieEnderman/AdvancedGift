@@ -6,13 +6,12 @@ import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
 
-public class CommandGiftBlock implements CommandExecutor {
+public class CommandGiftBlock{
     private final AdvancedGift plugin;
     private String prefix;
 
@@ -22,12 +21,7 @@ public class CommandGiftBlock implements CommandExecutor {
     }
 
     @SuppressWarnings("deprecation")
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be run by a player.");
-            return true;
-        }
+    public void onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         Player s = (Player) sender;
         UUID senderUUID = s.getUniqueId();
         if (cmd.getName().equalsIgnoreCase("giftblock")) {
@@ -42,14 +36,14 @@ public class CommandGiftBlock implements CommandExecutor {
                     OfflinePlayer targetOffline = Bukkit.getOfflinePlayer(target);
                     if (!targetOffline.hasPlayedBefore()) {
                         s.sendMessage(prefix + ChatColor.RED + "No player going by " + target + " has played on here before.");
-                        return true;
+                        return;
                     }
                     targetUUID = targetOffline.getUniqueId().toString();
                     target = targetOffline.getName();
                 } else {
                     if (targetPlayer == s.getPlayer()) {
                         s.sendMessage(prefix + ChatColor.RED + "Are you trying to block yourself?");
-                        return true;
+                        return;
                     }
                     targetUUID = targetPlayer.getUniqueId().toString();
                     target = targetPlayer.getName();
@@ -88,7 +82,7 @@ public class CommandGiftBlock implements CommandExecutor {
             }
 
         }
-        return true;
+        return;
     }
 
 }
