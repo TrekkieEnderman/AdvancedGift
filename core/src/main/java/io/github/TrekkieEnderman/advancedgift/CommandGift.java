@@ -119,7 +119,7 @@ public class CommandGift implements CommandExecutor {
                 return;
                 //Add console log here?
             } else if (giveAmount < 0){
-                s.sendMessage(prefix = ChatColor.RED + "You can't have negative amount!");
+                s.sendMessage(prefix + ChatColor.RED + "You can't have negative amount!");
                 return;
             }
         } catch (NumberFormatException e) {
