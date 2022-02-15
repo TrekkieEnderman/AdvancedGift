@@ -92,7 +92,7 @@ public class CommandGift implements CommandExecutor {
 
     private int getAmountHas(PlayerInventory sinv, ItemStack itemstack) {
         int hasAmount = 0;
-        for (ItemStack item : sinv.getContents()) {
+        for (ItemStack item : sinv.getStorageContents()) { //getContents also returns offhand and armor slots, which we don't want to
             if ((item != null) && (item.isSimilar(itemstack))) {
                 hasAmount += item.getAmount();
             }
@@ -288,7 +288,7 @@ public class CommandGift implements CommandExecutor {
     private void sendItem (Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, int giveAmount, String message) {
         List<ItemStack> itemList = new ArrayList<>();
         int amountLeft = giveAmount;
-        for (ItemStack item : sinv.getContents()) {
+        for (ItemStack item : sinv.getStorageContents()) {
             if (item != null && item.isSimilar(itemstack) && amountLeft != 0) {
                 int itemAmount = item.getAmount();
                 if (itemAmount <= amountLeft) {
@@ -305,7 +305,7 @@ public class CommandGift implements CommandExecutor {
             }
         }
         ItemStack[] itemToSend = itemList.toArray(new ItemStack[0]);
-        HashMap<Integer, ItemStack> excess = tinv.addItem(itemToSend); //TODO If returning excess screwed up during testing, fix this part.
+        HashMap<Integer, ItemStack> excess = tinv.addItem(itemToSend);
         if (!excess.isEmpty()) {
             for (Map.Entry<Integer, ItemStack> me : excess.entrySet()) {
                 int itemAmount = me.getValue().getAmount();
