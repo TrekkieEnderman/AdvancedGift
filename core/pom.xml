@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>advancedgift-core</artifactId>
-    <version>1.10.9</version>
+    <version>1.10.11</version>
     <build>
         <directory>../target</directory>
         <finalName>AdvancedGift-${version}</finalName>
@@ -135,11 +135,16 @@
             <version>1_16_R3</version>
         </dependency>
         <dependency>
+            <groupId>io.github.TrekkieEnderman</groupId>
+            <artifactId>advancedgift-1_17_R1</artifactId>
+            <version>1_17_R1</version>
+        </dependency>
+        <dependency>
             <groupId>ArtMap</groupId>
             <artifactId>ArtMap</artifactId>
-            <version>3.5.4</version>
+            <version>3.8.1</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/ArtMap-3.5.4.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/ArtMap-3.8.1.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

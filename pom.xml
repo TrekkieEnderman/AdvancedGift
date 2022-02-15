@@ -39,6 +39,7 @@
         <module>spigot_1_16_R1</module>
         <module>spigot_1_16_R2</module>
         <module>spigot_1_16_R3</module>
+        <module>spigot_1_17_R1</module>
     </modules>
     <repositories>
         <repository>
@@ -50,7 +51,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.15-R0.1-SNAPSHOT</version>
+            <version>1.15.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
