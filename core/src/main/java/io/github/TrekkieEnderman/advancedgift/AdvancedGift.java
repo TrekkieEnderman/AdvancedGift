@@ -46,7 +46,8 @@ public class AdvancedGift extends JavaPlugin {
         getLogger().info("Checking server version  ------------------");
         String packageName = this.getServer().getClass().getPackage().getName();
         String version = packageName.substring(packageName.lastIndexOf('.') + 1);
-        getLogger().info("Version: " + version);
+        getLogger().info("NMS Version used: " + version);
+        getLogger().info("");
         if (version.startsWith("v1_8")) isBefore1_9 = true;
         if (isBefore1_9 || version.startsWith("v1_9") || version.equalsIgnoreCase("v1_10_R1")) isBefore1_11 = true;
         if (isBefore1_11 || version.equalsIgnoreCase("v1_11_R1") || version.equalsIgnoreCase("v1_12_R1")) isBefore1_13 = true;
@@ -54,16 +55,18 @@ public class AdvancedGift extends JavaPlugin {
             final Class<?> classy = Class.forName("io.github.TrekkieEnderman.advancedgift.nms." + version.toUpperCase());
             if (NMSInterface.class.isAssignableFrom(classy)) {
                 nms = (NMSInterface) classy.getConstructor().newInstance();
-                getLogger().info("Found NMS support for this server version!");
+                getLogger().info("This version is supported!");
                 getLogger().info("");
                 canUseTooltips = true;
             }
         } catch (final Exception e) {
-            getLogger().warning("ERROR! NMS support for this server version not found!");
-            getLogger().warning("Are you using a newer server version? Check for AdvancedGift updates at:");
-            getLogger().warning("www.spigotmc.org/resources/advancedgift.46458/");
-            getLogger().warning("In meantime, some features will be disabled for better compatibility.");
-            getLogger().warning("However other parts of AdvancedGift may will break!");
+            getLogger().warning("Warning!");
+            getLogger().warning("This plugin doesn't have support for the NMS version this server uses!");
+            getLogger().warning("In order to maintain compatibility with this server,");
+            getLogger().warning("Item text hoverover has been disabled in this plugin!");
+            getLogger().warning("Check for updates at www.spigotmc.org/resources/advancedgift.46458/");
+            getLogger().warning("");
+            getLogger().warning("If this plugin still breaks, please contact TrekkieEnderman immediately.");
             canUseTooltips = false;
             getLogger().info("");
         }
@@ -72,13 +75,13 @@ public class AdvancedGift extends JavaPlugin {
         loadFiles();
         getLogger().info("");
 
-        getLogger().info("Searching for a material lib  -----------------");
+        getLogger().info("Searching for a material library  -----------------");
         if (Bukkit.getPluginManager().getPlugin("LangUtils") != null) {
-            getLogger().info("Language Utils found. Using it.");
+            getLogger().info("Language Utils found. This library will be used.");
             extLib = "LangUtils";
         } else {
-            getLogger().info("No supported material lib found.");
-            getLogger().info("Using Spigot's material enum instead.");
+            getLogger().info("No supported material library found.");
+            getLogger().info("Spigot's material enum will be used instead.");
             extLib = "none";
         }
         this.getCommand("gift").setExecutor(new CommandGift(this));
