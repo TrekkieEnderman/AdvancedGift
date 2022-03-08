@@ -1,6 +1,7 @@
 package io.github.TrekkieEnderman.advancedgift;
 
 import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -90,6 +91,7 @@ public class AdvancedGift extends JavaPlugin {
         this.getCommand("giftblocklist").setExecutor(new CommandGiftBlock(this));
         getLogger().info("===================================================");
         if (Bukkit.getPluginManager().getPlugin("ArtMap") != null) hasArtMap = true;
+        startMetrics();
     }
 
     private void loadFiles() {
@@ -338,6 +340,10 @@ public class AdvancedGift extends JavaPlugin {
         loadWorldGroupList();
         prefix = ChatColor.translateAlternateColorCodes('&', this.getConfigFile().getString("prefix") + " ");
         return true;
+    }
+
+    private void startMetrics() {
+        new Metrics(this, 13627);
     }
 
     @Override
