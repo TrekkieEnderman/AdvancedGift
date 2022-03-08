@@ -61,23 +61,8 @@
         </dependency>
         <dependency>
             <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_8_R1</artifactId>
-            <version>1_8_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_8_R2</artifactId>
-            <version>1_8_R2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
             <artifactId>advancedgift-1_8_R3</artifactId>
             <version>1_8_R3</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_9_R1</artifactId>
-            <version>1_9_R1</version>
         </dependency>
         <dependency>
             <groupId>io.github.TrekkieEnderman</groupId>
@@ -101,11 +86,6 @@
         </dependency>
         <dependency>
             <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_13_R1</artifactId>
-            <version>1_13_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
             <artifactId>advancedgift-1_13_R2</artifactId>
             <version>1_13_R2</version>
         </dependency>
@@ -118,16 +98,6 @@
             <groupId>io.github.TrekkieEnderman</groupId>
             <artifactId>advancedgift-1_15_R1</artifactId>
             <version>1_15_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_16_R1</artifactId>
-            <version>1_16_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_16_R2</artifactId>
-            <version>1_16_R2</version>
         </dependency>
         <dependency>
             <groupId>io.github.TrekkieEnderman</groupId>
