@@ -307,25 +307,19 @@ public class CommandGift implements CommandExecutor {
         ItemStack[] itemToSend = itemList.toArray(new ItemStack[0]);
         HashMap<Integer, ItemStack> excess = tinv.addItem(itemToSend);
         if (!excess.isEmpty()) {
+            s.sendMessage(prefix + ChatColor.RED + target.getName() + "'s inventory was nearly full when you sent the gift. Only part of the gift was sent.");
+            target.sendMessage(prefix + ChatColor.RED + "Your inventory was nearly full when the gift was sent. Only part of the gift was received.");
+            logCustom("WARNING: Sent only a part of " + s.getName() + "'s gift: " + target.getName() + "'s inventory was nearly full.");
             for (Map.Entry<Integer, ItemStack> me : excess.entrySet()) {
                 int itemAmount = me.getValue().getAmount();
                 giveAmount -= itemAmount;
                 sinv.addItem(me.getValue());
             }
-            getMaterial(s, target, itemstack, giveAmount, message);
-            if (!message.isEmpty()) {
-                s.sendMessage(ChatColor.GOLD + "Your message: " + ChatColor.WHITE + message);
-                target.sendMessage(ChatColor.GOLD + s.getName() + "'s message: " + ChatColor.WHITE + message);
-            }
-            s.sendMessage(prefix + ChatColor.RED + target.getName() + "'s inventory was nearly full when you sent the gift. Only part of the gift was sent.");
-            target.sendMessage(prefix + ChatColor.RED + "Your inventory was nearly full when the gift was sent. Only part of the gift was received.");
-            logCustom("WARNING: Sent only a part of " + s.getName() + "'s gift: " + target.getName() + "'s inventory was nearly full.");
-        } else {
-            getMaterial(s, target, itemstack, giveAmount, message);
-            if (!message.isEmpty()) {
-                s.sendMessage(ChatColor.GOLD + "Your message: " + ChatColor.WHITE + message);
-                target.sendMessage(ChatColor.GOLD + s.getName() + "'s message: " + ChatColor.WHITE + message);
-            }
+        }
+        getMaterial(s, target, itemstack, giveAmount, message);
+        if (!message.isEmpty()) {
+            s.sendMessage(ChatColor.GOLD + "Your message: " + ChatColor.WHITE + message);
+            target.sendMessage(ChatColor.GOLD + s.getName() + "'s message: " + ChatColor.WHITE + message);
         }
     }
 
