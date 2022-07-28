@@ -129,6 +129,11 @@
             <version>1_18_R2</version>
         </dependency>
         <dependency>
+            <groupId>io.github.TrekkieEnderman</groupId>
+            <artifactId>advancedgift-1_19_R1</artifactId>
+            <version>1_19_R1</version>
+        </dependency>
+        <dependency>
             <groupId>com.gitlab.blockstack</groupId>
             <artifactId>ArtMap</artifactId>
             <version>3.8.1</version>
