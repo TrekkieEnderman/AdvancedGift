@@ -72,15 +72,15 @@ public class CommandGift implements CommandExecutor {
                         }
                     } else {
                         if (args.length == 2) {
-                            check2ndArgument(s, target, sinv, tinv, itemstack, args, false);
+                            checkAmountInput(s, target, sinv, tinv, itemstack, args, false);
                         } else {
                             if (!enableMessage) {
-                                check2ndArgument(s, target, sinv, tinv, itemstack, args, false);
+                                checkAmountInput(s, target, sinv, tinv, itemstack, args, false);
                             } else if (!(s.hasPermission("advancedgift.gift.message"))) {
                                 s.sendMessage(prefix + ChatColor.RED + "You don't have permission to send messages!");
-                                logDenied(s.getName(), s.getName() + "is missing permission node 'advancedgift.gift.message'.");
+                                logGiftDenied(s.getName(), s.getName() + "is missing permission node 'advancedgift.gift.message'.");
                             } else {
-                                check2ndArgument(s, target, sinv, tinv, itemstack, args, true);
+                                checkAmountInput(s, target, sinv, tinv, itemstack, args, true);
                             }
                         }
                     }
@@ -90,7 +90,7 @@ public class CommandGift implements CommandExecutor {
         return true;
     }
 
-    private int getAmountHas(PlayerInventory sinv, ItemStack itemstack) {
+    private int getTotalAmountHas(PlayerInventory sinv, ItemStack itemstack) {
         int hasAmount = 0;
         for (ItemStack item : sinv.getStorageContents()) { //getContents also returns offhand and armor slots, which we don't want to
             if ((item != null) && (item.isSimilar(itemstack))) {
@@ -100,9 +100,9 @@ public class CommandGift implements CommandExecutor {
         return hasAmount;
     }
 
-    private void check2ndArgument(Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, String[] args, boolean hasMessage) {
+    private void checkAmountInput(Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, String[] args, boolean hasMessage) {
         String amountAsString = args[1];
-        int hasAmount = getAmountHas(sinv, itemstack);
+        int hasAmount = getTotalAmountHas(sinv, itemstack);
         int giveAmount;
         if (amountAsString.equalsIgnoreCase("hand")) {
             giveAmount = itemstack.getAmount();
@@ -112,7 +112,7 @@ public class CommandGift implements CommandExecutor {
             giveAmount = Integer.parseInt(amountAsString);
             if (giveAmount > hasAmount) {
                 s.sendMessage(prefix + ChatColor.RED + "You don't have that much of that item! Please specify lower amount or use \"all\".");
-                logDenied(s.getName(), s.getName() + " doesn't have the amount specified.");
+                logGiftDenied(s.getName(), s.getName() + " doesn't have the amount specified.");
                 return;
             } else if (giveAmount == 0) {
                 s.sendMessage(prefix + ChatColor.RED + "You can't give your friend nothing!");
@@ -129,7 +129,7 @@ public class CommandGift implements CommandExecutor {
             //Add console log here?
         }
         if (canSendGift(s, target, tinv, itemstack, args)) {
-            if (hasMessage) getMessage(s, target, sinv, tinv, itemstack, giveAmount, args);
+            if (hasMessage) checkMessageInput(s, target, sinv, tinv, itemstack, giveAmount, args);
             else sendItem(s, target, sinv, tinv, itemstack, giveAmount, "");
         }
     }
@@ -145,7 +145,7 @@ public class CommandGift implements CommandExecutor {
 
         if (isVanished(target) && !s.hasPermission("advancedgift.bypass.vanish")) {
             s.sendMessage(prefix + ChatColor.RED + args[0] + " is not online!");
-            logDenied(sName, "Can't give gifts to vanished players without permission node 'advancedgift.bypass.vanish'");
+            logGiftDenied(sName, "Can't give gifts to vanished players without permission node 'advancedgift.bypass.vanish'");
             return false;
         }
         if (enableWorldRestrict) {
@@ -153,24 +153,24 @@ public class CommandGift implements CommandExecutor {
             int tWorldGroup = plugin.getPlayerWorldGroup(target);
             if (sWorldGroup == -1 && !(s.hasPermission("advancedgift.bypass.world.blacklist"))) {
                 s.sendMessage(prefix + ChatColor.RED + "Sorry! The world you are in is blacklisted from gift activities.");
-                logDenied(sName, sName + " is in " + s.getWorld().getName() + ", a blacklisted world.");
+                logGiftDenied(sName, sName + " is in " + s.getWorld().getName() + ", a blacklisted world.");
                 return false;
             }
             if (tWorldGroup == -1 && !(s.hasPermission("advancedgift.bypass.world.blacklist"))) {
                 s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " is in a world blacklisted from gift activities.");
-                logDenied(sName, "Target " + tName + " is in " + target.getWorld().getName() + ", a blacklisted world.");
+                logGiftDenied(sName, "Target " + tName + " is in " + target.getWorld().getName() + ", a blacklisted world.");
                 return false;
             }
             if (sWorldGroup != (tWorldGroup) && !(s.hasPermission("advancedgift.bypass.world.restriction"))) {
                 s.sendMessage(prefix + ChatColor.RED + "Sorry! You and " + tName + " are not in the same world or group of worlds.");
                 s.sendMessage(ChatColor.RED + "You cannot send the gift due to an interworld gift restriction.");
-                logDenied(sName, sName + " and " + tName + " are not in the same group of worlds.");
+                logGiftDenied(sName, sName + " and " + tName + " are not in the same group of worlds.");
                 return false;
             }
         }
         if (!(target.hasPermission("advancedgift.gift.receive"))) {
             s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " doesn't have permission to receive gifts.");
-            logDenied(sName, tName + " is missing permission node 'advancedgift.gift.receive'.");
+            logGiftDenied(sName, tName + " is missing permission node 'advancedgift.gift.receive'.");
             return false;
         }
         if (plugin.hasArtMap) {
@@ -180,11 +180,11 @@ public class CommandGift implements CommandExecutor {
                 ArtistHandler artistHandler = artMap.getArtistHandler();
                 if (artistHandler.containsPlayer(s)) {
                     s.sendMessage(prefix + ChatColor.RED + "Sorry! You cannot send gifts while painting!");
-                    logDenied(sName, "ArtMap has force-artkit enabled and " + sName + "is currently making an artmap.");
+                    logGiftDenied(sName, "ArtMap has force-artkit enabled and " + sName + "is currently making an artmap.");
                     return false;
                 } else if (artistHandler.containsPlayer(target)) {
                     s.sendMessage(prefix + ChatColor.RED + "Sorry! " + target.getName() + " is currently painting and cannot receive gifts.");
-                    logDenied(sName, "ArtMap has force-artkit enabled and " + tName + "is currently making an artmap.");
+                    logGiftDenied(sName, "ArtMap has force-artkit enabled and " + tName + "is currently making an artmap.");
                     return false;
                 }
 
@@ -192,12 +192,12 @@ public class CommandGift implements CommandExecutor {
         }
         if (plugin.containsUUID(targetUUID, "tg", "")) {
             s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " has disabled their ability to receive gifts.");
-            logDenied(sName, tName + " has their ability to receive gifts disabled.");
+            logGiftDenied(sName, tName + " has their ability to receive gifts disabled.");
             return false;
         }
         if (plugin.containsUUID(targetUUID, "block", senderUUID.toString())) {
             s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " is blocking gifts from you.");
-            logDenied(sName, tName + " has " + sName + " on their gift block list.");
+            logGiftDenied(sName, tName + " has " + sName + " on their gift block list.");
             return false;
         }
         if (hasCooldownPassed(s, senderUUID, cooldownTime, enableCooldown)) {
@@ -212,14 +212,14 @@ public class CommandGift implements CommandExecutor {
                 if (space == 0) {
                     s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + "'s inventory is full.");
                     target.sendMessage(prefix + ChatColor.RED + s.getName() + " attempted to send you a gift, but your inventory is full.");
-                    logDenied(sName, tName + "'s inventory is full.");
+                    logGiftDenied(sName, tName + "'s inventory is full.");
                     return false;
                 }
             }
             if (enableCooldown) cooldown.put(senderUUID, System.currentTimeMillis());
         } else {
             s.sendMessage(prefix + ChatColor.RED + "Please wait another " + ChatColor.YELLOW + (cooldownTime - diff) + ((cooldownTime-diff) != 1 ? " seconds " : " second ") + ChatColor.RED + "before /gift can be used again.");
-            logDenied(sName, sName + "'s /gift cooldown hasn't ended yet.");
+            logGiftDenied(sName, sName + "'s /gift cooldown hasn't ended yet.");
             return false;
         }
         return true;
@@ -241,7 +241,7 @@ public class CommandGift implements CommandExecutor {
         }
     }
 
-    private void getMessage(Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, int giveAmount, String[] args) {
+    private void checkMessageInput(Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, int giveAmount, String[] args) {
         boolean enableCensorship = plugin.getConfigFile().getBoolean("message-censorship");
         String[] messageArray = Arrays.copyOfRange(args, 2, args.length);
         if (enableCensorship) {
@@ -270,14 +270,14 @@ public class CommandGift implements CommandExecutor {
                 if (sendCensoredMessage.equalsIgnoreCase("with")) {
                     sendItem(s, target, sinv, tinv, itemstack, giveAmount, message);
                     //Add a warning to the sender?
-                    logCustom("WARNING: Censored the banned words from " + s.getName() + "'s gift message: " + censoredList);
+                    logMessage("WARNING: Censored the banned words from " + s.getName() + "'s gift message: " + censoredList);
                 } else if (sendCensoredMessage.equalsIgnoreCase("without")) {
                     sendItem(s, target, sinv, tinv, itemstack, giveAmount, "");
                     s.sendMessage(ChatColor.DARK_RED + "Warning: " + ChatColor.RED + "Your message was not sent because it contains the following blocked words: " + censoredList + ".");
-                    logCustom("WARNING: Removed " +s.getName() + "'s gift message: it contains the following blacklisted words: " + censoredList + ".");
+                    logMessage("WARNING: Removed " +s.getName() + "'s gift message: it contains the following blacklisted words: " + censoredList + ".");
                 } else if (sendCensoredMessage.equalsIgnoreCase("block")) {
                     s.sendMessage(ChatColor.DARK_RED + "Warning: " + ChatColor.RED + "Your gift was not sent because your message contains the following blocked words: " + censoredList + ".");
-                    logDenied(s.getName(), s.getName() + "'s gift message contains the following blacklisted words: " + censoredList + ".");
+                    logGiftDenied(s.getName(), s.getName() + "'s gift message contains the following blacklisted words: " + censoredList + ".");
                 }
             }
         } else {
@@ -309,21 +309,21 @@ public class CommandGift implements CommandExecutor {
         if (!excess.isEmpty()) {
             s.sendMessage(prefix + ChatColor.RED + target.getName() + "'s inventory was nearly full when you sent the gift. Only part of the gift was sent.");
             target.sendMessage(prefix + ChatColor.RED + "Your inventory was nearly full when the gift was sent. Only part of the gift was received.");
-            logCustom("WARNING: Sent only a part of " + s.getName() + "'s gift: " + target.getName() + "'s inventory was nearly full.");
+            logMessage("WARNING: Sent only a part of " + s.getName() + "'s gift: " + target.getName() + "'s inventory was nearly full.");
             for (Map.Entry<Integer, ItemStack> me : excess.entrySet()) {
                 int itemAmount = me.getValue().getAmount();
                 giveAmount -= itemAmount;
                 sinv.addItem(me.getValue());
             }
         }
-        getMaterial(s, target, itemstack, giveAmount, message);
+        sendGiftNotification(s, target, itemstack, giveAmount, message);
         if (!message.isEmpty()) {
             s.sendMessage(ChatColor.GOLD + "Your message: " + ChatColor.WHITE + message);
             target.sendMessage(ChatColor.GOLD + s.getName() + "'s message: " + ChatColor.WHITE + message);
         }
     }
 
-    private void getMaterial(Player s, Player target, ItemStack itemstack, int amountSent, String message) {
+    private void sendGiftNotification(Player s, Player target, ItemStack itemstack, int amountSent, String message) {
         String material;
         String extLib = plugin.extLib;
         if (extLib.equals("LangUtils")) material = LanguageHelper.getItemName(itemstack, "en_us").toUpperCase();
@@ -368,7 +368,7 @@ public class CommandGift implements CommandExecutor {
             target.sendMessage(prefix + ChatColor.WHITE + "You received " + ChatColor.YELLOW + amountSent + itemEnchanted + itemPatterned + material +
                     itemDisplayName + ChatColor.WHITE + " from " + ChatColor.GOLD + sName + ChatColor.WHITE + ".");
         }
-        logGift(message, sName, tName, amountSent, material, itemstack, itemPatterned, itemEnchanted, itemDisplayName);
+        logGiftSent(message, sName, tName, amountSent, material, itemstack, itemPatterned, itemEnchanted, itemDisplayName);
     }
 
     private boolean isPatternedBanner(ItemStack itemstack) {
@@ -381,14 +381,14 @@ public class CommandGift implements CommandExecutor {
         return false;
     }
 
-    private void logCustom(String message) { plugin.getLogger().info(agLog + message); }
+    private void logMessage(String message) { plugin.getLogger().info(agLog + message); }
 
-    private void logDenied(String sName, String reason) { plugin.getLogger().info(agLog + "Denied " + sName + "'s /gift use: " + reason); }
+    private void logGiftDenied(String sName, String reason) { plugin.getLogger().info(agLog + "Denied " + sName + "'s /gift use: " + reason); }
 
     @SuppressWarnings("deprecation")
-    private void logGift(String message, String sName, String tName, int amount, String material, ItemStack itemstack, String itemPatterned, String itemEnchanted, String itemDisplayName) {
+    private void logGiftSent(String message, String sName, String tName, int amount, String material, ItemStack itemstack, String itemPatterned, String itemEnchanted, String itemDisplayName) {
         itemDisplayName = ChatColor.stripColor(itemDisplayName);
-        logCustom(sName + " gave " + tName + " " + amount + " " + itemPatterned + material + itemDisplayName + ".");
+        logMessage(sName + " gave " + tName + " " + amount + " " + itemPatterned + material + itemDisplayName + ".");
         if (itemstack.hasItemMeta()) {
             ItemMeta itemmeta = itemstack.getItemMeta();
             if (itemmeta.hasEnchants() || itemmeta.hasLore() || (!plugin.isBefore1_11 && itemmeta.isUnbreakable())) {
