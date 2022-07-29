@@ -71,18 +71,7 @@ public class CommandGift implements CommandExecutor {
                             sendItem(s, target, sinv, tinv, itemstack, itemstack.getAmount(), "");
                         }
                     } else {
-                        if (args.length == 2) {
-                            checkAmountInput(s, target, sinv, tinv, itemstack, args, false);
-                        } else {
-                            if (!enableMessage) {
-                                checkAmountInput(s, target, sinv, tinv, itemstack, args, false);
-                            } else if (!(s.hasPermission("advancedgift.gift.message"))) {
-                                s.sendMessage(prefix + ChatColor.RED + "You don't have permission to send messages!");
-                                logGiftDenied(s.getName(), s.getName() + "is missing permission node 'advancedgift.gift.message'.");
-                            } else {
-                                checkAmountInput(s, target, sinv, tinv, itemstack, args, true);
-                            }
-                        }
+                        checkAmountInput(s, target, sinv, tinv, itemstack, args, args.length > 2);
                     }
                 }
             }
@@ -237,6 +226,16 @@ public class CommandGift implements CommandExecutor {
     }
 
     private void checkMessageInput(Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, int giveAmount, String[] args) {
+        if (!enableMessage) {
+            sendItem(s, target, sinv, tinv, itemstack, giveAmount, "");
+            return;
+        }
+        if (!s.hasPermission("advancedgift.gift.message")) {
+            s.sendMessage(prefix + ChatColor.RED + "You don't have permission to send messages!");
+            logGiftDenied(s.getName(), s.getName() + "is missing permission node 'advancedgift.gift.message'.");
+            return;
+        }
+
         boolean enableCensorship = plugin.getConfigFile().getBoolean("message-censorship");
         String[] messageArray = Arrays.copyOfRange(args, 2, args.length);
         if (enableCensorship) {
