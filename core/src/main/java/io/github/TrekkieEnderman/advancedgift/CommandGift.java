@@ -58,7 +58,7 @@ public class CommandGift implements CommandExecutor {
                 ItemStack itemstack = (plugin.isBefore1_9 ? sinv.getItemInHand() : sinv.getItemInMainHand());
                 if (!(s.hasPermission("advancedgift.gift.send"))) {
                     s.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this command!");
-                } else if (target == null) {
+                } else if (target == null || (isVanished(target) && !s.hasPermission("advancedgift.bypass.vanish"))) {
                     s.sendMessage(prefix + ChatColor.RED + args[0] + " is not online!");
                 } else if (target == s.getPlayer()) {
                     s.sendMessage(prefix + ChatColor.RED + "You can't send yourself a gift!");
@@ -143,11 +143,6 @@ public class CommandGift implements CommandExecutor {
         String sName = s.getName();
         String tName = target.getName();
 
-        if (isVanished(target) && !s.hasPermission("advancedgift.bypass.vanish")) {
-            s.sendMessage(prefix + ChatColor.RED + args[0] + " is not online!");
-            logGiftDenied(sName, "Can't give gifts to vanished players without permission node 'advancedgift.bypass.vanish'");
-            return false;
-        }
         if (enableWorldRestrict) {
             int sWorldGroup = plugin.getPlayerWorldGroup(s);
             int tWorldGroup = plugin.getPlayerWorldGroup(target);
