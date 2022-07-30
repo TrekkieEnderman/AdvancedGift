@@ -66,11 +66,10 @@ public class CommandGift implements CommandExecutor {
                 } else if (itemstack.getType() == Material.AIR) {
                     s.sendMessage(prefix + ChatColor.RED + "You need to hold something in your hand!");
                 } else {
-                    PlayerInventory tinv = target.getInventory();
                     if (args.length == 1) {
-                        sendItem(s, target, sinv, tinv, itemstack, itemstack.getAmount(), "");
+                        sendItem(s, target, itemstack, itemstack.getAmount(), "");
                     } else {
-                        checkAmountInput(s, target, sinv, tinv, itemstack, args);
+                        checkAmountInput(s, target, itemstack, args);
                     }
                 }
             }
@@ -88,7 +87,8 @@ public class CommandGift implements CommandExecutor {
         return hasAmount;
     }
 
-    private void checkAmountInput(Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, String[] args) {
+    private void checkAmountInput(Player s, Player target, ItemStack itemstack, String[] args) {
+        PlayerInventory sinv = s.getInventory();
         final String amountAsString = args[1];
         int giveAmount;
         if (amountAsString.equalsIgnoreCase("hand")) {
@@ -113,13 +113,14 @@ public class CommandGift implements CommandExecutor {
                 }
             }
         }
-        if (args.length > 2) checkMessageInput(s, target, sinv, tinv, itemstack, giveAmount, args);
-        else sendItem(s, target, sinv, tinv, itemstack, giveAmount, "");
+        if (args.length > 2) checkMessageInput(s, target, itemstack, giveAmount, args);
+        else sendItem(s, target, itemstack, giveAmount, "");
     }
 
-    private boolean canSendGift(Player s, Player target, PlayerInventory tinv, ItemStack itemstack, String[] args) {
+    private boolean canSendGift(Player s, Player target, ItemStack itemstack) {
         UUID senderUUID = s.getUniqueId();
         UUID targetUUID = target.getUniqueId();
+        PlayerInventory tinv = target.getInventory();
         int cooldownTime = plugin.getConfigFile().getInt("cooldown-time");
         boolean enableCooldown = plugin.getConfigFile().getBoolean("enable-cooldown");
         boolean enableWorldRestrict = plugin.getConfigFile().getBoolean("restrict-interworld-gift");
@@ -178,7 +179,7 @@ public class CommandGift implements CommandExecutor {
             logGiftDenied(sName, tName + " has " + sName + " on their gift block list.");
             return false;
         }
-        if (hasCooldownPassed(s, senderUUID, cooldownTime, enableCooldown)) {
+        if (hasCooldownPassed(s, cooldownTime, enableCooldown)) {
             if (tinv.firstEmpty() == -1) {
                 int space = 0;
                 for (ItemStack item: tinv.getContents()) {
@@ -210,18 +211,19 @@ public class CommandGift implements CommandExecutor {
         return false;
     }
 
-    private boolean hasCooldownPassed(Player s, UUID senderUUID, int cooldownTime, boolean enableCooldown) {
+    private boolean hasCooldownPassed(Player s, int cooldownTime, boolean enableCooldown) {
         if (!enableCooldown) return true;
-        if (!cooldown.containsKey(s.getUniqueId())) return true;
+        UUID senderUUID = s.getUniqueId();
+        if (!cooldown.containsKey(senderUUID)) return true;
         else {
             diff = (System.currentTimeMillis()/1000 - cooldown.get(senderUUID)/1000);
             return (diff >= cooldownTime || s.hasPermission("advancedgift.bypass.cooldown"));
         }
     }
 
-    private void checkMessageInput(Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, int giveAmount, String[] args) {
+    private void checkMessageInput(Player s, Player target, ItemStack itemstack, int giveAmount, String[] args) {
         if (!enableMessage) {
-            sendItem(s, target, sinv, tinv, itemstack, giveAmount, "");
+            sendItem(s, target, itemstack, giveAmount, "");
             return;
         }
         if (!s.hasPermission("advancedgift.gift.message")) {
@@ -252,15 +254,15 @@ public class CommandGift implements CommandExecutor {
             }
             String message = String.join(" ", messageArray);
             if (censoredList.length() == 0) {
-                sendItem(s, target, sinv, tinv, itemstack, giveAmount, message);
+                sendItem(s, target, itemstack, giveAmount, message);
             } else {
                 String sendCensoredMessage = plugin.getConfigFile().getString("send-censored-message");
                 if (sendCensoredMessage.equalsIgnoreCase("with")) {
-                    sendItem(s, target, sinv, tinv, itemstack, giveAmount, message);
+                    sendItem(s, target, itemstack, giveAmount, message);
                     //Add a warning to the sender?
                     logMessage("WARNING: Censored the banned words from " + s.getName() + "'s gift message: " + censoredList);
                 } else if (sendCensoredMessage.equalsIgnoreCase("without")) {
-                    sendItem(s, target, sinv, tinv, itemstack, giveAmount, "");
+                    sendItem(s, target, itemstack, giveAmount, "");
                     s.sendMessage(ChatColor.DARK_RED + "Warning: " + ChatColor.RED + "Your message was not sent because it contains the following blocked words: " + censoredList + ".");
                     logMessage("WARNING: Removed " +s.getName() + "'s gift message: it contains the following blacklisted words: " + censoredList + ".");
                 } else if (sendCensoredMessage.equalsIgnoreCase("block")) {
@@ -269,14 +271,16 @@ public class CommandGift implements CommandExecutor {
                 }
             }
         } else {
-            sendItem(s, target, sinv, tinv, itemstack, giveAmount, String.join(" ", messageArray));
+            sendItem(s, target, itemstack, giveAmount, String.join(" ", messageArray));
         }
     }
 
-    private void sendItem (Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, int giveAmount, String message) {
-        if (!canSendGift(s, target, tinv, itemstack, null))
+    private void sendItem (Player s, Player target, ItemStack itemstack, int giveAmount, String message) {
+        if (!canSendGift(s, target, itemstack))
             return;
 
+        PlayerInventory sinv = s.getInventory();
+        PlayerInventory tinv = target.getInventory();
         List<ItemStack> itemList = new ArrayList<>();
         int amountLeft = giveAmount;
         for (ItemStack item : sinv.getStorageContents()) {
