@@ -80,7 +80,7 @@ public class CommandGift implements CommandExecutor {
     private int getTotalAmountHas(PlayerInventory sinv, ItemStack itemstack) {
         int hasAmount = 0;
         for (ItemStack item : sinv.getStorageContents()) { //getContents also returns offhand and armor slots, which we don't want to
-            if ((item != null) && (item.isSimilar(itemstack))) {
+            if (itemstack.isSimilar(item)) {
                 hasAmount += item.getAmount();
             }
         }
@@ -121,8 +121,6 @@ public class CommandGift implements CommandExecutor {
         UUID senderUUID = s.getUniqueId();
         UUID targetUUID = target.getUniqueId();
         PlayerInventory tinv = target.getInventory();
-        int cooldownTime = plugin.getConfigFile().getInt("cooldown-time");
-        boolean enableCooldown = plugin.getConfigFile().getBoolean("enable-cooldown");
         boolean enableWorldRestrict = plugin.getConfigFile().getBoolean("restrict-interworld-gift");
         String sName = s.getName();
         String tName = target.getName();
@@ -179,27 +177,26 @@ public class CommandGift implements CommandExecutor {
             logGiftDenied(sName, tName + " has " + sName + " on their gift block list.");
             return false;
         }
-        if (hasCooldownPassed(s, cooldownTime, enableCooldown)) {
-            if (tinv.firstEmpty() == -1) {
-                int space = 0;
-                for (ItemStack item: tinv.getContents()) {
-                    if (item != null && item.isSimilar(itemstack)) {
-                        space = item.getMaxStackSize() - item.getAmount();
-                        if (space > 0) break;
-                    }
-                }
-                if (space == 0) {
-                    s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + "'s inventory is full.");
-                    target.sendMessage(prefix + ChatColor.RED + s.getName() + " attempted to send you a gift, but your inventory is full.");
-                    logGiftDenied(sName, tName + "'s inventory is full.");
-                    return false;
-                }
-            }
-            if (enableCooldown) cooldown.put(senderUUID, System.currentTimeMillis());
-        } else {
-            s.sendMessage(prefix + ChatColor.RED + "Please wait another " + ChatColor.YELLOW + (cooldownTime - diff) + ((cooldownTime-diff) != 1 ? " seconds " : " second ") + ChatColor.RED + "before /gift can be used again.");
+        int timeRemaining;
+        if ((timeRemaining = getPlayerCooldownTime(s)) > 0) {
+            s.sendMessage(prefix + ChatColor.RED + "Please wait another " + ChatColor.YELLOW + (timeRemaining) + ((timeRemaining) != 1 ? " seconds " : " second ") + ChatColor.RED + "before /gift can be used again.");
             logGiftDenied(sName, sName + "'s /gift cooldown hasn't ended yet.");
             return false;
+        }
+        if (tinv.firstEmpty() == -1) {
+            int space = 0;
+            for (ItemStack item: tinv.getContents()) {
+                if (itemstack.isSimilar(item)) {
+                    space = item.getMaxStackSize() - item.getAmount();
+                    if (space > 0) break;
+                }
+            }
+            if (space == 0) {
+                s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + "'s inventory is full.");
+                target.sendMessage(prefix + ChatColor.RED + s.getName() + " attempted to send you a gift, but your inventory is full.");
+                logGiftDenied(sName, tName + "'s inventory is full.");
+                return false;
+            }
         }
         return true;
     }
@@ -211,14 +208,12 @@ public class CommandGift implements CommandExecutor {
         return false;
     }
 
-    private boolean hasCooldownPassed(Player s, int cooldownTime, boolean enableCooldown) {
-        if (!enableCooldown) return true;
+    private int getPlayerCooldownTime(Player s) {
+        if (!plugin.getConfigFile().getBoolean("enable-cooldown")) return 0;
+        if (s.hasPermission("advancedgift.bypass.cooldown")) return 0;
         UUID senderUUID = s.getUniqueId();
-        if (!cooldown.containsKey(senderUUID)) return true;
-        else {
-            diff = (System.currentTimeMillis()/1000 - cooldown.get(senderUUID)/1000);
-            return (diff >= cooldownTime || s.hasPermission("advancedgift.bypass.cooldown"));
-        }
+        if (!cooldown.containsKey(senderUUID)) return 0;
+        return (int) (plugin.getConfigFile().getInt("cooldown-time") - System.currentTimeMillis()/1000 - cooldown.get(senderUUID)/1000);
     }
 
     private void checkMessageInput(Player s, Player target, ItemStack itemstack, int giveAmount, String[] args) {
@@ -265,7 +260,7 @@ public class CommandGift implements CommandExecutor {
                     sendItem(s, target, itemstack, giveAmount, "");
                     s.sendMessage(ChatColor.DARK_RED + "Warning: " + ChatColor.RED + "Your message was not sent because it contains the following blocked words: " + censoredList + ".");
                     logMessage("WARNING: Removed " +s.getName() + "'s gift message: it contains the following blacklisted words: " + censoredList + ".");
-                } else if (sendCensoredMessage.equalsIgnoreCase("block")) {
+                } else {
                     s.sendMessage(ChatColor.DARK_RED + "Warning: " + ChatColor.RED + "Your gift was not sent because your message contains the following blocked words: " + censoredList + ".");
                     logGiftDenied(s.getName(), s.getName() + "'s gift message contains the following blacklisted words: " + censoredList + ".");
                 }
@@ -279,36 +274,36 @@ public class CommandGift implements CommandExecutor {
         if (!canSendGift(s, target, itemstack))
             return;
 
+        if (plugin.getConfigFile().getBoolean("enable-cooldown"))
+            cooldown.put(s.getUniqueId(), System.currentTimeMillis());
         PlayerInventory sinv = s.getInventory();
         PlayerInventory tinv = target.getInventory();
         List<ItemStack> itemList = new ArrayList<>();
         int amountLeft = giveAmount;
         for (ItemStack item : sinv.getStorageContents()) {
-            if (item != null && item.isSimilar(itemstack) && amountLeft != 0) {
+            if (itemstack.isSimilar(item)) {
                 int itemAmount = item.getAmount();
+                ItemStack itemToAdd = item.clone();
                 if (itemAmount <= amountLeft) {
-                    itemList.add(new ItemStack(item));
                     amountLeft -= itemAmount;
                     sinv.removeItem(item);
                 } else {
-                    item.setAmount(amountLeft);
-                    itemList.add(new ItemStack(item));
+                    itemToAdd.setAmount(amountLeft);
                     item.setAmount(itemAmount - amountLeft);
                     amountLeft = 0;
                 }
+                itemList.add(itemToAdd);
                 if (amountLeft == 0) break;
             }
         }
-        ItemStack[] itemToSend = itemList.toArray(new ItemStack[0]);
-        HashMap<Integer, ItemStack> excess = tinv.addItem(itemToSend);
+        HashMap<Integer, ItemStack> excess = tinv.addItem(itemList.toArray(new ItemStack[0]));
         if (!excess.isEmpty()) {
             s.sendMessage(prefix + ChatColor.RED + target.getName() + "'s inventory was nearly full when you sent the gift. Only part of the gift was sent.");
             target.sendMessage(prefix + ChatColor.RED + "Your inventory was nearly full when the gift was sent. Only part of the gift was received.");
             logMessage("WARNING: Sent only a part of " + s.getName() + "'s gift: " + target.getName() + "'s inventory was nearly full.");
-            for (Map.Entry<Integer, ItemStack> me : excess.entrySet()) {
-                int itemAmount = me.getValue().getAmount();
-                giveAmount -= itemAmount;
-                sinv.addItem(me.getValue());
+            for (ItemStack extra : excess.values()) {
+                giveAmount -= extra.getAmount();
+                sinv.addItem(extra);
             }
         }
         sendGiftNotification(s, target, itemstack, giveAmount, message);
