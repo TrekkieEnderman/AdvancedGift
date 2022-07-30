@@ -4,6 +4,7 @@ import java.util.*;
 
 import me.Fupery.ArtMap.ArtMap;
 import me.Fupery.ArtMap.Painting.ArtistHandler;
+import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.ChatColor;
@@ -71,7 +72,7 @@ public class CommandGift implements CommandExecutor {
                             sendItem(s, target, sinv, tinv, itemstack, itemstack.getAmount(), "");
                         }
                     } else {
-                        checkAmountInput(s, target, sinv, tinv, itemstack, args, args.length > 2);
+                        checkAmountInput(s, target, sinv, tinv, itemstack, args);
                     }
                 }
             }
@@ -89,36 +90,33 @@ public class CommandGift implements CommandExecutor {
         return hasAmount;
     }
 
-    private void checkAmountInput(Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, String[] args, boolean hasMessage) {
-        String amountAsString = args[1];
-        int hasAmount = getTotalAmountHas(sinv, itemstack);
+    private void checkAmountInput(Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, String[] args) {
+        final String amountAsString = args[1];
         int giveAmount;
         if (amountAsString.equalsIgnoreCase("hand")) {
             giveAmount = itemstack.getAmount();
         } else if (amountAsString.equalsIgnoreCase("all")){
-            giveAmount = hasAmount;
-        } else try {
-            giveAmount = Integer.parseInt(amountAsString);
-            if (giveAmount > hasAmount) {
-                s.sendMessage(prefix + ChatColor.RED + "You don't have that much of that item! Please specify lower amount or use \"all\".");
-                logGiftDenied(s.getName(), s.getName() + " doesn't have the amount specified.");
+            giveAmount = getTotalAmountHas(sinv, itemstack);
+        } else {
+            //Try to parse string as an integer, first checking if it is all digits
+            if (!NumberUtils.isDigits(amountAsString)) {
+                s.sendMessage(prefix + ChatColor.RED + "Invalid amount! It must be a whole number above zero.");
                 return;
-            } else if (giveAmount == 0) {
-                s.sendMessage(prefix + ChatColor.RED + "You can't give your friend nothing!");
-                return;
-                //Add console log here?
-            } else if (giveAmount < 0){
-                s.sendMessage(prefix + ChatColor.RED + "You can't have negative amount!");
-                return;
+            } else {
+                giveAmount = NumberUtils.toInt(amountAsString);
+                if (giveAmount < 1) {
+                    s.sendMessage(prefix + ChatColor.RED + "Invalid amount! It must be a whole number above zero.");
+                    return;
+                }
+                if (!sinv.containsAtLeast(itemstack, giveAmount)) {
+                    s.sendMessage(prefix + ChatColor.RED + "You don't have that much of this item! Please specify a smaller amount or use \"all\".");
+                    logGiftDenied(s.getName(), s.getName() + " doesn't have the amount specified.");
+                    return;
+                }
             }
-        } catch (NumberFormatException e) {
-            s.sendMessage(prefix + ChatColor.RED + amountAsString + " is not an integer!");
-            s.sendMessage(usage);
-            return;
-            //Add console log here?
         }
         if (canSendGift(s, target, tinv, itemstack, args)) {
-            if (hasMessage) checkMessageInput(s, target, sinv, tinv, itemstack, giveAmount, args);
+            if (args.length > 2) checkMessageInput(s, target, sinv, tinv, itemstack, giveAmount, args);
             else sendItem(s, target, sinv, tinv, itemstack, giveAmount, "");
         }
     }
