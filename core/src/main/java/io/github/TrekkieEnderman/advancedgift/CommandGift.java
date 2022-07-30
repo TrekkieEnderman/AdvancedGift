@@ -68,9 +68,7 @@ public class CommandGift implements CommandExecutor {
                 } else {
                     PlayerInventory tinv = target.getInventory();
                     if (args.length == 1) {
-                        if (canSendGift(s, target, tinv, itemstack, args)) {
-                            sendItem(s, target, sinv, tinv, itemstack, itemstack.getAmount(), "");
-                        }
+                        sendItem(s, target, sinv, tinv, itemstack, itemstack.getAmount(), "");
                     } else {
                         checkAmountInput(s, target, sinv, tinv, itemstack, args);
                     }
@@ -115,10 +113,8 @@ public class CommandGift implements CommandExecutor {
                 }
             }
         }
-        if (canSendGift(s, target, tinv, itemstack, args)) {
-            if (args.length > 2) checkMessageInput(s, target, sinv, tinv, itemstack, giveAmount, args);
-            else sendItem(s, target, sinv, tinv, itemstack, giveAmount, "");
-        }
+        if (args.length > 2) checkMessageInput(s, target, sinv, tinv, itemstack, giveAmount, args);
+        else sendItem(s, target, sinv, tinv, itemstack, giveAmount, "");
     }
 
     private boolean canSendGift(Player s, Player target, PlayerInventory tinv, ItemStack itemstack, String[] args) {
@@ -278,6 +274,9 @@ public class CommandGift implements CommandExecutor {
     }
 
     private void sendItem (Player s, Player target, PlayerInventory sinv, PlayerInventory tinv, ItemStack itemstack, int giveAmount, String message) {
+        if (!canSendGift(s, target, tinv, itemstack, null))
+            return;
+
         List<ItemStack> itemList = new ArrayList<>();
         int amountLeft = giveAmount;
         for (ItemStack item : sinv.getStorageContents()) {
