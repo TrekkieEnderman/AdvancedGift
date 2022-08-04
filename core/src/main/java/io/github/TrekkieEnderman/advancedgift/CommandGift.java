@@ -258,7 +258,7 @@ public class CommandGift implements CommandExecutor {
                     logMessage("WARNING: Censored the banned words from " + s.getName() + "'s gift message: " + censoredList);
                 } else if (sendCensoredMessage.equalsIgnoreCase("without")) {
                     sendItem(s, target, itemstack, giveAmount, "");
-                    s.sendMessage(ChatColor.DARK_RED + "Warning: " + ChatColor.RED + "Your message was not sent because it contains the following blocked words: " + censoredList + ".");
+                    s.sendMessage(ChatColor.DARK_RED + "Warning: " + ChatColor.RED + "Your message was not sent because it contains the following blocked words: " + censoredList + "."); //todo fix this, will still show even if gift was not sent
                     logMessage("WARNING: Removed " +s.getName() + "'s gift message: it contains the following blacklisted words: " + censoredList + ".");
                 } else {
                     s.sendMessage(ChatColor.DARK_RED + "Warning: " + ChatColor.RED + "Your gift was not sent because your message contains the following blocked words: " + censoredList + ".");
@@ -276,6 +276,7 @@ public class CommandGift implements CommandExecutor {
 
         if (plugin.getConfigFile().getBoolean("enable-cooldown"))
             cooldown.put(s.getUniqueId(), System.currentTimeMillis());
+        plugin.getGiftCounter().increment();
         PlayerInventory sinv = s.getInventory();
         PlayerInventory tinv = target.getInventory();
         List<ItemStack> itemList = new ArrayList<>();

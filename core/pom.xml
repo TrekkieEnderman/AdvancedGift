@@ -69,6 +69,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-base</artifactId>
+            <version>3.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>io.github.TrekkieEnderman</groupId>
             <artifactId>advancedgift-api</artifactId>
             <version>API</version>

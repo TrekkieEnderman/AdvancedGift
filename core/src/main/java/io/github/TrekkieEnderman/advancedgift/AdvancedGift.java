@@ -1,7 +1,9 @@
 package io.github.TrekkieEnderman.advancedgift;
 
+import io.github.TrekkieEnderman.advancedgift.metrics.GiftCounter;
 import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
 import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -40,6 +42,7 @@ public class AdvancedGift extends JavaPlugin {
     boolean isBefore1_11 = false;
     boolean isBefore1_13 = false;
     boolean hasArtMap = false;
+    private final GiftCounter giftCounter = new GiftCounter();
 
     @Override
     public void onEnable() {
@@ -343,7 +346,12 @@ public class AdvancedGift extends JavaPlugin {
     }
 
     private void startMetrics() {
-        new Metrics(this, 13627);
+        Metrics metrics = new Metrics(this, 13627);
+        metrics.addCustomChart(new SingleLineChart("gifts_sent", giftCounter::collect));
+    }
+
+    public GiftCounter getGiftCounter() {
+        return giftCounter;
     }
 
     @Override
