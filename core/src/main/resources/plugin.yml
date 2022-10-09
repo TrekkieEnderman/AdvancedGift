@@ -27,3 +27,31 @@ commands:
     description: "Lists the players you've blocked gifts from, or clear the list."
     usage: "/giftblocklist (clear)"
     aliases: [gblocklist, gblist]
+
+permissions:
+  advancedgift.gift.send:
+    description: Allows sending gifts
+    default: true
+    children:
+      advancedgift.gift.receive: true
+  advancedgift.gift.message:
+    description: Allows attaching messages to gifts
+    default: true
+  advancedgift.gift.spy:
+    description: Allows spying on gift exchanges
+    default: op
+  advancedgift.bypass.cooldown:
+    description: Allows bypassing the gift cooldown
+    default: false
+  advancedgift.bypass.world.restriction:
+    description: Allows bypassing the restriction on sending gifts between groups of worlds
+    default: false
+  advancedgift.bypass.world.blacklist:
+    description: Allows sending and receiving gifts while in a blacklisted world
+    default: false
+  advancedgift.bypass.vanish:
+    description: Allows sending gifts to hidden players
+    default: op
+  advancedgift.reload:
+    description: Allows reloading AdvancedGift's configuration files
+    default: op
