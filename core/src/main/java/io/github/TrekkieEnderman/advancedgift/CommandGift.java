@@ -4,10 +4,10 @@ import java.util.*;
 
 import me.Fupery.ArtMap.ArtMap;
 import me.Fupery.ArtMap.Painting.ArtistHandler;
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,14 +22,17 @@ import org.bukkit.metadata.MetadataValue;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.ChatColor;
 
 import com.meowj.langutils.lang.LanguageHelper;
 
 public class CommandGift implements CommandExecutor {
     private final AdvancedGift plugin;
-    private String prefix;
-    private boolean enableMessage;
-    private String usage;
+    private final String prefix;
+    private final boolean enableMessage;
+    private final String usage;
+    private final static char[] SPACE_DELIMITER = new char[]{' '};
 
     CommandGift(AdvancedGift plugin) {
         this.plugin = plugin;
@@ -38,9 +41,8 @@ public class CommandGift implements CommandExecutor {
         this.usage = ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/gift [player]" + ChatColor.GRAY + " <amount | hand | all>" + (enableMessage ? " <your message>" : "");
     }
 
-    private HashMap<UUID, Long> cooldown = new HashMap<>();
-    private String agLog = "[AG LOG] > ";
-    private long diff;
+    private final HashMap<UUID, Long> cooldown = new HashMap<>();
+    private final String agLog = "[AG LOG] > ";
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -308,58 +310,76 @@ public class CommandGift implements CommandExecutor {
             }
         }
         sendGiftNotification(s, target, itemstack, giveAmount, message);
-        if (!message.isEmpty()) {
-            s.sendMessage(ChatColor.GOLD + "Your message: " + ChatColor.WHITE + message);
-            target.sendMessage(ChatColor.GOLD + s.getName() + "'s message: " + ChatColor.WHITE + message);
-        }
     }
 
     private void sendGiftNotification(Player s, Player target, ItemStack itemstack, int amountSent, String message) {
+        StringJoiner joiner = new StringJoiner(" ");
         String material;
         String extLib = plugin.extLib;
-        if (extLib.equals("LangUtils")) material = LanguageHelper.getItemName(itemstack, "en_us").toUpperCase();
-        else if (extLib.equals("none")) material = itemstack.getType().toString().replace("_", " ");
-        else material = ChatColor.RED + "yeet";
+        if (extLib.equals("LangUtils")) {
+            material = LanguageHelper.getItemName(itemstack, "en_us");
+        }
+        else {
+            material = itemstack.getType().toString().replace("_", " ").toLowerCase();
+        }
+
+        joiner.add(String.valueOf(amountSent));
+
+        boolean hasItemMeta = itemstack.hasItemMeta();
+        ItemMeta meta = itemstack.getItemMeta();
+
+        //add prefixes
+        if (hasItemMeta && meta.hasEnchants()) {
+            joiner.add("Enchanted");
+        }
+        if (isPatternedBanner(itemstack)) {
+            joiner.add("Patterned");
+        }
+
+        //add material name
+        joiner.add(WordUtils.capitalize(material, SPACE_DELIMITER));
+
+        //add suffixes
+        if (hasItemMeta && meta.hasDisplayName()) {
+            joiner.add("named").add(meta.getDisplayName());
+        }
+        String itemDetails = joiner.toString();
+
         String sName = s.getName();
         String tName = target.getName();
-        boolean hasItemMeta = itemstack.hasItemMeta();
-        String itemDisplayName = (hasItemMeta && itemstack.getItemMeta().hasDisplayName() ? ChatColor.WHITE + " named " + ChatColor.GREEN + itemstack.getItemMeta().getDisplayName() : "");
-        String itemPatterned = (isPatternedBanner(itemstack) ? "PATTERNED " : "");
-        String itemEnchanted = (hasItemMeta && itemstack.getItemMeta().hasEnchants() ? " ENCHANTED " : " ");
+
+        final String senderNotification = prefix + ChatColor.WHITE + "You gave " + ChatColor.GOLD + tName + " " + ChatColor.YELLOW + itemDetails + ChatColor.WHITE + ".";
+        final String targetNotification = prefix + ChatColor.WHITE + "You received " + ChatColor.YELLOW + itemDetails + ChatColor.WHITE + " from " + ChatColor.GOLD + sName + ".";
+        final String spyNotification = prefix + ChatColor.GRAY + sName + " gave " + tName + " " + ChatColor.stripColor(itemDetails) + ".";
+        final TextComponent senderComponent = new TextComponent(TextComponent.fromLegacyText(senderNotification));
+        final TextComponent targetComponent = new TextComponent(TextComponent.fromLegacyText(targetNotification));
+        final TextComponent spyComponent = new TextComponent(TextComponent.fromLegacyText(spyNotification));
 
         if (plugin.canUseTooltips) {
-            TextComponent materialComp = new TextComponent(material);
-            materialComp.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
-            BaseComponent [] hoverMessage = new BaseComponent[] { new TextComponent(AdvancedGift.nms.convertItemToJson(itemstack)) };
+            BaseComponent[] hoverMessage = new ComponentBuilder(AdvancedGift.nms.convertItemToJson(itemstack)).create();
             HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverMessage);
-            materialComp.setHoverEvent(event);
 
-            //Message to the sender
-            TextComponent sMessage = new TextComponent("");
-            TextComponent sBefore = new TextComponent(TextComponent.fromLegacyText(prefix + ChatColor.WHITE + "You gave " + ChatColor.GOLD + tName +
-                    ChatColor.YELLOW + " " + amountSent + itemEnchanted + itemPatterned));
-            TextComponent sAfter = new TextComponent(TextComponent.fromLegacyText(itemDisplayName + ChatColor.WHITE + "."));
-            sMessage.addExtra(sBefore);
-            sMessage.addExtra(materialComp);
-            sMessage.addExtra(sAfter);
-            s.spigot().sendMessage(sMessage);
-
-            //Message to the target
-            TextComponent tMessage = new TextComponent("");
-            TextComponent tBefore = new TextComponent(TextComponent.fromLegacyText(prefix + ChatColor.WHITE + "You received " + ChatColor.YELLOW + amountSent + itemEnchanted + itemPatterned));
-            TextComponent tAfter = new TextComponent(TextComponent.fromLegacyText(itemDisplayName + ChatColor.WHITE + " from " + ChatColor.GOLD + sName + ChatColor.WHITE + "."));
-            tMessage.addExtra(tBefore);
-            tMessage.addExtra(materialComp);
-            tMessage.addExtra(tAfter);
-            target.spigot().sendMessage(tMessage);
-
-        } else {
-            s.sendMessage(prefix + ChatColor.WHITE + "You gave " + ChatColor.GOLD + tName + ChatColor.YELLOW + " " + amountSent + itemEnchanted +
-                    itemPatterned + material + itemDisplayName + ChatColor.WHITE + ".");
-            target.sendMessage(prefix + ChatColor.WHITE + "You received " + ChatColor.YELLOW + amountSent + itemEnchanted + itemPatterned + material +
-                    itemDisplayName + ChatColor.WHITE + " from " + ChatColor.GOLD + sName + ChatColor.WHITE + ".");
+            senderComponent.setHoverEvent(event);
+            targetComponent.setHoverEvent(event);
+            spyComponent.setHoverEvent(event);
         }
-        logGiftSent(message, sName, tName, amountSent, material, itemstack, itemPatterned, itemEnchanted, itemDisplayName);
+
+        s.spigot().sendMessage(senderComponent);
+        target.spigot().sendMessage(targetComponent);
+        if (!message.isEmpty()) {
+            s.sendMessage("Your message: " + message);
+            target.sendMessage("Gift message: " + message);
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player == s || player == target) continue;
+            if (plugin.spyPlayers.contains(player.getUniqueId().toString())) {
+                player.spigot().sendMessage(spyComponent);
+                if (!message.isEmpty()) player.sendMessage("Gift message: " + message);
+            }
+        }
+
+        logGiftSent(message, sName, tName, itemstack, itemDetails);
     }
 
     private boolean isPatternedBanner(ItemStack itemstack) {
@@ -377,9 +397,9 @@ public class CommandGift implements CommandExecutor {
     private void logGiftDenied(String sName, String reason) { plugin.getLogger().info(agLog + "Denied " + sName + "'s /gift use: " + reason); }
 
     @SuppressWarnings("deprecation")
-    private void logGiftSent(String message, String sName, String tName, int amount, String material, ItemStack itemstack, String itemPatterned, String itemEnchanted, String itemDisplayName) {
-        itemDisplayName = ChatColor.stripColor(itemDisplayName);
-        logMessage(sName + " gave " + tName + " " + amount + " " + itemPatterned + material + itemDisplayName + ".");
+    private void logGiftSent(String message, String sName, String tName, ItemStack itemstack, String itemDetails) {
+        itemDetails = ChatColor.stripColor(itemDetails);
+        logMessage(sName + " gave " + tName + " " + itemDetails + ".");
         if (itemstack.hasItemMeta()) {
             ItemMeta itemmeta = itemstack.getItemMeta();
             if (itemmeta.hasEnchants() || itemmeta.hasLore() || (!plugin.isBefore1_11 && itemmeta.isUnbreakable())) {
@@ -438,27 +458,5 @@ public class CommandGift implements CommandExecutor {
             }
         }
         if (!message.isEmpty()) plugin.getLogger().info(agLog + sName + "'s gift message: " + message);
-
-        for (String spy : plugin.spyPlayers) {
-            Player spyPlayer = Bukkit.getPlayer(UUID.fromString(spy));
-            if (spyPlayer != null && !(spyPlayer.getName().equalsIgnoreCase(sName)) && !(spyPlayer.getName().equalsIgnoreCase(tName))) {
-                if (plugin.canUseTooltips) {
-                    TextComponent component = new TextComponent("");
-                    component.setColor(net.md_5.bungee.api.ChatColor.GRAY);
-                    TextComponent logPrefix = new TextComponent(agLog);
-                    logPrefix.setColor(net.md_5.bungee.api.ChatColor.WHITE);
-                    component.addExtra(logPrefix);
-                    component.addExtra(sName + " gave " + tName + " " + amount + itemEnchanted + itemPatterned);
-                    TextComponent itemHover = new TextComponent(material);
-                    BaseComponent [] hoverMessage = new BaseComponent[] {new TextComponent(AdvancedGift.nms.convertItemToJson(itemstack))};
-                    HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverMessage);
-                    itemHover.setHoverEvent(event);
-                    component.addExtra(itemHover);
-                    component.addExtra(itemDisplayName + ".");
-                    spyPlayer.spigot().sendMessage(component);
-                } else spyPlayer.sendMessage(ChatColor.WHITE + agLog + ChatColor.GRAY + sName + " gave " + tName + " " + amount + itemEnchanted + itemPatterned + material + itemDisplayName + ".");
-                if (!message.isEmpty()) spyPlayer.sendMessage(ChatColor.WHITE + agLog + ChatColor.GRAY + sName + "'s gift message: " + message);
-            }
-        }
     }
 }
