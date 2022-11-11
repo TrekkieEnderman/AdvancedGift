@@ -4,6 +4,7 @@ import java.util.*;
 
 import me.Fupery.ArtMap.ArtMap;
 import me.Fupery.ArtMap.Painting.ArtistHandler;
+import net.md_5.bungee.api.chat.*;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
@@ -19,10 +20,6 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.ChatColor;
 
 import com.meowj.langutils.lang.LanguageHelper;
@@ -55,8 +52,34 @@ public class CommandGift implements CommandExecutor {
                 s.sendMessage(ChatColor.YELLOW + "Hold something in your hand and use the following command. White text is required, and gray text is optional.");
                 s.sendMessage(usage);
             } else {
-                Player target = (Bukkit.getServer().getPlayer(args[0]));
+                Player target = null;
                 PlayerInventory sinv = s.getInventory();
+                List<Player> matchList = Bukkit.matchPlayer(args[0]);
+                matchList.remove(s);
+
+                if (matchList.size() == 1) {
+                    target = matchList.get(0);
+                } else if (matchList.size() > 1) {
+                    s.sendMessage(prefix + ChatColor.YELLOW + "Several matches found. Please pick one you want to give.");
+                    ComponentBuilder builder = new ComponentBuilder();
+
+                    final HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to send this player a gift").create());
+                    final String[] argsClone = args.clone(); //we want to reuse the exact command the player used, and just change the target name
+                    for (Player player : matchList) {
+                        TextComponent textComponent = new TextComponent(TextComponent.fromLegacyText(player.getDisplayName()));
+                        textComponent.setHoverEvent(hoverEvent);
+
+                        argsClone[0] = player.getName(); //replace the original 1st argument with new name
+                        final String commandString = "/gift " + String.join(" ", argsClone);
+                        textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, commandString));
+
+                        if (builder.getCursor() != 0) builder.append(" ", ComponentBuilder.FormatRetention.NONE);
+                        builder.append(textComponent);
+                    }
+                    s.spigot().sendMessage(builder.create());
+                    return true;
+                }
+
                 @SuppressWarnings("deprecation")
                 ItemStack itemstack = (plugin.isBefore1_9 ? sinv.getItemInHand() : sinv.getItemInMainHand());
                 if (!(s.hasPermission("advancedgift.gift.send"))) {
