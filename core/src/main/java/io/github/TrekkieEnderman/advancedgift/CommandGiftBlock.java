@@ -1,9 +1,12 @@
 package io.github.TrekkieEnderman.advancedgift;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -76,8 +79,27 @@ public class CommandGiftBlock implements CommandExecutor {
                 Set<UUID> blockList = plugin.getBlockList(senderUUID);
                 if (blockList == null || blockList.isEmpty()) s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list is empty.");
                 else {
-                    s.sendMessage(ChatColor.GRAY + "Your gift block list: " + ChatColor.DARK_AQUA + blockList);
-                    s.sendMessage(ChatColor.AQUA + "To clear the list, " + ChatColor.WHITE + "/giftblocklist clear");
+                    s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list:");
+                    ComponentBuilder builder = new ComponentBuilder(); //main builder for showing the list
+
+                    final TextComponent blankSpaceComponent = new TextComponent(" ");
+                    final HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to unblock this player").create());
+
+                    for (UUID playerUUID : blockList) {
+                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
+                        TextComponent textComponent = offlinePlayer.isOnline()
+                                ? new TextComponent(TextComponent.fromLegacyText(offlinePlayer.getPlayer().getDisplayName(), ChatColor.DARK_AQUA))
+                                : new TextComponent(offlinePlayer.getName());
+                        textComponent.setColor(ChatColor.DARK_AQUA);
+                        textComponent.setHoverEvent((hoverEvent));
+                        textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/giftunblock " + offlinePlayer.getName()));
+
+                        builder.append(blankSpaceComponent);
+                        builder.append(textComponent);
+                    }
+                    s.spigot().sendMessage(builder.create());
+                    s.sendMessage(ChatColor.AQUA + "To unblock a player, click on their name in the list or use " + ChatColor.WHITE + "/giftunblock <player>");
+                    s.sendMessage(ChatColor.AQUA + "To clear the list, use " + ChatColor.WHITE + "/giftblocklist clear");
                 }
             } else {
                 if (args[0].equalsIgnoreCase("clear")) {
