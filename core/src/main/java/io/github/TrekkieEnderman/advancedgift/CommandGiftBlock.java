@@ -1,5 +1,7 @@
 package io.github.TrekkieEnderman.advancedgift;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -36,21 +38,21 @@ public class CommandGiftBlock implements CommandExecutor {
             } else {
                 String target = args[0];
                 Player targetPlayer = Bukkit.getServer().getPlayer(target);
-                String targetUUID;
+                UUID targetUUID;
                 if (targetPlayer == null) {
                     OfflinePlayer targetOffline = Bukkit.getOfflinePlayer(target);
                     if (!targetOffline.hasPlayedBefore()) {
                         s.sendMessage(prefix + ChatColor.RED + "No player going by " + target + " has played on here before.");
                         return true;
                     }
-                    targetUUID = targetOffline.getUniqueId().toString();
+                    targetUUID = targetOffline.getUniqueId();
                     target = targetOffline.getName();
                 } else {
                     if (targetPlayer == s.getPlayer()) {
                         s.sendMessage(prefix + ChatColor.RED + "Are you trying to block yourself?");
                         return true;
                     }
-                    targetUUID = targetPlayer.getUniqueId().toString();
+                    targetUUID = targetPlayer.getUniqueId();
                     target = targetPlayer.getName();
                 }
                 if (label.equalsIgnoreCase("giftblock") || label.equalsIgnoreCase("blockgift") || label.equalsIgnoreCase("gblock")) {
@@ -71,8 +73,8 @@ public class CommandGiftBlock implements CommandExecutor {
             }
         } else {
             if (args.length == 0) {
-                String blockList = plugin.getBlockList(senderUUID);
-                if (blockList.isEmpty()) s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list is empty.");
+                Set<UUID> blockList = plugin.getBlockList(senderUUID);
+                if (blockList == null || blockList.isEmpty()) s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list is empty.");
                 else {
                     s.sendMessage(ChatColor.GRAY + "Your gift block list: " + ChatColor.DARK_AQUA + blockList);
                     s.sendMessage(ChatColor.AQUA + "To clear the list, " + ChatColor.WHITE + "/giftblocklist clear");

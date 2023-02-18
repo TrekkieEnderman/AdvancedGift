@@ -27,24 +27,24 @@ public class CommandGiftToggle implements CommandExecutor {
         Player s = (Player) sender;
         UUID senderUUID = s.getUniqueId();
         if (args.length == 0) {
-            if (!plugin.containsUUID(senderUUID, "tg", "")) {
-                plugin.addUUID(senderUUID, "tg", "");
+            if (!plugin.containsUUID(senderUUID, "tg", null)) {
+                plugin.addUUID(senderUUID, "tg", null);
                 s.sendMessage(prefix + ChatColor.YELLOW + "You won't receive any more gifts now.");
             } else {
-                plugin.removeUUID(senderUUID, "tg", "");
+                plugin.removeUUID(senderUUID, "tg", null);
                 s.sendMessage(prefix + ChatColor.GREEN + "You will receive gifts from now on.");
             }
         } else {
             if (args[0].equalsIgnoreCase("off") || args[0].equalsIgnoreCase("disable")) {
-                if (!plugin.containsUUID(senderUUID, "tg", "")) {
-                    plugin.addUUID(senderUUID, "tg", "");
+                if (!plugin.containsUUID(senderUUID, "tg", null)) {
+                    plugin.addUUID(senderUUID, "tg", null);
                     s.sendMessage(prefix + ChatColor.YELLOW + "You won't receive any more gifts now.");
                 } else {
                     s.sendMessage(prefix + ChatColor.RED + "Your ability to receive gifts is already disabled.");
                 }
             } else if (args[0].equalsIgnoreCase("on") || args [0].equalsIgnoreCase("enable")) {
-                if (plugin.containsUUID(senderUUID, "tg", "")) {
-                    plugin.removeUUID(senderUUID, "tg", "");
+                if (plugin.containsUUID(senderUUID, "tg", null)) {
+                    plugin.removeUUID(senderUUID, "tg", null);
                     s.sendMessage(prefix + ChatColor.GREEN + "You will receive gifts from now on.");
                 } else {
                     s.sendMessage(prefix + ChatColor.RED + "Your ability to receive gifts is already enabled.");

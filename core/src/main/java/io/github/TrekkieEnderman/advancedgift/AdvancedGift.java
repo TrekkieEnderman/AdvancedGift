@@ -1,5 +1,8 @@
 package io.github.TrekkieEnderman.advancedgift;
 
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 import io.github.TrekkieEnderman.advancedgift.metrics.GiftCounter;
 import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
 import org.bstats.bukkit.Metrics;
@@ -15,25 +18,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.internal.LinkedTreeMap;
 
 public class AdvancedGift extends JavaPlugin {
     private File configFile, playerInfoFile;
     private FileConfiguration giftBlockData, configData;
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private ArrayList<String> togglePlayers;
-    private HashMap<String, ArrayList<String>> blockPlayers = new HashMap<>();
-    ArrayList<String> spyPlayers;
+    private final Type uuidSetType = TypeToken.getParameterized(HashSet.class, UUID.class).getType();
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(uuidSetType, new uuidSetJsonAdapter()).create();
+    private Set<UUID> togglePlayers = new HashSet<>(), spyPlayers = new HashSet<>();
+    private Map<UUID, Set<UUID>> blockPlayers = new HashMap<>();
     private HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
     String prefix, extLib;
     static NMSInterface nms;
@@ -184,127 +186,111 @@ public class AdvancedGift extends JavaPlugin {
     }
 
     private void loadBlockList() {
-        if (!this.getBlockData().isSet("UUIDs")) {
-            togglePlayers = new ArrayList<>();
-        } else {
-            togglePlayers = (ArrayList<String>)getBlockData().getStringList("UUIDs");
+        if (this.getBlockData().isSet("UUIDs")) {
+            togglePlayers = getBlockData().getStringList("UUIDs").stream().map(UUID::fromString).collect(Collectors.toCollection(HashSet::new));
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadPlayerInfo() {
-        try {
-            Map<String, Object> map = gson.fromJson(new FileReader(playerInfoFile), HashMap.class); //new HashMap<String, Object>().getClass()
-            if (!map.containsKey("ToggleList")) {
-                togglePlayers = new ArrayList<>();
-            } else {
-                togglePlayers = (ArrayList<String>)map.get("ToggleList");
-            }
-            if (!map.containsKey("SpyList")) {
-                spyPlayers = new ArrayList<>();
-            } else {
-                spyPlayers = (ArrayList<String>)map.get("SpyList");
-            }
-            if (!map.containsKey("BlockList")) {
-                blockPlayers = new HashMap<>();
-            } else {
-                LinkedTreeMap<String, Object> blockMap = (LinkedTreeMap<String, Object>)map.get("BlockList");
-                for (String uuid : blockMap.keySet()) {
-                    ArrayList<String> blockList = (ArrayList<String>)blockMap.get(uuid);
-                    blockPlayers.put(uuid, blockList);
+        try (BufferedReader buffer = Files.newBufferedReader(playerInfoFile.toPath())) {
+            //Check what happens if a list being loaded is empty (aka is null). May need to use isJsonNull() before loading it.
+            JsonObject object = new JsonParser().parse(new JsonReader(buffer)).getAsJsonObject();
+            String name;
+            if (object.has(name = "ToggleList")) togglePlayers = gson.fromJson(object.get(name), uuidSetType);
+            if (object.has(name = "SpyList")) spyPlayers = gson.fromJson(object.get(name), uuidSetType);
+            if (object.has(name = "BlockList")) {
+                JsonObject mapJsonObject = object.getAsJsonObject(name);
+                for (Map.Entry<String, JsonElement> entry : mapJsonObject.entrySet()) {
+                    blockPlayers.put(UUID.fromString(entry.getKey()), gson.fromJson(entry.getValue(), uuidSetType));
                 }
-
             }
-        } catch (JsonSyntaxException | JsonIOException | FileNotFoundException e) {
+        } catch (JsonSyntaxException | JsonIOException | IOException e) {
             e.printStackTrace();
         }
     }
 
     private void savePlayerInfo() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("ToggleList", togglePlayers);
-        map.put("SpyList", spyPlayers);
-        map.put("BlockList", blockPlayers);
-        final String json = gson.toJson(map);
-        try {
-            FileWriter fw = new FileWriter(playerInfoFile);
-            fw.write(json);
-            fw.close();
+        //Combines all lists into a single json object so gson will convert them to string in one go
+        JsonObject object = new JsonObject();
+        object.add("ToggleList", gson.toJsonTree(togglePlayers));
+        object.add("SpyList", gson.toJsonTree(spyPlayers));
+        JsonObject mapJsonObj = new JsonObject();
+        for (Map.Entry<UUID, Set<UUID>> entry : blockPlayers.entrySet()) {
+            mapJsonObj.add(entry.getKey().toString(), gson.toJsonTree(entry.getValue()));
+        }
+        object.add("BlockList", mapJsonObj);
+        final String json = gson.toJson(object);
+        try (BufferedWriter writer = Files.newBufferedWriter(playerInfoFile.toPath())) {
+            writer.write(json);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    void addUUID(UUID playerUUID, String var, String secondUUID) {
-        String uuid = playerUUID.toString();
+    //Bad. Just bad. Unfortunately this is not something I can easily fix without a major rewrite.
+    void addUUID(UUID playerUUID, String var, UUID secondUUID) {
+        if (playerUUID == null) return;
         switch (var) {
             case "tg":
-                togglePlayers.add(uuid);
+                togglePlayers.add(playerUUID);
                 break;
             case "spy":
-                spyPlayers.add(uuid);
+                spyPlayers.add(playerUUID);
                 break;
             case "block":
-                if (!blockPlayers.containsKey(uuid)) {
-                    ArrayList<String> list = new ArrayList<>();
+                if (!blockPlayers.containsKey(playerUUID)) {
+                    Set<UUID> list = new HashSet<>();
                     list.add(secondUUID);
-                    blockPlayers.put(uuid, list);
-                } else blockPlayers.get(uuid).add(secondUUID);
+                    blockPlayers.put(playerUUID, list);
+                } else blockPlayers.get(playerUUID).add(secondUUID);
                 break;
         }
     }
 
-    boolean containsUUID(UUID playerUUID, String var, String secondUUID) {
+    //Why did I do this way?
+    boolean containsUUID(UUID playerUUID, String var, UUID secondUUID) {
+        if (playerUUID == null) return false;
         boolean bool = false;
-        String uuid = playerUUID.toString();
         switch (var) {
             case "tg":
-                bool = togglePlayers.contains(uuid);
+                bool = togglePlayers.contains(playerUUID);
                 break;
             case "spy":
-                bool = spyPlayers.contains(uuid);
+                bool = spyPlayers.contains(playerUUID);
                 break;
             case "block":
-                if (blockPlayers.containsKey(uuid)) {
-                    bool = blockPlayers.get(uuid).contains(secondUUID);
+                if (blockPlayers.containsKey(playerUUID)) {
+                    bool = blockPlayers.get(playerUUID).contains(secondUUID);
                 }
                 break;
         }
         return bool;
     }
 
-    void removeUUID(UUID playerUUID, String var, String secondUUID) {
-        String uuid = playerUUID.toString();
+    //Seriously, why?
+    void removeUUID(UUID playerUUID, String var, UUID secondUUID) {
+        if (playerUUID == null) return;
         switch (var) {
             case "tg":
-                togglePlayers.remove(uuid);
+                togglePlayers.remove(playerUUID);
                 break;
             case "spy":
-                spyPlayers.remove(uuid);
+                spyPlayers.remove(playerUUID);
                 break;
             case "block":
-                blockPlayers.get(uuid).remove(secondUUID);
-                if (blockPlayers.get(uuid).isEmpty()) blockPlayers.keySet().remove(uuid);
+                blockPlayers.get(playerUUID).remove(secondUUID);
+                if (blockPlayers.get(playerUUID).isEmpty()) blockPlayers.keySet().remove(playerUUID);
                 break;
         }
     }
 
-    String getBlockList(UUID playerUUID) {
-        ArrayList<String> blockList = blockPlayers.get(playerUUID.toString());
-        String playerBlockList = "";
-        if (blockList != null) {
-            for (String uuidString : blockList) {
-                String player = Bukkit.getOfflinePlayer(UUID.fromString(uuidString)).getName();
-                playerBlockList = (playerBlockList.isEmpty() ? "" : playerBlockList + " ") + player;
-            }
-        }
-        return playerBlockList;
+    Set<UUID> getBlockList(UUID playerUUID) {
+        return blockPlayers.get(playerUUID);
     }
 
     boolean clearBlockList(UUID playerUUID) {
-        String uuid = playerUUID.toString();
-        if (blockPlayers.containsKey(uuid)) {
-            blockPlayers.keySet().remove(uuid);
+        if (blockPlayers.containsKey(playerUUID)) {
+            blockPlayers.keySet().remove(playerUUID);
             return true;
         }
         return false;
@@ -377,24 +363,24 @@ public class AdvancedGift extends JavaPlugin {
                     String spyEnabled = prefix + ChatColor.GREEN + "Gift Spy enabled.";
                     String spyDisabled = prefix + ChatColor.RED + "Gift Spy disabled.";
                     if (args.length == 0) {
-                        if (!containsUUID(senderUUID, "spy", "")) {
-                            addUUID(senderUUID, "spy", "");
+                        if (!containsUUID(senderUUID, "spy", null)) {
+                            addUUID(senderUUID, "spy", null);
                             s.sendMessage(spyEnabled);
                         } else {
-                            removeUUID(senderUUID, "spy", "");
+                            removeUUID(senderUUID, "spy", null);
                             s.sendMessage(spyDisabled);
                         }
                     } else {
                         if (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("enable")) {
-                            if (!containsUUID(senderUUID, "spy", "")) {
-                                addUUID(senderUUID, "spy", "");
+                            if (!containsUUID(senderUUID, "spy", null)) {
+                                addUUID(senderUUID, "spy", null);
                                 s.sendMessage(spyEnabled);
                             } else {
                                 s.sendMessage(prefix + ChatColor.GRAY + "Gift Spy is already enabled.");
                             }
                         } else if (args[0].equalsIgnoreCase("off") || args [0].equalsIgnoreCase("disable")) {
-                            if (containsUUID(senderUUID, "spy", "")) {
-                                removeUUID(senderUUID, "spy", "");
+                            if (containsUUID(senderUUID, "spy", null)) {
+                                removeUUID(senderUUID, "spy", null);
                                 s.sendMessage(spyDisabled);
                             } else {
                                 s.sendMessage(prefix + ChatColor.GRAY + "Gift Spy is already disabled.");
@@ -410,5 +396,21 @@ public class AdvancedGift extends JavaPlugin {
             }
         }
         return true;
+    }
+
+    //Converts a set of UUIDs to/from json
+    static class uuidSetJsonAdapter implements JsonSerializer<Set<UUID>>, JsonDeserializer<Set<UUID>> {
+        @Override
+        public Set<UUID> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            JsonArray jsonArray = jsonElement.getAsJsonArray();
+            return StreamSupport.stream(jsonArray.spliterator(), false).map(JsonElement::getAsString).map(UUID::fromString).collect(Collectors.toCollection(HashSet::new));
+        }
+
+        @Override
+        public JsonElement serialize(Set<UUID> uuids, Type type, JsonSerializationContext jsonSerializationContext) {
+            JsonArray jsonArray = new JsonArray();
+            uuids.stream().map(UUID::toString).forEach(jsonArray::add);
+            return jsonArray;
+        }
     }
 }

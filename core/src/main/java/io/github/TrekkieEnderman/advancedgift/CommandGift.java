@@ -192,12 +192,12 @@ public class CommandGift implements CommandExecutor {
 
             }
         }
-        if (plugin.containsUUID(targetUUID, "tg", "")) {
+        if (plugin.containsUUID(targetUUID, "tg", null)) {
             s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " has disabled their ability to receive gifts.");
             logGiftDenied(sName, tName + " has their ability to receive gifts disabled.");
             return false;
         }
-        if (plugin.containsUUID(targetUUID, "block", senderUUID.toString())) {
+        if (plugin.containsUUID(targetUUID, "block", senderUUID)) {
             s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " is blocking gifts from you.");
             logGiftDenied(sName, tName + " has " + sName + " on their gift block list.");
             return false;
@@ -306,7 +306,7 @@ public class CommandGift implements CommandExecutor {
         PlayerInventory tinv = target.getInventory();
         List<ItemStack> itemList = new ArrayList<>();
         int amountLeft = giveAmount;
-        for (ItemStack item : sinv.getStorageContents()) {
+        for (ItemStack item : sinv.getStorageContents()) { //todo getStorageContents doesn't exist in 1.8
             if (itemstack.isSimilar(item)) {
                 int itemAmount = item.getAmount();
                 ItemStack itemToAdd = item.clone();
@@ -396,7 +396,7 @@ public class CommandGift implements CommandExecutor {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player == s || player == target) continue;
-            if (plugin.spyPlayers.contains(player.getUniqueId().toString())) {
+            if (plugin.containsUUID(player.getUniqueId(), "spy", null)) {
                 player.spigot().sendMessage(spyComponent);
                 if (!message.isEmpty()) player.sendMessage("Gift message: " + message);
             }
