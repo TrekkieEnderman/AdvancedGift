@@ -40,25 +40,18 @@ public class AdvancedGift extends JavaPlugin {
     String prefix, extLib;
     static NMSInterface nms;
     boolean canUseTooltips;
-    boolean isBefore1_9 = false;
-    boolean isBefore1_11 = false;
-    boolean isBefore1_13 = false;
     boolean hasArtMap = false;
     private final GiftCounter giftCounter = new GiftCounter();
 
     @Override
     public void onEnable() {
+        ServerVersion.init();
         getLogger().info("===================================================");
         getLogger().info("Checking server version  ------------------");
-        String packageName = this.getServer().getClass().getPackage().getName();
-        String version = packageName.substring(packageName.lastIndexOf('.') + 1);
-        getLogger().info("NMS Version used: " + version);
+        getLogger().info("NMS Version used: " + ServerVersion.getNMSVersion());
         getLogger().info("");
-        if (version.startsWith("v1_8")) isBefore1_9 = true;
-        if (isBefore1_9 || version.startsWith("v1_9") || version.equalsIgnoreCase("v1_10_R1")) isBefore1_11 = true;
-        if (isBefore1_11 || version.equalsIgnoreCase("v1_11_R1") || version.equalsIgnoreCase("v1_12_R1")) isBefore1_13 = true;
         try {
-            final Class<?> classy = Class.forName("io.github.TrekkieEnderman.advancedgift.nms." + version.toUpperCase());
+            final Class<?> classy = Class.forName("io.github.TrekkieEnderman.advancedgift.nms." + ServerVersion.getNMSVersion().toUpperCase());
             if (NMSInterface.class.isAssignableFrom(classy)) {
                 nms = (NMSInterface) classy.getConstructor().newInstance();
                 getLogger().info("This version is supported!");

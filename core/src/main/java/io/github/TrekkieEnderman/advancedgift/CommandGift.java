@@ -81,7 +81,7 @@ public class CommandGift implements CommandExecutor {
                 }
 
                 @SuppressWarnings("deprecation")
-                ItemStack itemstack = (plugin.isBefore1_9 ? sinv.getItemInHand() : sinv.getItemInMainHand());
+                ItemStack itemstack = (ServerVersion.getMinorVersion() < 9 ? sinv.getItemInHand() : sinv.getItemInMainHand());
                 if (!(s.hasPermission("advancedgift.gift.send"))) {
                     s.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this command!");
                 } else if (target == null || (isVanished(target) && !s.hasPermission("advancedgift.bypass.vanish"))) {
@@ -425,9 +425,9 @@ public class CommandGift implements CommandExecutor {
         logMessage(sName + " gave " + tName + " " + itemDetails + ".");
         if (itemstack.hasItemMeta()) {
             ItemMeta itemmeta = itemstack.getItemMeta();
-            if (itemmeta.hasEnchants() || itemmeta.hasLore() || (!plugin.isBefore1_11 && itemmeta.isUnbreakable())) {
+            if (itemmeta.hasEnchants() || itemmeta.hasLore() || (ServerVersion.getMinorVersion() >= 11 && itemmeta.isUnbreakable())) {
                 plugin.getLogger().info("   More item info on " + sName + "'s gift:");
-                if (!plugin.isBefore1_11) { if (itemmeta.isUnbreakable()) plugin.getLogger().info("   - Unbreakable"); }
+                if (ServerVersion.getMinorVersion() >= 11) { if (itemmeta.isUnbreakable()) plugin.getLogger().info("   - Unbreakable"); }
                 if (itemmeta.hasLore()) {
                     ArrayList<String> loreList = new ArrayList<>();
                     for (String lore : itemmeta.getLore()) {
@@ -439,7 +439,7 @@ public class CommandGift implements CommandExecutor {
                     ArrayList<String> enchantmentList= new ArrayList<>();
                     for (Enchantment key : itemstack.getEnchantments().keySet()) {
                         String name;
-                        if (plugin.isBefore1_13) {
+                        if (ServerVersion.getMinorVersion() < 13) {
                             switch(key.getName()) {
                                 case "ARROW_DAMAGE": name = "POWER"; break;
                                 case "ARROW_FIRE": name = "FLAME"; break;
