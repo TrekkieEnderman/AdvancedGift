@@ -20,8 +20,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -31,13 +33,13 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
 public class AdvancedGift extends JavaPlugin {
-    private File configFile, playerInfoFile;
-    private FileConfiguration giftBlockData, configData;
+    private final File configFile = new File(getDataFolder(),"config.yml"), playerInfoFile = new File(getDataFolder(), "playerinfo.json");
+    private final FileConfiguration giftBlockData = new YamlConfiguration();
     private final Type uuidSetType = TypeToken.getParameterized(HashSet.class, UUID.class).getType();
     private final Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(uuidSetType, new uuidSetJsonAdapter()).create();
     private Set<UUID> togglePlayers = new HashSet<>(), spyPlayers = new HashSet<>();
-    private Map<UUID, Set<UUID>> blockPlayers = new HashMap<>();
-    private HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
+    private final Map<UUID, Set<UUID>> blockPlayers = new HashMap<>();
+    private final HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
     String prefix, extLib;
     static NMSInterface nms;
     boolean canUseTooltips;
@@ -62,7 +64,7 @@ public class AdvancedGift extends JavaPlugin {
                 try {
                     nms = new Reflect(ServerVersion.getNMSVersion());
                 } catch (Throwable ex) {
-                    ex.printStackTrace();
+                    getLogger().log(Level.WARNING, "Couldn't set up reflection for item text hover over", ex);
                     nms = null;
                 }
             }
@@ -94,75 +96,62 @@ public class AdvancedGift extends JavaPlugin {
         } else {
             getLogger().info("No supported material library found.");
             getLogger().info("Spigot's material enum will be used instead.");
-            extLib = "none";
+            extLib = "none"; //If you're wondering why this isn't left null instead, I don't know!
         }
         this.getCommand("gift").setExecutor(new CommandGift(this));
         this.getCommand("togglegift").setExecutor(new CommandGiftToggle(this));
-        this.getCommand("giftblock").setExecutor(new CommandGiftBlock(this));
-        this.getCommand("giftblocklist").setExecutor(new CommandGiftBlock(this));
+        CommandGiftBlock commandGiftBlock = new CommandGiftBlock(this);
+        this.getCommand("giftblock").setExecutor(commandGiftBlock);
+        this.getCommand("giftblocklist").setExecutor(commandGiftBlock);
         getLogger().info("===================================================");
         if (Bukkit.getPluginManager().getPlugin("ArtMap") != null) hasArtMap = true;
         startMetrics();
     }
 
     private void loadFiles() {
-        try {
-            if(!getDataFolder().exists()) {
-                getDataFolder().mkdirs();
-            }
-            configFile = new File(getDataFolder(), "config.yml");
-            File giftBlockFile = new File(getDataFolder(), "giftblock.yml");
-            playerInfoFile = new File(getDataFolder(), "playerinfo.json");
-            configData = new YamlConfiguration();
-            giftBlockData = new YamlConfiguration();
-            if (!configFile.exists()) {
-                getLogger().info("config.yml not found. Creating a new one.");
-                saveDefaultConfig();
-                loadConfig();
-            } else {
-                getLogger().info("config.yml found.");
-                loadConfig();
-                getLogger().info("Verifying that config.yml is up to date.");
-                if (!this.getConfigFile().isSet("restrict-interworld-gift")) {
-                    getLogger().warning("Outdated config.yml! Some newer options are missing!");
-                    configFile.renameTo(new File(getDataFolder(), "outdated_config.yml"));
-                    saveDefaultConfig();
-                    loadConfig();
-                    getLogger().info("Regenerating the default config.yml.");
-                    getLogger().info("The old config has been renamed to \"outdated_config.yml\".");
-                    getLogger().info("The data from outdated_config.yml can be copied and pasted to the new config.yml.");
-                    getLogger().info("Make sure not to overwrite the new options added in this update.");
-                    getLogger().info("");
-                } else {
-                    getLogger().info("config.yml is up to date.");
-                }
-            }
-            if (!playerInfoFile.exists()) {
-                getLogger().info("playerinfo.json not found. Looking for older file, giftblock.yml.");
-                if (giftBlockFile.exists()) {
-                    getLogger().info("giftblock.yml found. Initiating data migration!");
-                    giftBlockData.load(giftBlockFile);
-                    loadBlockList();
-                    getLogger().info("Creating playerinfo.json...");
-                    createPlayerInfo();
-                    getLogger().info("Done. Transferring data from giftblock.yml to playerinfo.json...");
-                    savePlayerInfo();
-                    getLogger().info("Done. Removing giftblock.yml as it's no longer used or needed.");
-                    giftBlockFile.delete();
-                } else {
-                    getLogger().info("giftblock.yml not found.");
-                    getLogger().info("Creating playerinfo.json.");
-                    createPlayerInfo();
-                }
-
-            } else {
-                getLogger().info("playerinfo.json found.");
-            }
-            loadPlayerInfo();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
         }
+        final File oldBlockFile = new File(getDataFolder(), "giftblock.yml");
+        if (!configFile.exists()) {
+            getLogger().info("Config not found. Creating a new one.");
+            saveDefaultConfig();
+            loadConfigFile();
+        } else {
+            loadConfigFile();
+            if (!this.getConfig().isSet("restrict-interworld-gift")) {
+                getLogger().warning("Outdated config! Some newer options are missing!");
+                configFile.renameTo(new File(getDataFolder(), "outdated_config.yml"));
+                saveDefaultConfig();
+                loadConfigFile();
+                getLogger().info("Regenerating the default config.");
+                getLogger().info("The old config has been renamed to \"outdated_config.yml\".");
+                getLogger().info("The data from outdated_config.yml can be copied and pasted to the new config.yml.");
+                getLogger().info("Make sure not to overwrite the new options added in this update.");
+                getLogger().info("");
+            }
+        }
+        if (!playerInfoFile.exists()) {
+            getLogger().info(playerInfoFile.getName() + " not found. Creating a new one.");
+            createPlayerInfo();
+            getLogger().info("Looking for an older file, " + oldBlockFile.getName() + ".");
+            if (oldBlockFile.exists()) {
+                getLogger().info(oldBlockFile.getName() + " found. Migrating data from it to " + playerInfoFile.getName() + ".");
+                try {
+                    giftBlockData.load(oldBlockFile);
+                    loadOldBlockList();
+                    if (savePlayerInfo()) {
+                        getLogger().info("Done. Removing the old file as it's no longer needed.");
+                        oldBlockFile.delete();
+                    }
+                } catch (InvalidConfigurationException | IOException e) {
+                    getLogger().log(Level.SEVERE, "Unable to load " + oldBlockFile.getName(), e);
+                }
+            } else {
+                getLogger().info(oldBlockFile.getName() + " not found.");
+            }
+        }
+        loadPlayerInfo();
     }
 
     private FileConfiguration getBlockData() {
@@ -170,34 +159,38 @@ public class AdvancedGift extends JavaPlugin {
     }
 
     FileConfiguration getConfigFile() {
-        return this.configData;
+        return getConfig();
+    }
+
+    private boolean loadConfigFile() {
+        getLogger().log(Level.INFO, "Config loaded.");
+        reloadConfig();
+        loadWorldGroupList();
+        prefix = ChatColor.translateAlternateColorCodes('&', this.getConfigFile().getString("prefix") + " ");
+        return true;
     }
 
     @Override
     public void onDisable() {
         savePlayerInfo();
-        getLogger().info("Saving playerinfo.yml.");
     }
 
     private void createPlayerInfo() {
-        PrintWriter pw;
-        try {
-            pw = new PrintWriter(playerInfoFile, "UTF-8");
+        try (PrintWriter pw = new PrintWriter(playerInfoFile, StandardCharsets.UTF_8.name())) {
             pw.print("{");
             pw.print("}");
-            pw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadBlockList() {
+    private void loadOldBlockList() {
         if (this.getBlockData().isSet("UUIDs")) {
             togglePlayers = getBlockData().getStringList("UUIDs").stream().map(UUID::fromString).collect(Collectors.toCollection(HashSet::new));
         }
     }
 
-    private void loadPlayerInfo() {
+    private boolean loadPlayerInfo() {
         try (BufferedReader buffer = Files.newBufferedReader(playerInfoFile.toPath())) {
             //Check what happens if a list being loaded is empty (aka is null). May need to use isJsonNull() before loading it.
             JsonObject object = new JsonParser().parse(new JsonReader(buffer)).getAsJsonObject();
@@ -211,11 +204,14 @@ public class AdvancedGift extends JavaPlugin {
                 }
             }
         } catch (JsonSyntaxException | JsonIOException | IOException e) {
-            e.printStackTrace();
+            getLogger().log(Level.SEVERE, "Unable to load player info", e);
+            return false;
         }
+        getLogger().log(Level.INFO, "Player info loaded.");
+        return true;
     }
 
-    private void savePlayerInfo() {
+    private boolean savePlayerInfo() {
         //Combines all lists into a single json object so gson will convert them to string in one go
         JsonObject object = new JsonObject();
         object.add("ToggleList", gson.toJsonTree(togglePlayers));
@@ -228,9 +224,11 @@ public class AdvancedGift extends JavaPlugin {
         final String json = gson.toJson(object);
         try (BufferedWriter writer = Files.newBufferedWriter(playerInfoFile.toPath())) {
             writer.write(json);
+            getLogger().info("Saving playerinfo.json.");
         } catch (IOException e) {
-            e.printStackTrace();
+            getLogger().log(Level.SEVERE, "Unable to save player info", e);
         }
+        return true;
     }
 
     //Bad. Just bad. Unfortunately this is not something I can easily fix without a major rewrite.
@@ -304,7 +302,7 @@ public class AdvancedGift extends JavaPlugin {
 
     private void loadWorldGroupList() {
         int key = 1;
-        for (String world : getConfigFile().getStringList("world-group-list")) {
+        for (String world : getConfig().getStringList("world-group-list")) {
             String[] array = world.split(", ");
             ArrayList<String> list = new ArrayList<>(Arrays.asList(array));
             worldList.put(key, list);
@@ -325,18 +323,6 @@ public class AdvancedGift extends JavaPlugin {
         return -1;
     }
 
-    private boolean loadConfig() {
-        try {
-            configData.load(configFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-            return false;
-        }
-        loadWorldGroupList();
-        prefix = ChatColor.translateAlternateColorCodes('&', this.getConfigFile().getString("prefix") + " ");
-        return true;
-    }
-
     private void startMetrics() {
         Metrics metrics = new Metrics(this, 13627);
         metrics.addCustomChart(new SingleLineChart("gifts_sent", giftCounter::collect));
@@ -350,11 +336,11 @@ public class AdvancedGift extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("agreload")) {
             if (!(sender instanceof Player)) {
-                if (loadConfig()) getServer().getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Reloaded the config.");
+                if (loadConfigFile()) getServer().getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Reloaded the config.");
                 else getServer().getConsoleSender().sendMessage(prefix + ChatColor.RED + "Failed to reload the config.");
             } else {
                 if (sender.hasPermission("advancedgift.reload")) {
-                    if (loadConfig()) sender.sendMessage(prefix + ChatColor.GREEN + "Reloaded the config.");
+                    if (loadConfigFile()) sender.sendMessage(prefix + ChatColor.GREEN + "Reloaded the config.");
                     else sender.sendMessage(prefix + ChatColor.RED + "Failed to reload the config. Check the console for errors.");
                 } else sender.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this command!");
             }
