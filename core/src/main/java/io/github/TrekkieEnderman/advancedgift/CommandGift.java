@@ -306,7 +306,8 @@ public class CommandGift implements CommandExecutor {
         PlayerInventory tinv = target.getInventory();
         List<ItemStack> itemList = new ArrayList<>();
         int amountLeft = giveAmount;
-        for (ItemStack item : sinv.getStorageContents()) { //todo getStorageContents doesn't exist in 1.8
+        ItemStack[] contents = ServerVersion.getMinorVersion() > 8 ? sinv.getStorageContents() : sinv.getContents();
+        for (ItemStack item : contents) {
             if (itemstack.isSimilar(item)) {
                 int itemAmount = item.getAmount();
                 ItemStack itemToAdd = item.clone();
