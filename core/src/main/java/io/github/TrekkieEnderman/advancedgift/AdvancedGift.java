@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import io.github.TrekkieEnderman.advancedgift.metrics.GiftCounter;
 import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
+import io.github.TrekkieEnderman.advancedgift.nms.Reflect;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
@@ -54,13 +55,25 @@ public class AdvancedGift extends JavaPlugin {
             final Class<?> classy = Class.forName("io.github.TrekkieEnderman.advancedgift.nms." + ServerVersion.getNMSVersion().toUpperCase());
             if (NMSInterface.class.isAssignableFrom(classy)) {
                 nms = (NMSInterface) classy.getConstructor().newInstance();
-                getLogger().info("This version is supported!");
-                getLogger().info("");
-                canUseTooltips = true;
             }
-        } catch (final Exception e) {
+        } catch (final Exception ignored) {
+            //Attempt to use the reflection class only if the server is newer than 1.19.
+            if (ServerVersion.getMinorVersion() > 19) {
+                try {
+                    nms = new Reflect(ServerVersion.getNMSVersion());
+                } catch (Throwable ex) {
+                    ex.printStackTrace();
+                    nms = null;
+                }
+            }
+        }
+        if (nms != null) {
+            getLogger().info("This version is supported!");
+            getLogger().info("");
+            canUseTooltips = true;
+        } else {
             getLogger().warning("Warning!");
-            getLogger().warning("This plugin doesn't have support for the NMS version this server uses!");
+            getLogger().warning("This plugin doesn't have support for this version!");
             getLogger().warning("In order to maintain compatibility with this server,");
             getLogger().warning("Item text hoverover has been disabled in this plugin!");
             getLogger().warning("Check for updates at www.spigotmc.org/resources/advancedgift.46458/");
