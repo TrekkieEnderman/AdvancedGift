@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>advancedgift-core</artifactId>
-    <version>1.11.0</version>
+    <version>1.11.1</version>
     <build>
         <directory>../target</directory>
         <finalName>AdvancedGift-${project.version}</finalName>
