@@ -238,7 +238,9 @@ public class CommandGift implements CommandExecutor {
         if (s.hasPermission("advancedgift.bypass.cooldown")) return 0;
         UUID senderUUID = s.getUniqueId();
         if (!cooldown.containsKey(senderUUID)) return 0;
-        return (int) (plugin.getConfigFile().getInt("cooldown-time") - System.currentTimeMillis()/1000 - cooldown.get(senderUUID)/1000);
+        //Adds 1 more second, as long division would truncate remainders. Simpler than other solutions, and off by only one millisecond.
+        //Which is fine for a command cooldown. Nobody but a computer or a supernerd is going to notice it.
+        return (int) ((cooldown.get(senderUUID) - System.currentTimeMillis())/1000 + 1);
     }
 
     private void checkMessageInput(Player s, Player target, ItemStack itemstack, int giveAmount, String[] args) {
@@ -300,7 +302,7 @@ public class CommandGift implements CommandExecutor {
             return;
 
         if (plugin.getConfigFile().getBoolean("enable-cooldown"))
-            cooldown.put(s.getUniqueId(), System.currentTimeMillis());
+            cooldown.put(s.getUniqueId(), System.currentTimeMillis() + plugin.getConfigFile().getLong("cooldown-time")*1000);
         plugin.getGiftCounter().increment();
         PlayerInventory sinv = s.getInventory();
         PlayerInventory tinv = target.getInventory();
