@@ -108,7 +108,8 @@ public class CommandGift implements CommandExecutor {
 
     private int getTotalAmountHas(PlayerInventory sinv, ItemStack itemstack) {
         int hasAmount = 0;
-        for (ItemStack item : sinv.getStorageContents()) { //getContents also returns offhand and armor slots, which we don't want to
+        ItemStack[] contents = ServerVersion.getMinorVersion() > 8 ? sinv.getStorageContents() : sinv.getContents();
+        for (ItemStack item : contents) { //getContents also returns offhand and armor slots, which we don't want to
             if (itemstack.isSimilar(item)) {
                 hasAmount += item.getAmount();
             }
