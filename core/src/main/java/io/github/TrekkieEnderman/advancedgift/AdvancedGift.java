@@ -1,8 +1,8 @@
 package io.github.TrekkieEnderman.advancedgift;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
+import io.github.TrekkieEnderman.advancedgift.data.LegacyDataManager;
+import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
+import io.github.TrekkieEnderman.advancedgift.data.StandardDataManager;
 import io.github.TrekkieEnderman.advancedgift.metrics.GiftCounter;
 import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
 import io.github.TrekkieEnderman.advancedgift.nms.Reflect;
@@ -12,39 +12,23 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 
 public class AdvancedGift extends JavaPlugin {
-    private final File configFile = new File(getDataFolder(),"config.yml"), playerInfoFile = new File(getDataFolder(), "playerinfo.json");
-    private final FileConfiguration giftBlockData = new YamlConfiguration();
-    private final Type uuidSetType = TypeToken.getParameterized(HashSet.class, UUID.class).getType();
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(uuidSetType, new uuidSetJsonAdapter()).create();
-    private Set<UUID> togglePlayers = new HashSet<>(), spyPlayers = new HashSet<>();
-    private final Map<UUID, Set<UUID>> blockPlayers = new HashMap<>();
+    private final File configFile = new File(getDataFolder(),"config.yml");
     private final HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
     String prefix, extLib;
     static NMSInterface nms;
     boolean canUseTooltips;
     boolean hasArtMap = false;
     private final GiftCounter giftCounter = new GiftCounter();
+    private PlayerDataManager playerDataManager;
 
     @Override
     public void onEnable() {
@@ -112,7 +96,6 @@ public class AdvancedGift extends JavaPlugin {
         if(!getDataFolder().exists()) {
             getDataFolder().mkdirs();
         }
-        final File oldBlockFile = new File(getDataFolder(), "giftblock.yml");
         if (!configFile.exists()) {
             getLogger().info("Config not found. Creating a new one.");
             saveDefaultConfig();
@@ -131,31 +114,9 @@ public class AdvancedGift extends JavaPlugin {
                 getLogger().info("");
             }
         }
-        if (!playerInfoFile.exists()) {
-            getLogger().info(playerInfoFile.getName() + " not found. Creating a new one.");
-            createPlayerInfo();
-            getLogger().info("Looking for an older file, " + oldBlockFile.getName() + ".");
-            if (oldBlockFile.exists()) {
-                getLogger().info(oldBlockFile.getName() + " found. Migrating data from it to " + playerInfoFile.getName() + ".");
-                try {
-                    giftBlockData.load(oldBlockFile);
-                    loadOldBlockList();
-                    if (savePlayerInfo()) {
-                        getLogger().info("Done. Removing the old file as it's no longer needed.");
-                        oldBlockFile.delete();
-                    }
-                } catch (InvalidConfigurationException | IOException e) {
-                    getLogger().log(Level.SEVERE, "Unable to load " + oldBlockFile.getName(), e);
-                }
-            } else {
-                getLogger().info(oldBlockFile.getName() + " not found.");
-            }
-        }
-        loadPlayerInfo();
-    }
-
-    private FileConfiguration getBlockData() {
-        return this.giftBlockData;
+        if (ServerVersion.getMinorVersion() > 11) playerDataManager = new StandardDataManager(this);
+        else playerDataManager = new LegacyDataManager(this);
+        this.getPlayerDataManager().load();
     }
 
     FileConfiguration getConfigFile() {
@@ -172,132 +133,7 @@ public class AdvancedGift extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        savePlayerInfo();
-    }
-
-    private void createPlayerInfo() {
-        try (PrintWriter pw = new PrintWriter(playerInfoFile, StandardCharsets.UTF_8.name())) {
-            pw.print("{");
-            pw.print("}");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadOldBlockList() {
-        if (this.getBlockData().isSet("UUIDs")) {
-            togglePlayers = getBlockData().getStringList("UUIDs").stream().map(UUID::fromString).collect(Collectors.toCollection(HashSet::new));
-        }
-    }
-
-    private boolean loadPlayerInfo() {
-        try (BufferedReader buffer = Files.newBufferedReader(playerInfoFile.toPath())) {
-            //Check what happens if a list being loaded is empty (aka is null). May need to use isJsonNull() before loading it.
-            JsonObject object = new JsonParser().parse(new JsonReader(buffer)).getAsJsonObject();
-            String name;
-            if (object.has(name = "ToggleList")) togglePlayers = gson.fromJson(object.get(name), uuidSetType);
-            if (object.has(name = "SpyList")) spyPlayers = gson.fromJson(object.get(name), uuidSetType);
-            if (object.has(name = "BlockList")) {
-                JsonObject mapJsonObject = object.getAsJsonObject(name);
-                for (Map.Entry<String, JsonElement> entry : mapJsonObject.entrySet()) {
-                    blockPlayers.put(UUID.fromString(entry.getKey()), gson.fromJson(entry.getValue(), uuidSetType));
-                }
-            }
-        } catch (JsonSyntaxException | JsonIOException | IOException e) {
-            getLogger().log(Level.SEVERE, "Unable to load player info", e);
-            return false;
-        }
-        getLogger().log(Level.INFO, "Player info loaded.");
-        return true;
-    }
-
-    private boolean savePlayerInfo() {
-        //Combines all lists into a single json object so gson will convert them to string in one go
-        JsonObject object = new JsonObject();
-        object.add("ToggleList", gson.toJsonTree(togglePlayers));
-        object.add("SpyList", gson.toJsonTree(spyPlayers));
-        JsonObject mapJsonObj = new JsonObject();
-        for (Map.Entry<UUID, Set<UUID>> entry : blockPlayers.entrySet()) {
-            mapJsonObj.add(entry.getKey().toString(), gson.toJsonTree(entry.getValue()));
-        }
-        object.add("BlockList", mapJsonObj);
-        final String json = gson.toJson(object);
-        try (BufferedWriter writer = Files.newBufferedWriter(playerInfoFile.toPath())) {
-            writer.write(json);
-            getLogger().info("Saving playerinfo.json.");
-        } catch (IOException e) {
-            getLogger().log(Level.SEVERE, "Unable to save player info", e);
-        }
-        return true;
-    }
-
-    //Bad. Just bad. Unfortunately this is not something I can easily fix without a major rewrite.
-    void addUUID(UUID playerUUID, String var, UUID secondUUID) {
-        if (playerUUID == null) return;
-        switch (var) {
-            case "tg":
-                togglePlayers.add(playerUUID);
-                break;
-            case "spy":
-                spyPlayers.add(playerUUID);
-                break;
-            case "block":
-                if (!blockPlayers.containsKey(playerUUID)) {
-                    Set<UUID> list = new HashSet<>();
-                    list.add(secondUUID);
-                    blockPlayers.put(playerUUID, list);
-                } else blockPlayers.get(playerUUID).add(secondUUID);
-                break;
-        }
-    }
-
-    //Why did I do this way?
-    boolean containsUUID(UUID playerUUID, String var, UUID secondUUID) {
-        if (playerUUID == null) return false;
-        boolean bool = false;
-        switch (var) {
-            case "tg":
-                bool = togglePlayers.contains(playerUUID);
-                break;
-            case "spy":
-                bool = spyPlayers.contains(playerUUID);
-                break;
-            case "block":
-                if (blockPlayers.containsKey(playerUUID)) {
-                    bool = blockPlayers.get(playerUUID).contains(secondUUID);
-                }
-                break;
-        }
-        return bool;
-    }
-
-    //Seriously, why?
-    void removeUUID(UUID playerUUID, String var, UUID secondUUID) {
-        if (playerUUID == null) return;
-        switch (var) {
-            case "tg":
-                togglePlayers.remove(playerUUID);
-                break;
-            case "spy":
-                spyPlayers.remove(playerUUID);
-                break;
-            case "block":
-                blockPlayers.get(playerUUID).remove(secondUUID);
-                if (blockPlayers.get(playerUUID).isEmpty()) blockPlayers.keySet().remove(playerUUID);
-                break;
-        }
-    }
-
-    Set<UUID> getBlockList(UUID playerUUID) {
-        return blockPlayers.get(playerUUID);
-    }
-
-    boolean clearBlockList(UUID playerUUID) {
-        if (blockPlayers.containsKey(playerUUID)) {
-            blockPlayers.keySet().remove(playerUUID);
-            return true;
-        }
-        return false;
+        this.getPlayerDataManager().save();
     }
 
     private void loadWorldGroupList() {
@@ -332,6 +168,10 @@ public class AdvancedGift extends JavaPlugin {
         return giftCounter;
     }
 
+    public PlayerDataManager getPlayerDataManager() {
+        return playerDataManager;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("agreload")) {
@@ -355,24 +195,24 @@ public class AdvancedGift extends JavaPlugin {
                     String spyEnabled = prefix + ChatColor.GREEN + "Gift Spy enabled.";
                     String spyDisabled = prefix + ChatColor.RED + "Gift Spy disabled.";
                     if (args.length == 0) {
-                        if (!containsUUID(senderUUID, "spy", null)) {
-                            addUUID(senderUUID, "spy", null);
+                        if (!getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
+                            getPlayerDataManager().addUUID(senderUUID, "spy", null);
                             s.sendMessage(spyEnabled);
                         } else {
-                            removeUUID(senderUUID, "spy", null);
+                            getPlayerDataManager().removeUUID(senderUUID, "spy", null);
                             s.sendMessage(spyDisabled);
                         }
                     } else {
                         if (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("enable")) {
-                            if (!containsUUID(senderUUID, "spy", null)) {
-                                addUUID(senderUUID, "spy", null);
+                            if (!getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
+                                getPlayerDataManager().addUUID(senderUUID, "spy", null);
                                 s.sendMessage(spyEnabled);
                             } else {
                                 s.sendMessage(prefix + ChatColor.GRAY + "Gift Spy is already enabled.");
                             }
                         } else if (args[0].equalsIgnoreCase("off") || args [0].equalsIgnoreCase("disable")) {
-                            if (containsUUID(senderUUID, "spy", null)) {
-                                removeUUID(senderUUID, "spy", null);
+                            if (getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
+                                getPlayerDataManager().removeUUID(senderUUID, "spy", null);
                                 s.sendMessage(spyDisabled);
                             } else {
                                 s.sendMessage(prefix + ChatColor.GRAY + "Gift Spy is already disabled.");
@@ -388,21 +228,5 @@ public class AdvancedGift extends JavaPlugin {
             }
         }
         return true;
-    }
-
-    //Converts a set of UUIDs to/from json
-    static class uuidSetJsonAdapter implements JsonSerializer<Set<UUID>>, JsonDeserializer<Set<UUID>> {
-        @Override
-        public Set<UUID> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            JsonArray jsonArray = jsonElement.getAsJsonArray();
-            return StreamSupport.stream(jsonArray.spliterator(), false).map(JsonElement::getAsString).map(UUID::fromString).collect(Collectors.toCollection(HashSet::new));
-        }
-
-        @Override
-        public JsonElement serialize(Set<UUID> uuids, Type type, JsonSerializationContext jsonSerializationContext) {
-            JsonArray jsonArray = new JsonArray();
-            uuids.stream().map(UUID::toString).forEach(jsonArray::add);
-            return jsonArray;
-        }
     }
 }

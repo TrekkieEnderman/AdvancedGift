@@ -59,15 +59,15 @@ public class CommandGiftBlock implements CommandExecutor {
                     target = targetPlayer.getName();
                 }
                 if (label.equalsIgnoreCase("giftblock") || label.equalsIgnoreCase("blockgift") || label.equalsIgnoreCase("gblock")) {
-                    if (!plugin.containsUUID(senderUUID, "block", targetUUID)) {
-                        plugin.addUUID(senderUUID, "block", targetUUID);
+                    if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "block", targetUUID)) {
+                        plugin.getPlayerDataManager().addUUID(senderUUID, "block", targetUUID);
                         s.sendMessage(prefix + ChatColor.GREEN + "Added " + target + " to your gift block list!");
                     } else {
                         s.sendMessage(prefix + ChatColor.GRAY + target + " is already on your gift block list.");
                     }
                 } else {
-                    if (plugin.containsUUID(senderUUID, "block", targetUUID)) {
-                        plugin.removeUUID(senderUUID, "block", targetUUID);
+                    if (plugin.getPlayerDataManager().containsUUID(senderUUID, "block", targetUUID)) {
+                        plugin.getPlayerDataManager().removeUUID(senderUUID, "block", targetUUID);
                         s.sendMessage(prefix + ChatColor.AQUA + "Removed " + target + " from your gift block list!");
                     } else {
                         s.sendMessage(prefix + ChatColor.GRAY + target + " is not on your gift block list.");
@@ -76,7 +76,7 @@ public class CommandGiftBlock implements CommandExecutor {
             }
         } else {
             if (args.length == 0) {
-                Set<UUID> blockList = plugin.getBlockList(senderUUID);
+                Set<UUID> blockList = plugin.getPlayerDataManager().getBlockList(senderUUID);
                 if (blockList == null || blockList.isEmpty()) s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list is empty.");
                 else {
                     s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list:");
@@ -103,7 +103,7 @@ public class CommandGiftBlock implements CommandExecutor {
                 }
             } else {
                 if (args[0].equalsIgnoreCase("clear")) {
-                    if (plugin.clearBlockList(senderUUID)) s.sendMessage(prefix + ChatColor.GREEN + "Cleared your gift block list!");
+                    if (plugin.getPlayerDataManager().clearBlockList(senderUUID)) s.sendMessage(prefix + ChatColor.GREEN + "Cleared your gift block list!");
                     else s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list is already empty.");
                 } else {
                     s.sendMessage(prefix + ChatColor.RED + "Cannot understand " + args[0] + "!");
