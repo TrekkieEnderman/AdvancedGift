@@ -61,20 +61,24 @@ public class CommandGift implements CommandExecutor {
                     target = matchList.get(0);
                 } else if (matchList.size() > 1) {
                     s.sendMessage(prefix + ChatColor.YELLOW + "Several matches found. Please pick one you want to give.");
-                    ComponentBuilder builder = new ComponentBuilder();
+                    ComponentBuilder builder = new ComponentBuilder("");
 
                     final HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to send this player a gift").create());
                     final String[] argsClone = args.clone(); //we want to reuse the exact command the player used, and just change the target name
                     for (Player player : matchList) {
                         TextComponent textComponent = new TextComponent(TextComponent.fromLegacyText(player.getDisplayName()));
-                        textComponent.setHoverEvent(hoverEvent);
 
                         argsClone[0] = player.getName(); //replace the original 1st argument with new name
                         final String commandString = "/gift " + String.join(" ", argsClone);
-                        textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, commandString));
+                        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, commandString);
 
                         if (builder.getCursor() != 0) builder.append(" ", ComponentBuilder.FormatRetention.NONE);
-                        builder.append(textComponent);
+                        if (ServerVersion.getMinorVersion() < 12) {
+                            builder.append(textComponent.toLegacyText());
+                        } else {
+                            builder.append(textComponent);
+                        }
+                        builder.event(hoverEvent).event(clickEvent);
                     }
                     s.spigot().sendMessage(builder.create());
                     return true;

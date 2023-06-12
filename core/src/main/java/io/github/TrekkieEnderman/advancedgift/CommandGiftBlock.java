@@ -80,22 +80,27 @@ public class CommandGiftBlock implements CommandExecutor {
                 if (blockList == null || blockList.isEmpty()) s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list is empty.");
                 else {
                     s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list:");
-                    ComponentBuilder builder = new ComponentBuilder(); //main builder for showing the list
+                    ComponentBuilder builder = new ComponentBuilder(""); //main builder for showing the list
 
-                    final TextComponent blankSpaceComponent = new TextComponent(" ");
+                    final String blankSpaceString = " ";
                     final HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to unblock this player").create());
 
                     for (UUID playerUUID : blockList) {
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
                         TextComponent textComponent = offlinePlayer.isOnline()
-                                ? new TextComponent(TextComponent.fromLegacyText(offlinePlayer.getPlayer().getDisplayName(), ChatColor.DARK_AQUA))
+                                ? new TextComponent(TextComponent.fromLegacyText(offlinePlayer.getPlayer().getDisplayName()))
                                 : new TextComponent(offlinePlayer.getName());
                         textComponent.setColor(ChatColor.DARK_AQUA);
-                        textComponent.setHoverEvent((hoverEvent));
-                        textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/giftunblock " + offlinePlayer.getName()));
+                        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/giftunblock " + offlinePlayer.getName());
 
-                        builder.append(blankSpaceComponent);
-                        builder.append(textComponent);
+                        builder.append(blankSpaceString);
+
+                        if (ServerVersion.getMinorVersion() < 12) {
+                            builder.append(textComponent.toLegacyText());
+                        } else {
+                            builder.append(textComponent);
+                        }
+                        builder.event(hoverEvent).event(clickEvent);
                     }
                     s.spigot().sendMessage(builder.create());
                     s.sendMessage(ChatColor.AQUA + "To unblock a player, click on their name in the list or use " + ChatColor.WHITE + "/giftunblock <player>");
