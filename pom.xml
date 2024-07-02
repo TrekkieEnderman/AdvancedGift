@@ -8,12 +8,27 @@
     <artifactId>advancedgift-parent</artifactId>
     <packaging>pom</packaging>
     <version>parent</version>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>Maven Plugin Repository</name>
+            <url>http://repo1.maven.org/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -21,6 +36,7 @@
             </plugin>
         </plugins>
     </build>
+
     <modules>
         <module>core</module>
         <module>API</module>
@@ -39,12 +55,14 @@
         <module>spigot_1_19_R2</module>
         <module>spigot-unversioned</module>
     </modules>
+
     <repositories>
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
@@ -53,4 +71,5 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
 </project>
