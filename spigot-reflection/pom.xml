@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>advancedgift-unversioned</artifactId>
-    <version>unversioned</version>
+    <artifactId>advancedgift-reflection</artifactId>
+    <version>1.21</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
