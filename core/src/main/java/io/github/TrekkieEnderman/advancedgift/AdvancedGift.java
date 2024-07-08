@@ -43,8 +43,8 @@ public class AdvancedGift extends JavaPlugin {
                 nms = (NMSInterface) classy.getConstructor().newInstance();
             }
         } catch (final Exception ignored) {
-            //Attempt to use the reflection class only if the server is newer than 1.19.
-            if (ServerVersion.getMinorVersion() > 19) {
+            //Attempt to use the reflection class only if the server is 1.20.5 or newer.
+            if (ServerVersion.getMinorVersion() == 20 && ServerVersion.getRevisionVersion() >= 5 || ServerVersion.getMinorVersion() >= 21) {
                 try {
                     nms = new Reflect(ServerVersion.getNMSVersion());
                 } catch (Throwable ex) {

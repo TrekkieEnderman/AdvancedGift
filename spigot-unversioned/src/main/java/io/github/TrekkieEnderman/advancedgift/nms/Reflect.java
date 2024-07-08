@@ -1,6 +1,7 @@
 package io.github.TrekkieEnderman.advancedgift.nms;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.core.IRegistryCustom;
+import net.minecraft.nbt.NBTBase;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -13,45 +14,60 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 
 public class Reflect implements NMSInterface {
-    MethodHandle asNMSCopyMH;
-    MethodHandle saveTagMH;
+    final MethodHandle asNMSCopyMH;
+    final MethodHandle saveTagMH;
+    final MethodHandle getRegistryMH;
+
     public Reflect(final String nmsVersion) throws Throwable {
-        //runs a test on initialization to ensure nothing will break while using reflection. If anything breaks, throws an exception which the main class will catch.
-        final Class<?> classy = Class.forName("org.bukkit.craftbukkit." + nmsVersion + ".inventory.CraftItemStack");
+        // Run a test on initialization to ensure nothing will break while using reflection. If anything breaks, throws an exception which the main class will catch.
+        // Get the method that converts a Bukkit ItemStack to a Minecraft ItemStack
+        final Class<?> classCraftItemStack = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".inventory.CraftItemStack");
         MethodHandles.Lookup publicLookup = MethodHandles.publicLookup();
-        MethodType CraftMethodType = MethodType.methodType(net.minecraft.world.item.ItemStack.class, ItemStack.class);
-        asNMSCopyMH = publicLookup.findStatic(classy, "asNMSCopy", CraftMethodType);
+        MethodType CraftNMSMethodType = MethodType.methodType(net.minecraft.world.item.ItemStack.class, ItemStack.class);
+        asNMSCopyMH = publicLookup.findStatic(classCraftItemStack, "asNMSCopy", CraftNMSMethodType);
+
+        // Get the method that returns the Minecraft registry I need
+        final Class<?> classCraftRegistry = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".CraftRegistry");
+        MethodType RegistryMethodType = MethodType.methodType(IRegistryCustom.class);
+        getRegistryMH = publicLookup.findStatic(classCraftRegistry, "getMinecraftRegistry", RegistryMethodType);
+
+        // Search for the method that will return the NBT component
+        MethodHandle temp = null;
         for (Method method : net.minecraft.world.item.ItemStack.class.getMethods()) {
-            if (method.getReturnType().equals(NBTTagCompound.class) && method.getParameterCount() == 1 && method.getParameterTypes()[0].equals(NBTTagCompound.class)) {
-                saveTagMH = publicLookup.unreflect(method);
+            if (method.getReturnType().equals(NBTBase.class) && method.getParameterCount() == 1) {
+                temp = publicLookup.unreflect(method);
                 break;
             }
         }
+        saveTagMH = temp;
 
-        //Construct a simple ItemStack with ItemMeta to test on
-        ItemStack item = new ItemStack(Material.DIRT);
-        ItemMeta meta = Bukkit.getItemFactory().getItemMeta(Material.DIRT);
-        meta.setDisplayName("Test Name");
-        item.setItemMeta(meta);
-        test(item);
+        test();
+
     }
 
     @Override
     public String convertItemToJson(ItemStack item) {
         try {
-            net.minecraft.world.item.ItemStack nmsItemStack = (net.minecraft.world.item.ItemStack) asNMSCopyMH.invoke(item);
-            NBTTagCompound compound = new NBTTagCompound();
-            return saveTagMH.invoke(nmsItemStack, compound).toString();
+            return getNBTString(item);
         } catch (Throwable e) {
             Bukkit.getPluginManager().getPlugin("AdvancedGift").getLogger().log(Level.SEVERE, "Something went wrong with getting an item tooltip", e);
-            return "";
+            return "{}";
         }
     }
 
-    public void test(ItemStack item) throws Throwable {
-        if (asNMSCopyMH == null || saveTagMH == null) return;
-        net.minecraft.world.item.ItemStack nmsItemStack = (net.minecraft.world.item.ItemStack) asNMSCopyMH.invoke(item);
-        NBTTagCompound compound = new NBTTagCompound();
-        saveTagMH.invoke(nmsItemStack, compound);
+    private void test() throws Throwable {
+        //Construct a simple ItemStack with ItemMeta to test on
+        ItemStack item = new ItemStack(Material.DIRT);
+        ItemMeta meta = Bukkit.getItemFactory().getItemMeta(Material.DIRT);
+        meta.setDisplayName("Test Name");
+        item.setItemMeta(meta);
+
+        getNBTString(item);
+    }
+
+    private String getNBTString(ItemStack craftItemStack) throws Throwable {
+        net.minecraft.world.item.ItemStack nmsItemStack = (net.minecraft.world.item.ItemStack) asNMSCopyMH.invoke(craftItemStack);
+        IRegistryCustom registryCustom = (IRegistryCustom) getRegistryMH.invoke();
+        return saveTagMH.invoke(nmsItemStack, registryCustom).toString();
     }
 }
