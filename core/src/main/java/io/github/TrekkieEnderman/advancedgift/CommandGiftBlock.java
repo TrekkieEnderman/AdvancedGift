@@ -18,11 +18,9 @@ import net.md_5.bungee.api.ChatColor;
 
 public class CommandGiftBlock implements CommandExecutor {
     private final AdvancedGift plugin;
-    private String prefix;
 
     CommandGiftBlock(AdvancedGift plugin) {
         this.plugin = plugin;
-        this.prefix = this.plugin.prefix;
     }
 
     @SuppressWarnings("deprecation")
@@ -36,7 +34,7 @@ public class CommandGiftBlock implements CommandExecutor {
         UUID senderUUID = s.getUniqueId();
         if (cmd.getName().equalsIgnoreCase("giftblock")) {
             if (args.length == 0) {
-                s.sendMessage(prefix + ChatColor.YELLOW + "Block gifts from a player you dislike or find annoying!" + ChatColor.GRAY + " ...Or unblock them.");
+                s.sendMessage(plugin.getPrefix() + ChatColor.YELLOW + "Block gifts from a player you dislike or find annoying!" + ChatColor.GRAY + " ...Or unblock them.");
                 s.sendMessage(ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/giftblock [player]" + ChatColor.GRAY + "  ||  " + ChatColor.WHITE + "/giftunblock [player]");
             } else {
                 String target = args[0];
@@ -45,14 +43,14 @@ public class CommandGiftBlock implements CommandExecutor {
                 if (targetPlayer == null) {
                     OfflinePlayer targetOffline = Bukkit.getOfflinePlayer(target);
                     if (!targetOffline.hasPlayedBefore()) {
-                        s.sendMessage(prefix + ChatColor.RED + "No player going by " + target + " has played on here before.");
+                        s.sendMessage(plugin.getPrefix() + ChatColor.RED + "No player going by " + target + " has played on here before.");
                         return true;
                     }
                     targetUUID = targetOffline.getUniqueId();
                     target = targetOffline.getName();
                 } else {
                     if (targetPlayer == s.getPlayer()) {
-                        s.sendMessage(prefix + ChatColor.RED + "Are you trying to block yourself?");
+                        s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Are you trying to block yourself?");
                         return true;
                     }
                     targetUUID = targetPlayer.getUniqueId();
@@ -61,25 +59,25 @@ public class CommandGiftBlock implements CommandExecutor {
                 if (label.equalsIgnoreCase("giftblock") || label.equalsIgnoreCase("blockgift") || label.equalsIgnoreCase("gblock")) {
                     if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "block", targetUUID)) {
                         plugin.getPlayerDataManager().addUUID(senderUUID, "block", targetUUID);
-                        s.sendMessage(prefix + ChatColor.GREEN + "Added " + target + " to your gift block list!");
+                        s.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "Added " + target + " to your gift block list!");
                     } else {
-                        s.sendMessage(prefix + ChatColor.GRAY + target + " is already on your gift block list.");
+                        s.sendMessage(plugin.getPrefix() + ChatColor.GRAY + target + " is already on your gift block list.");
                     }
                 } else {
                     if (plugin.getPlayerDataManager().containsUUID(senderUUID, "block", targetUUID)) {
                         plugin.getPlayerDataManager().removeUUID(senderUUID, "block", targetUUID);
-                        s.sendMessage(prefix + ChatColor.AQUA + "Removed " + target + " from your gift block list!");
+                        s.sendMessage(plugin.getPrefix() + ChatColor.AQUA + "Removed " + target + " from your gift block list!");
                     } else {
-                        s.sendMessage(prefix + ChatColor.GRAY + target + " is not on your gift block list.");
+                        s.sendMessage(plugin.getPrefix() + ChatColor.GRAY + target + " is not on your gift block list.");
                     }
                 }
             }
         } else {
             if (args.length == 0) {
                 Set<UUID> blockList = plugin.getPlayerDataManager().getBlockList(senderUUID);
-                if (blockList == null || blockList.isEmpty()) s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list is empty.");
+                if (blockList == null || blockList.isEmpty()) s.sendMessage(plugin.getPrefix() + ChatColor.GRAY + "Your gift block list is empty.");
                 else {
-                    s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list:");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.GRAY + "Your gift block list:");
                     ComponentBuilder builder = new ComponentBuilder(""); //main builder for showing the list
 
                     final String blankSpaceString = " ";
@@ -108,10 +106,10 @@ public class CommandGiftBlock implements CommandExecutor {
                 }
             } else {
                 if (args[0].equalsIgnoreCase("clear")) {
-                    if (plugin.getPlayerDataManager().clearBlockList(senderUUID)) s.sendMessage(prefix + ChatColor.GREEN + "Cleared your gift block list!");
-                    else s.sendMessage(prefix + ChatColor.GRAY + "Your gift block list is already empty.");
+                    if (plugin.getPlayerDataManager().clearBlockList(senderUUID)) s.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "Cleared your gift block list!");
+                    else s.sendMessage(plugin.getPrefix() + ChatColor.GRAY + "Your gift block list is already empty.");
                 } else {
-                    s.sendMessage(prefix + ChatColor.RED + "Cannot understand " + args[0] + "!");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Cannot understand " + args[0] + "!");
                 }
             }
 

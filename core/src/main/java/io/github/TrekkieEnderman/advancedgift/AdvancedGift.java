@@ -24,7 +24,8 @@ import java.util.logging.Level;
 public class AdvancedGift extends JavaPlugin {
     private final File configFile = new File(getDataFolder(),"config.yml");
     private final HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
-    public String prefix, extLib;
+    private String prefix;
+    public String extLib;
     static NMSInterface nms;
     boolean canUseTooltips;
     boolean hasArtMap = false;
@@ -178,17 +179,21 @@ public class AdvancedGift extends JavaPlugin {
         return playerDataManager;
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("agreload")) {
             if (!(sender instanceof Player)) {
-                if (loadConfigFile()) getServer().getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Reloaded the config.");
-                else getServer().getConsoleSender().sendMessage(prefix + ChatColor.RED + "Failed to reload the config.");
+                if (loadConfigFile()) getServer().getConsoleSender().sendMessage(getPrefix() + ChatColor.GREEN + "Reloaded the config.");
+                else getServer().getConsoleSender().sendMessage(getPrefix() + ChatColor.RED + "Failed to reload the config.");
             } else {
                 if (sender.hasPermission("advancedgift.reload")) {
-                    if (loadConfigFile()) sender.sendMessage(prefix + ChatColor.GREEN + "Reloaded the config.");
-                    else sender.sendMessage(prefix + ChatColor.RED + "Failed to reload the config. Check the console for errors.");
-                } else sender.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this command!");
+                    if (loadConfigFile()) sender.sendMessage(getPrefix() + ChatColor.GREEN + "Reloaded the config.");
+                    else sender.sendMessage(getPrefix() + ChatColor.RED + "Failed to reload the config. Check the console for errors.");
+                } else sender.sendMessage(getPrefix() + ChatColor.RED + "You don't have permission to use this command!");
             }
         }
         if (cmd.getName().equalsIgnoreCase("giftspy")) {
@@ -198,8 +203,8 @@ public class AdvancedGift extends JavaPlugin {
                     String usage = ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/giftspy " + ChatColor.GRAY + "<on/off>";
                     Player s = (Player) sender;
                     UUID senderUUID = s.getUniqueId();
-                    String spyEnabled = prefix + ChatColor.GREEN + "Gift Spy enabled.";
-                    String spyDisabled = prefix + ChatColor.RED + "Gift Spy disabled.";
+                    String spyEnabled = getPrefix() + ChatColor.GREEN + "Gift Spy enabled.";
+                    String spyDisabled = getPrefix() + ChatColor.RED + "Gift Spy disabled.";
                     if (args.length == 0) {
                         if (!getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
                             getPlayerDataManager().addUUID(senderUUID, "spy", null);
@@ -214,22 +219,22 @@ public class AdvancedGift extends JavaPlugin {
                                 getPlayerDataManager().addUUID(senderUUID, "spy", null);
                                 s.sendMessage(spyEnabled);
                             } else {
-                                s.sendMessage(prefix + ChatColor.GRAY + "Gift Spy is already enabled.");
+                                s.sendMessage(getPrefix() + ChatColor.GRAY + "Gift Spy is already enabled.");
                             }
                         } else if (args[0].equalsIgnoreCase("off") || args [0].equalsIgnoreCase("disable")) {
                             if (getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
                                 getPlayerDataManager().removeUUID(senderUUID, "spy", null);
                                 s.sendMessage(spyDisabled);
                             } else {
-                                s.sendMessage(prefix + ChatColor.GRAY + "Gift Spy is already disabled.");
+                                s.sendMessage(getPrefix() + ChatColor.GRAY + "Gift Spy is already disabled.");
                             }
                         } else {
-                            s.sendMessage(prefix + ChatColor.RED + "Cannot understand " + args[0] + "!");
+                            s.sendMessage(getPrefix() + ChatColor.RED + "Cannot understand " + args[0] + "!");
                             s.sendMessage(usage);
                         }
                     }
                 } else {
-                    sender.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this!");
+                    sender.sendMessage(getPrefix() + ChatColor.RED + "You don't have permission to use this!");
                 }
             }
         }

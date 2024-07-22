@@ -10,11 +10,9 @@ import org.bukkit.entity.Player;
 
 public class CommandGiftToggle implements CommandExecutor {
     private final AdvancedGift plugin;
-    private String prefix;
 
     CommandGiftToggle(AdvancedGift plugin) {
         this.plugin = plugin;
-        this.prefix = this.plugin.prefix;
     }
 
     @Override
@@ -29,28 +27,28 @@ public class CommandGiftToggle implements CommandExecutor {
         if (args.length == 0) {
             if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
                 plugin.getPlayerDataManager().addUUID(senderUUID, "tg", null);
-                s.sendMessage(prefix + ChatColor.YELLOW + "You won't receive any more gifts now.");
+                s.sendMessage(plugin.getPrefix() + ChatColor.YELLOW + "You won't receive any more gifts now.");
             } else {
                 plugin.getPlayerDataManager().removeUUID(senderUUID, "tg", null);
-                s.sendMessage(prefix + ChatColor.GREEN + "You will receive gifts from now on.");
+                s.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "You will receive gifts from now on.");
             }
         } else {
             if (args[0].equalsIgnoreCase("off") || args[0].equalsIgnoreCase("disable")) {
                 if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
                     plugin.getPlayerDataManager().addUUID(senderUUID, "tg", null);
-                    s.sendMessage(prefix + ChatColor.YELLOW + "You won't receive any more gifts now.");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.YELLOW + "You won't receive any more gifts now.");
                 } else {
-                    s.sendMessage(prefix + ChatColor.RED + "Your ability to receive gifts is already disabled.");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Your ability to receive gifts is already disabled.");
                 }
             } else if (args[0].equalsIgnoreCase("on") || args [0].equalsIgnoreCase("enable")) {
                 if (plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
                     plugin.getPlayerDataManager().removeUUID(senderUUID, "tg", null);
-                    s.sendMessage(prefix + ChatColor.GREEN + "You will receive gifts from now on.");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "You will receive gifts from now on.");
                 } else {
-                    s.sendMessage(prefix + ChatColor.RED + "Your ability to receive gifts is already enabled.");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Your ability to receive gifts is already enabled.");
                 }
             } else {
-                s.sendMessage(prefix + ChatColor.RED + "Cannot understand " + args[0] + "!");
+                s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Cannot understand " + args[0] + "!");
                 s.sendMessage(usage);
             }
         }

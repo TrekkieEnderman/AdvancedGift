@@ -18,7 +18,7 @@ public class PlayerJoinListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent joinEvent) {
         Player player = joinEvent.getPlayer();
         if (player.isOp() && plugin.isConfigOutdated()) {
-            player.sendMessage(plugin.prefix + ChatColor.RED + "Config is outdated.");
+            player.sendMessage(plugin.getPrefix() + ChatColor.RED + "Config is outdated.");
         }
     }
 }

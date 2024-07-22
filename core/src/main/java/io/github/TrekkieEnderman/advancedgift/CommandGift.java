@@ -26,14 +26,12 @@ import com.meowj.langutils.lang.LanguageHelper;
 
 public class CommandGift implements CommandExecutor {
     private final AdvancedGift plugin;
-    private final String prefix;
     private final boolean enableMessage;
     private final String usage;
     private final static char[] SPACE_DELIMITER = new char[]{' '};
 
     CommandGift(AdvancedGift plugin) {
         this.plugin = plugin;
-        this.prefix = this.plugin.prefix;
         this.enableMessage = this.plugin.getConfigFile().getBoolean("allow-gift-message");
         this.usage = ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/gift [player]" + ChatColor.GRAY + " <amount | hand | all>" + (enableMessage ? " <your message>" : "");
     }
@@ -48,7 +46,7 @@ public class CommandGift implements CommandExecutor {
         } else {
             Player s = (Player) sender;
             if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-                s.sendMessage(prefix + ChatColor.YELLOW + "Send your friend or foe a gift, anywhere and anytime, in an instant!");
+                s.sendMessage(plugin.getPrefix() + ChatColor.YELLOW + "Send your friend or foe a gift, anywhere and anytime, in an instant!");
                 s.sendMessage(ChatColor.YELLOW + "Hold something in your hand and use the following command. White text is required, and gray text is optional.");
                 s.sendMessage(usage);
             } else {
@@ -60,7 +58,7 @@ public class CommandGift implements CommandExecutor {
                 if (matchList.size() == 1) {
                     target = matchList.get(0);
                 } else if (matchList.size() > 1) {
-                    s.sendMessage(prefix + ChatColor.YELLOW + "Several matches found. Please pick one you want to give.");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.YELLOW + "Several matches found. Please pick one you want to give.");
                     ComponentBuilder builder = new ComponentBuilder("");
 
                     final HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to send this player a gift").create());
@@ -87,13 +85,13 @@ public class CommandGift implements CommandExecutor {
                 @SuppressWarnings("deprecation")
                 ItemStack itemstack = (ServerVersion.getMinorVersion() < 9 ? sinv.getItemInHand() : sinv.getItemInMainHand());
                 if (!(s.hasPermission("advancedgift.gift.send"))) {
-                    s.sendMessage(prefix + ChatColor.RED + "You don't have permission to use this command!");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "You don't have permission to use this command!");
                 } else if (target == null || (isVanished(target) && !s.hasPermission("advancedgift.bypass.vanish"))) {
-                    s.sendMessage(prefix + ChatColor.RED + args[0] + " is not online!");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + args[0] + " is not online!");
                 } else if (target == s.getPlayer()) {
-                    s.sendMessage(prefix + ChatColor.RED + "You can't send yourself a gift!");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "You can't send yourself a gift!");
                 } else if (itemstack.getType() == Material.AIR) {
-                    s.sendMessage(prefix + ChatColor.RED + "You need to hold something in your hand!");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "You need to hold something in your hand!");
                 } else {
                     if (args.length == 1) {
                         sendItem(s, target, itemstack, itemstack.getAmount(), "");
@@ -128,16 +126,16 @@ public class CommandGift implements CommandExecutor {
         } else {
             //Try to parse string as an integer, first checking if it is all digits
             if (!NumberUtils.isDigits(amountAsString)) {
-                s.sendMessage(prefix + ChatColor.RED + "Invalid amount! It must be a whole number above zero.");
+                s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Invalid amount! It must be a whole number above zero.");
                 return;
             } else {
                 giveAmount = NumberUtils.toInt(amountAsString);
                 if (giveAmount < 1) {
-                    s.sendMessage(prefix + ChatColor.RED + "Invalid amount! It must be a whole number above zero.");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Invalid amount! It must be a whole number above zero.");
                     return;
                 }
                 if (!sinv.containsAtLeast(itemstack, giveAmount)) {
-                    s.sendMessage(prefix + ChatColor.RED + "You don't have that much of this item! Please specify a smaller amount or use \"all\".");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "You don't have that much of this item! Please specify a smaller amount or use \"all\".");
                     logGiftDenied(s.getName(), s.getName() + " doesn't have the amount specified.");
                     return;
                 }
@@ -159,24 +157,24 @@ public class CommandGift implements CommandExecutor {
             int sWorldGroup = plugin.getPlayerWorldGroup(s);
             int tWorldGroup = plugin.getPlayerWorldGroup(target);
             if (sWorldGroup == -1 && !(s.hasPermission("advancedgift.bypass.world.blacklist"))) {
-                s.sendMessage(prefix + ChatColor.RED + "Sorry! The world you are in is blacklisted from gift activities.");
+                s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Sorry! The world you are in is blacklisted from gift activities.");
                 logGiftDenied(sName, sName + " is in " + s.getWorld().getName() + ", a blacklisted world.");
                 return false;
             }
             if (tWorldGroup == -1 && !(s.hasPermission("advancedgift.bypass.world.blacklist"))) {
-                s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " is in a world blacklisted from gift activities.");
+                s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Sorry! " + tName + " is in a world blacklisted from gift activities.");
                 logGiftDenied(sName, "Target " + tName + " is in " + target.getWorld().getName() + ", a blacklisted world.");
                 return false;
             }
             if (sWorldGroup != (tWorldGroup) && !(s.hasPermission("advancedgift.bypass.world.restriction"))) {
-                s.sendMessage(prefix + ChatColor.RED + "Sorry! You and " + tName + " are not in the same world or group of worlds.");
+                s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Sorry! You and " + tName + " are not in the same world or group of worlds.");
                 s.sendMessage(ChatColor.RED + "You cannot send the gift due to an interworld gift restriction.");
                 logGiftDenied(sName, sName + " and " + tName + " are not in the same group of worlds.");
                 return false;
             }
         }
         if (!(target.hasPermission("advancedgift.gift.receive"))) {
-            s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " doesn't have permission to receive gifts.");
+            s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Sorry! " + tName + " doesn't have permission to receive gifts.");
             logGiftDenied(sName, tName + " is missing permission node 'advancedgift.gift.receive'.");
             return false;
         }
@@ -186,11 +184,11 @@ public class CommandGift implements CommandExecutor {
             if (artMap.getConfiguration().FORCE_ART_KIT) {
                 ArtistHandler artistHandler = artMap.getArtistHandler();
                 if (artistHandler.containsPlayer(s)) {
-                    s.sendMessage(prefix + ChatColor.RED + "Sorry! You cannot send gifts while painting!");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Sorry! You cannot send gifts while painting!");
                     logGiftDenied(sName, "ArtMap has force-artkit enabled and " + sName + "is currently making an artmap.");
                     return false;
                 } else if (artistHandler.containsPlayer(target)) {
-                    s.sendMessage(prefix + ChatColor.RED + "Sorry! " + target.getName() + " is currently painting and cannot receive gifts.");
+                    s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Sorry! " + target.getName() + " is currently painting and cannot receive gifts.");
                     logGiftDenied(sName, "ArtMap has force-artkit enabled and " + tName + "is currently making an artmap.");
                     return false;
                 }
@@ -198,18 +196,18 @@ public class CommandGift implements CommandExecutor {
             }
         }
         if (plugin.getPlayerDataManager().containsUUID(targetUUID, "tg", null)) {
-            s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " has disabled their ability to receive gifts.");
+            s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Sorry! " + tName + " has disabled their ability to receive gifts.");
             logGiftDenied(sName, tName + " has their ability to receive gifts disabled.");
             return false;
         }
         if (plugin.getPlayerDataManager().containsUUID(targetUUID, "block", senderUUID)) {
-            s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + " is blocking gifts from you.");
+            s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Sorry! " + tName + " is blocking gifts from you.");
             logGiftDenied(sName, tName + " has " + sName + " on their gift block list.");
             return false;
         }
         int timeRemaining;
         if ((timeRemaining = getPlayerCooldownTime(s)) > 0) {
-            s.sendMessage(prefix + ChatColor.RED + "Please wait another " + ChatColor.YELLOW + (timeRemaining) + ((timeRemaining) != 1 ? " seconds " : " second ") + ChatColor.RED + "before /gift can be used again.");
+            s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Please wait another " + ChatColor.YELLOW + (timeRemaining) + ((timeRemaining) != 1 ? " seconds " : " second ") + ChatColor.RED + "before /gift can be used again.");
             logGiftDenied(sName, sName + "'s /gift cooldown hasn't ended yet.");
             return false;
         }
@@ -222,8 +220,8 @@ public class CommandGift implements CommandExecutor {
                 }
             }
             if (space == 0) {
-                s.sendMessage(prefix + ChatColor.RED + "Sorry! " + tName + "'s inventory is full.");
-                target.sendMessage(prefix + ChatColor.RED + s.getName() + " attempted to send you a gift, but your inventory is full.");
+                s.sendMessage(plugin.getPrefix() + ChatColor.RED + "Sorry! " + tName + "'s inventory is full.");
+                target.sendMessage(plugin.getPrefix() + ChatColor.RED + s.getName() + " attempted to send you a gift, but your inventory is full.");
                 logGiftDenied(sName, tName + "'s inventory is full.");
                 return false;
             }
@@ -254,7 +252,7 @@ public class CommandGift implements CommandExecutor {
             return;
         }
         if (!s.hasPermission("advancedgift.gift.message")) {
-            s.sendMessage(prefix + ChatColor.RED + "You don't have permission to send messages!");
+            s.sendMessage(plugin.getPrefix() + ChatColor.RED + "You don't have permission to send messages!");
             logGiftDenied(s.getName(), s.getName() + "is missing permission node 'advancedgift.gift.message'.");
             return;
         }
@@ -332,8 +330,8 @@ public class CommandGift implements CommandExecutor {
         }
         HashMap<Integer, ItemStack> excess = tinv.addItem(itemList.toArray(new ItemStack[0]));
         if (!excess.isEmpty()) {
-            s.sendMessage(prefix + ChatColor.RED + target.getName() + "'s inventory was nearly full when you sent the gift. Only part of the gift was sent.");
-            target.sendMessage(prefix + ChatColor.RED + "Your inventory was nearly full when the gift was sent. Only part of the gift was received.");
+            s.sendMessage(plugin.getPrefix() + ChatColor.RED + target.getName() + "'s inventory was nearly full when you sent the gift. Only part of the gift was sent.");
+            target.sendMessage(plugin.getPrefix() + ChatColor.RED + "Your inventory was nearly full when the gift was sent. Only part of the gift was received.");
             logMessage("WARNING: Sent only a part of " + s.getName() + "'s gift: " + target.getName() + "'s inventory was nearly full.");
             for (ItemStack extra : excess.values()) {
                 giveAmount -= extra.getAmount();
@@ -379,9 +377,9 @@ public class CommandGift implements CommandExecutor {
         String sName = s.getName();
         String tName = target.getName();
 
-        final String senderNotification = prefix + ChatColor.WHITE + "You gave " + ChatColor.GOLD + tName + " " + ChatColor.YELLOW + itemDetails + ChatColor.WHITE + ".";
-        final String targetNotification = prefix + ChatColor.WHITE + "You received " + ChatColor.YELLOW + itemDetails + ChatColor.WHITE + " from " + ChatColor.GOLD + sName + ".";
-        final String spyNotification = prefix + ChatColor.GRAY + sName + " gave " + tName + " " + ChatColor.stripColor(itemDetails) + ".";
+        final String senderNotification = plugin.getPrefix() + ChatColor.WHITE + "You gave " + ChatColor.GOLD + tName + " " + ChatColor.YELLOW + itemDetails + ChatColor.WHITE + ".";
+        final String targetNotification = plugin.getPrefix() + ChatColor.WHITE + "You received " + ChatColor.YELLOW + itemDetails + ChatColor.WHITE + " from " + ChatColor.GOLD + sName + ".";
+        final String spyNotification = plugin.getPrefix() + ChatColor.GRAY + sName + " gave " + tName + " " + ChatColor.stripColor(itemDetails) + ".";
         final TextComponent senderComponent = new TextComponent(TextComponent.fromLegacyText(senderNotification));
         final TextComponent targetComponent = new TextComponent(TextComponent.fromLegacyText(targetNotification));
         final TextComponent spyComponent = new TextComponent(TextComponent.fromLegacyText(spyNotification));
