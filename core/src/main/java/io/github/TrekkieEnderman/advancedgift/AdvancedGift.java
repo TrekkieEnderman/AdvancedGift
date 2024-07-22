@@ -34,6 +34,10 @@ public class AdvancedGift extends JavaPlugin {
     public void onEnable() {
         ServerVersion.init();
         getLogger().info("===================================================");
+        getLogger().info("Loading files  --------------------");
+        loadFiles();
+        getLogger().info("");
+
         getLogger().info("Checking server version  ------------------");
         getLogger().info("NMS Version used: " + ServerVersion.getNMSVersion());
         getLogger().info("");
@@ -68,10 +72,6 @@ public class AdvancedGift extends JavaPlugin {
             canUseTooltips = false;
             getLogger().info("");
         }
-
-        getLogger().info("Loading files  --------------------");
-        loadFiles();
-        getLogger().info("");
 
         getLogger().info("Searching for a material library  -----------------");
         if (Bukkit.getPluginManager().getPlugin("LangUtils") != null) {
