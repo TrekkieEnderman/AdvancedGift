@@ -3,6 +3,7 @@ package io.github.TrekkieEnderman.advancedgift;
 import io.github.TrekkieEnderman.advancedgift.data.LegacyDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.StandardDataManager;
+import io.github.TrekkieEnderman.advancedgift.listener.PlayerJoinListener;
 import io.github.TrekkieEnderman.advancedgift.metrics.GiftCounter;
 import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
 import io.github.TrekkieEnderman.advancedgift.nms.Reflect;
@@ -23,7 +24,7 @@ import java.util.logging.Level;
 public class AdvancedGift extends JavaPlugin {
     private final File configFile = new File(getDataFolder(),"config.yml");
     private final HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
-    String prefix, extLib;
+    public String prefix, extLib;
     static NMSInterface nms;
     boolean canUseTooltips;
     boolean hasArtMap = false;
@@ -90,32 +91,24 @@ public class AdvancedGift extends JavaPlugin {
         getLogger().info("===================================================");
         if (Bukkit.getPluginManager().getPlugin("ArtMap") != null) hasArtMap = true;
         startMetrics();
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
     }
 
     private void loadFiles() {
         if(!getDataFolder().exists()) {
             getDataFolder().mkdirs();
         }
-        if (!configFile.exists()) {
-            getLogger().info("Config not found. Creating a new one.");
-            saveDefaultConfig();
-            loadConfigFile();
-        } else {
-            loadConfigFile();
-            if (!this.getConfig().isSet("restrict-interworld-gift")) {
-                getLogger().warning("Outdated config! Some newer options are missing!");
-                configFile.renameTo(new File(getDataFolder(), "outdated_config.yml"));
-                saveDefaultConfig();
-                loadConfigFile();
-                getLogger().info("Regenerating the default config.");
-                getLogger().info("The old config has been renamed to \"outdated_config.yml\".");
-                getLogger().info("The data from outdated_config.yml can be copied and pasted to the new config.yml.");
-                getLogger().info("Make sure not to overwrite the new options added in this update.");
-                getLogger().info("");
-            }
+        loadConfigFile();
+        if (isConfigOutdated()) {
+            getLogger().warning("Config is outdated.");
         }
-        if (ServerVersion.getMinorVersion() > 11) playerDataManager = new StandardDataManager(this);
-        else playerDataManager = new LegacyDataManager(this);
+
+        if (ServerVersion.getMinorVersion() > 11) {
+            playerDataManager = new StandardDataManager(this);
+        } else {
+            playerDataManager = new LegacyDataManager(this);
+        }
+
         this.getPlayerDataManager().load();
     }
 
@@ -124,11 +117,20 @@ public class AdvancedGift extends JavaPlugin {
     }
 
     private boolean loadConfigFile() {
-        getLogger().log(Level.INFO, "Config loaded.");
+        // Moved config creation to here so the plugin doesn't run into issues when reloading it on command later
+        if (!configFile.exists()) {
+            getLogger().info("Config not found. Creating a new one.");
+            saveDefaultConfig();
+        }
         reloadConfig();
         loadWorldGroupList();
         prefix = ChatColor.translateAlternateColorCodes('&', this.getConfigFile().getString("prefix") + " ");
+        getLogger().log(Level.INFO, "Config loaded.");
         return true;
+    }
+
+    public boolean isConfigOutdated() {
+        return !this.getConfig().isSet("restrict-interworld-gift");
     }
 
     @Override
