@@ -40,39 +40,43 @@ public class AdvancedGift extends JavaPlugin {
         getLogger().info("");
 
         getLogger().info("Checking server version  ------------------");
-        getLogger().info("NMS Version used: " + ServerVersion.getNMSVersion());
-        getLogger().info("");
-        try {
-            final Class<?> classy = Class.forName("io.github.TrekkieEnderman.advancedgift.nms." + ServerVersion.getNMSVersion().toUpperCase());
-            if (NMSInterface.class.isAssignableFrom(classy)) {
-                nms = (NMSInterface) classy.getConstructor().newInstance();
-            }
-        } catch (final Exception ignored) {
-            //Attempt to use the reflection class only if the server is 1.20.5 or newer.
-            if (ServerVersion.getMinorVersion() == 20 && ServerVersion.getRevisionVersion() >= 5 || ServerVersion.getMinorVersion() >= 21) {
-                try {
-                    nms = new Reflect(ServerVersion.getNMSVersion());
-                } catch (Throwable ex) {
-                    getLogger().log(Level.WARNING, "Couldn't set up reflection for item text hover over", ex);
-                    nms = null;
+        if (getConfigFile().getBoolean("enable-tooltip")) {
+            getLogger().info("NMS Version used: " + ServerVersion.getNMSVersion());
+            getLogger().info("");
+            try {
+                final Class<?> classy = Class.forName("io.github.TrekkieEnderman.advancedgift.nms." + ServerVersion.getNMSVersion().toUpperCase());
+                if (NMSInterface.class.isAssignableFrom(classy)) {
+                    nms = (NMSInterface) classy.getConstructor().newInstance();
+                }
+            } catch (final Exception ignored) {
+                // Attempt to use the reflection class only if the server is 1.20.5 or newer.
+                if (ServerVersion.getMinorVersion() == 20 && ServerVersion.getRevisionVersion() >= 5 || ServerVersion.getMinorVersion() >= 21) {
+                    try {
+                        nms = new Reflect(ServerVersion.getNMSVersion());
+                    } catch (Throwable ex) {
+                        getLogger().log(Level.WARNING, "Couldn't set up reflection for hover over text tooltip", ex);
+                        nms = null;
+                    }
                 }
             }
-        }
-        if (nms != null) {
-            getLogger().info("This version is supported!");
-            getLogger().info("");
-            canUseTooltips = true;
+            if (nms != null) {
+                getLogger().info("This version is supported!");
+                canUseTooltips = true;
+            } else {
+                getLogger().warning("Warning!");
+                getLogger().warning("This plugin doesn't have support for this version!");
+                getLogger().warning("In order to maintain compatibility with this server,");
+                getLogger().warning("Item text hover over has been disabled in this plugin!");
+                getLogger().warning("Check for updates at www.spigotmc.org/resources/advancedgift.46458/");
+                getLogger().warning("");
+                getLogger().warning("If this plugin still breaks, please contact TrekkieEnderman immediately.");
+                canUseTooltips = false;
+            }
         } else {
-            getLogger().warning("Warning!");
-            getLogger().warning("This plugin doesn't have support for this version!");
-            getLogger().warning("In order to maintain compatibility with this server,");
-            getLogger().warning("Item text hoverover has been disabled in this plugin!");
-            getLogger().warning("Check for updates at www.spigotmc.org/resources/advancedgift.46458/");
-            getLogger().warning("");
-            getLogger().warning("If this plugin still breaks, please contact TrekkieEnderman immediately.");
+            getLogger().info("No version-dependent features in use. Skipping this step.");
             canUseTooltips = false;
-            getLogger().info("");
         }
+        getLogger().info("");
 
         getLogger().info("Searching for a material library  -----------------");
         if (Bukkit.getPluginManager().getPlugin("LangUtils") != null) {
@@ -130,7 +134,7 @@ public class AdvancedGift extends JavaPlugin {
     }
 
     public boolean isConfigOutdated() {
-        return !this.getConfig().isSet("restrict-interworld-gift");
+        return !this.getConfig().isSet("enable-tooltip");
     }
 
     @Override

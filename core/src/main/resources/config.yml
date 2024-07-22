@@ -1,6 +1,10 @@
 prefix: '&6[AdvancedGift]'
 # No need to add a space at the end of the prefix. The plugin adds it automatically.
 
+enable-tooltip: true
+# Whether to show item tooltip on hover over the gift notification
+# RESTART REQUIRED TO TAKE EFFECT
+
 enable-cooldown: false
 
 cooldown-time: 10
