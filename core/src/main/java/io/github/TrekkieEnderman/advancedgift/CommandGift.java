@@ -301,7 +301,10 @@ public class CommandGift implements CommandExecutor {
     }
 
     private void sendItem (Player s, Player target, ItemStack itemstack, int giveAmount, String message) {
-        if (!canSendGift(s, target, itemstack))
+        ItemStack giftItem = itemstack.clone();
+        giftItem.setAmount(giveAmount);
+
+        if (!canSendGift(s, target, giftItem))
             return;
 
         if (plugin.getConfigFile().getBoolean("enable-cooldown"))
@@ -309,26 +312,8 @@ public class CommandGift implements CommandExecutor {
         plugin.getGiftCounter().increment();
         PlayerInventory sinv = s.getInventory();
         PlayerInventory tinv = target.getInventory();
-        List<ItemStack> itemList = new ArrayList<>();
-        int amountLeft = giveAmount;
-        ItemStack[] contents = ServerVersion.getMinorVersion() > 8 ? sinv.getStorageContents() : sinv.getContents();
-        for (ItemStack item : contents) {
-            if (itemstack.isSimilar(item)) {
-                int itemAmount = item.getAmount();
-                ItemStack itemToAdd = item.clone();
-                if (itemAmount <= amountLeft) {
-                    amountLeft -= itemAmount;
-                    sinv.removeItem(item);
-                } else {
-                    itemToAdd.setAmount(amountLeft);
-                    item.setAmount(itemAmount - amountLeft);
-                    amountLeft = 0;
-                }
-                itemList.add(itemToAdd);
-                if (amountLeft == 0) break;
-            }
-        }
-        HashMap<Integer, ItemStack> excess = tinv.addItem(itemList.toArray(new ItemStack[0]));
+        sinv.removeItem(giftItem);
+        HashMap<Integer, ItemStack> excess = tinv.addItem(giftItem);
         if (!excess.isEmpty()) {
             s.sendMessage(plugin.getPrefix() + ChatColor.RED + target.getName() + "'s inventory was nearly full when you sent the gift. Only part of the gift was sent.");
             target.sendMessage(plugin.getPrefix() + ChatColor.RED + "Your inventory was nearly full when the gift was sent. Only part of the gift was received.");
