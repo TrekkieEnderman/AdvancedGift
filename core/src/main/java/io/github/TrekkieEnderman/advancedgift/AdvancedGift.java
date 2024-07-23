@@ -25,10 +25,10 @@ public class AdvancedGift extends JavaPlugin {
     private final File configFile = new File(getDataFolder(),"config.yml");
     private final HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
     private String prefix;
-    public String extLib;
-    static NMSInterface nms;
-    boolean canUseTooltips;
-    boolean hasArtMap = false;
+    private String extLib;
+    private NMSInterface nms;
+    private boolean textTooltipEnabled;
+    private boolean hasArtMap = false;
     private final GiftCounter giftCounter = new GiftCounter();
     private PlayerDataManager playerDataManager;
 
@@ -62,7 +62,7 @@ public class AdvancedGift extends JavaPlugin {
             }
             if (nms != null) {
                 getLogger().info("This version is supported!");
-                canUseTooltips = true;
+                textTooltipEnabled = true;
             } else {
                 getLogger().warning("Warning!");
                 getLogger().warning("This plugin doesn't have support for this version!");
@@ -71,11 +71,11 @@ public class AdvancedGift extends JavaPlugin {
                 getLogger().warning("Check for updates at www.spigotmc.org/resources/advancedgift.46458/");
                 getLogger().warning("");
                 getLogger().warning("If this plugin still breaks, please contact TrekkieEnderman immediately.");
-                canUseTooltips = false;
+                textTooltipEnabled = false;
             }
         } else {
             getLogger().info("No version-dependent features in use. Skipping this step.");
-            canUseTooltips = false;
+            textTooltipEnabled = false;
         }
         getLogger().info("");
 
@@ -181,6 +181,22 @@ public class AdvancedGift extends JavaPlugin {
 
     public String getPrefix() {
         return prefix;
+    }
+
+    public NMSInterface getNms() {
+        return nms;
+    }
+
+    public String getExtLib() {
+        return extLib;
+    }
+
+    public boolean isTextTooltipEnabled() {
+        return textTooltipEnabled;
+    }
+
+    public boolean hasArtMap() {
+        return hasArtMap;
     }
 
     @Override

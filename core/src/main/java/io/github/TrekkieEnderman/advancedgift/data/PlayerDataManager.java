@@ -22,7 +22,7 @@ public abstract class PlayerDataManager {
     protected Set<UUID> togglePlayers = new HashSet<>(), spyPlayers = new HashSet<>();
     protected Map<UUID, Set<UUID>> blockPlayers = new HashMap<>();
 
-    public PlayerDataManager(AdvancedGift plugin) {
+    public PlayerDataManager(final AdvancedGift plugin) {
         this.plugin = plugin;
         playerInfoFile = new File(plugin.getDataFolder(), "playerinfo.json");
     }
@@ -73,7 +73,7 @@ public abstract class PlayerDataManager {
         }
     }
 
-    private void loadOldBlockList(File file) throws IOException, InvalidConfigurationException {
+    private void loadOldBlockList(final File file) throws IOException, InvalidConfigurationException {
         final FileConfiguration giftBlockData = new YamlConfiguration();
         giftBlockData.load(file);
         if (giftBlockData.isSet("UUIDs")) {
@@ -94,7 +94,7 @@ public abstract class PlayerDataManager {
     protected abstract void savePlayerInfo() throws IOException;
 
     //Bad. Just bad. Unfortunately this is not something I can easily fix without a major rewrite.
-    public final void addUUID(UUID playerUUID, String var, UUID secondUUID) {
+    public final void addUUID(final UUID playerUUID, final String var, final UUID secondUUID) {
         if (playerUUID == null) return;
         switch (var) {
             case "tg":
@@ -114,7 +114,7 @@ public abstract class PlayerDataManager {
     }
 
     //Why did I do this way?
-    public final boolean containsUUID(UUID playerUUID, String var, UUID secondUUID) {
+    public final boolean containsUUID(final UUID playerUUID, final String var, final UUID secondUUID) {
         if (playerUUID == null) return false;
         boolean bool = false;
         switch (var) {
@@ -134,7 +134,7 @@ public abstract class PlayerDataManager {
     }
 
     //Seriously, why?
-    public final void removeUUID(UUID playerUUID, String var, UUID secondUUID) {
+    public final void removeUUID(final UUID playerUUID, final String var, final UUID secondUUID) {
         if (playerUUID == null) return;
         switch (var) {
             case "tg":
@@ -150,11 +150,11 @@ public abstract class PlayerDataManager {
         }
     }
 
-    public Set<UUID> getBlockList(UUID playerUUID) {
+    public Set<UUID> getBlockList(final UUID playerUUID) {
         return blockPlayers.get(playerUUID);
     }
 
-    public boolean clearBlockList(UUID playerUUID) {
+    public boolean clearBlockList(final UUID playerUUID) {
         if (blockPlayers.containsKey(playerUUID)) {
             blockPlayers.keySet().remove(playerUUID);
             return true;

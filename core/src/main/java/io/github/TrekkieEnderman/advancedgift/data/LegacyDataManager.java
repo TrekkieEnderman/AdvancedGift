@@ -16,7 +16,7 @@ public class LegacyDataManager extends PlayerDataManager {
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public LegacyDataManager(AdvancedGift plugin) {
+    public LegacyDataManager(final AdvancedGift plugin) {
         super(plugin);
         plugin.getLogger().warning("This plugin is now using legacy methods to manage player data. " +
                 "The likely reason for this is the server is on an outdated version (<1.12).");
@@ -63,7 +63,7 @@ public class LegacyDataManager extends PlayerDataManager {
         }
     }
 
-    private Set<UUID> convertToUuidSet(List<String> list) {
+    private Set<UUID> convertToUuidSet(final List<String> list) {
         return list.stream().map(UUID::fromString).collect(Collectors.toCollection(HashSet::new));
     }
 }

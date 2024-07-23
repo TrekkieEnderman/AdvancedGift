@@ -22,7 +22,7 @@ public class StandardDataManager extends PlayerDataManager {
     private final Type uuidSetType = TypeToken.getParameterized(HashSet.class, UUID.class).getType(); // Issue here, method exists only since 1.12
     private final Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(uuidSetType, new uuidSetJsonAdapter()).create();
 
-    public StandardDataManager(AdvancedGift plugin) {
+    public StandardDataManager(final AdvancedGift plugin) {
         super(plugin);
     }
 
