@@ -44,8 +44,6 @@ public class LegacyDataManager extends PlayerDataManager {
                     blockPlayers.put(UUID.fromString(s), convertToUuidSet((ArrayList<String>) nestedMap.get(s)));
                 }
             }
-        } catch (JsonSyntaxException | JsonIOException | IOException e) {
-            throw e;
         }
     }
 
@@ -58,8 +56,6 @@ public class LegacyDataManager extends PlayerDataManager {
         final String json = gson.toJson(map);
         try (BufferedWriter writer = Files.newBufferedWriter(playerInfoFile.toPath())) {
             writer.write(json);
-        } catch (IOException e) {
-            throw e;
         }
     }
 

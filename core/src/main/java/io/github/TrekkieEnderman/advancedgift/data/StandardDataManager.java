@@ -41,8 +41,6 @@ public class StandardDataManager extends PlayerDataManager {
                     blockPlayers.put(UUID.fromString(entry.getKey()), gson.fromJson(entry.getValue(), uuidSetType));
                 }
             }
-        } catch (JsonSyntaxException | JsonIOException | IOException e) {
-            throw e;
         }
     }
 
@@ -60,8 +58,6 @@ public class StandardDataManager extends PlayerDataManager {
         final String json = gson.toJson(object);
         try (BufferedWriter writer = Files.newBufferedWriter(playerInfoFile.toPath())) {
             writer.write(json);
-        } catch (IOException e) {
-            throw e;
         }
     }
 
