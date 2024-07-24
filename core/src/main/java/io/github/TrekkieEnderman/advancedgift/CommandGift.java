@@ -23,6 +23,7 @@ import org.bukkit.metadata.MetadataValue;
 import net.md_5.bungee.api.ChatColor;
 
 import com.meowj.langutils.lang.LanguageHelper;
+import org.jetbrains.annotations.NotNull;
 
 public class CommandGift implements CommandExecutor {
     private final AdvancedGift plugin;
@@ -34,7 +35,7 @@ public class CommandGift implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(final CommandSender commandSender, final Command cmd, final String label, final String[] args) {
+    public boolean onCommand(@NotNull final CommandSender commandSender, @NotNull final Command cmd, @NotNull final String label, @NotNull final String[] args) {
         if (!(commandSender instanceof Player)) {
             commandSender.sendMessage("This command can only be run by a player.");
             return true;

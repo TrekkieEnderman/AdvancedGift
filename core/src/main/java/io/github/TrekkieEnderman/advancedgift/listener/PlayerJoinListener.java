@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class PlayerJoinListener implements Listener {
     final private AdvancedGift plugin;
@@ -15,7 +16,7 @@ public class PlayerJoinListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerJoin(final PlayerJoinEvent joinEvent) {
+    public void onPlayerJoin(@NotNull final PlayerJoinEvent joinEvent) {
         Player player = joinEvent.getPlayer();
         if (player.isOp() && plugin.isConfigOutdated()) {
             player.sendMessage(plugin.getPrefix() + ChatColor.RED + "Config is outdated.");

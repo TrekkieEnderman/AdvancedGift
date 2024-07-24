@@ -15,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
+import org.jetbrains.annotations.NotNull;
 
 public class CommandGiftBlock implements CommandExecutor {
     private final AdvancedGift plugin;
@@ -25,7 +26,7 @@ public class CommandGiftBlock implements CommandExecutor {
 
     @SuppressWarnings("deprecation")
     @Override
-    public boolean onCommand(final CommandSender commandSender, final Command cmd, final String label, final String[] args) {
+    public boolean onCommand(@NotNull final CommandSender commandSender, @NotNull final Command cmd, @NotNull final String label, @NotNull final String[] args) {
         if (!(commandSender instanceof Player)) {
             commandSender.sendMessage("This command can only be run by a player.");
             return true;
