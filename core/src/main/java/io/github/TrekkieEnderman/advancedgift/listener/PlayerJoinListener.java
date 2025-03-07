@@ -18,7 +18,7 @@
 package io.github.TrekkieEnderman.advancedgift.listener;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
-import org.bukkit.ChatColor;
+import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -36,7 +36,7 @@ public class PlayerJoinListener implements Listener {
     public void onPlayerJoin(@NotNull final PlayerJoinEvent joinEvent) {
         Player player = joinEvent.getPlayer();
         if (player.isOp() && plugin.isConfigOutdated()) {
-            player.sendMessage(plugin.getPrefix() + ChatColor.RED + "Config is outdated.");
+            player.sendMessage(plugin.getPrefix() + Message.OUTDATED_CONFIG.translate());
         }
     }
 }

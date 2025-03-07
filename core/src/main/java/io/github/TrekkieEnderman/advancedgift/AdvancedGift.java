@@ -20,10 +20,12 @@ package io.github.TrekkieEnderman.advancedgift;
 import io.github.TrekkieEnderman.advancedgift.data.LegacyDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.StandardDataManager;
+import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.listener.PlayerJoinListener;
 import io.github.TrekkieEnderman.advancedgift.metrics.GiftCounter;
 import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
 import io.github.TrekkieEnderman.advancedgift.nms.Reflect;
+import io.github.TrekkieEnderman.advancedgift.locale.Translation;
 import lombok.Getter;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SingleLineChart;
@@ -110,7 +112,7 @@ public class AdvancedGift extends JavaPlugin {
             extLib = "LangUtils";
         } else {
             getLogger().info("No supported material library found.");
-            getLogger().info("Spigot's material enum will be used instead.");
+            getLogger().info("Spigot's material enum will be used instead. Material names won't be translated.");
             extLib = "none"; //If you're wondering why this isn't left null instead, I don't know!
         }
         this.getCommand("gift").setExecutor(new CommandGift(this));
@@ -128,9 +130,10 @@ public class AdvancedGift extends JavaPlugin {
         if(!getDataFolder().exists()) {
             getDataFolder().mkdirs();
         }
+        Translation.init(this);
         loadConfigFile();
         if (isConfigOutdated()) {
-            getLogger().warning("Config is outdated.");
+            getLogger().warning(Message.OUTDATED_CONFIG.translate());
         }
 
         if (ServerVersion.getMinorVersion() > 11) {
@@ -149,18 +152,19 @@ public class AdvancedGift extends JavaPlugin {
     private boolean loadConfigFile() {
         // Moved config creation to here so the plugin doesn't run into issues when reloading it on command later
         if (!configFile.exists()) {
-            getLogger().info("Config not found. Creating a new one.");
+            getLogger().info(Message.CONFIG_NOT_FOUND.translate());
             saveDefaultConfig();
         }
         reloadConfig();
+        Translation.updateLocale(getConfigFile().getString("locale"));
         loadWorldGroupList();
         prefix = ChatColor.translateAlternateColorCodes('&', this.getConfigFile().getString("prefix") + " ");
-        getLogger().log(Level.INFO, "Config loaded.");
+        getLogger().log(Level.INFO, Message.CONFIG_LOADED.translate());
         return true;
     }
 
     public boolean isConfigOutdated() {
-        return !this.getConfig().isSet("enable-tooltip");
+        return !this.getConfig().isSet("locale");
     }
 
     @Override
@@ -204,54 +208,51 @@ public class AdvancedGift extends JavaPlugin {
     public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, @NotNull String[] args) {
         if (cmd.getName().equalsIgnoreCase("agreload")) {
             if (!(sender instanceof Player)) {
-                if (loadConfigFile()) getServer().getConsoleSender().sendMessage(getPrefix() + ChatColor.GREEN + "Reloaded the config.");
-                else getServer().getConsoleSender().sendMessage(getPrefix() + ChatColor.RED + "Failed to reload the config.");
+                if (loadConfigFile()) getServer().getConsoleSender().sendMessage(getPrefix() + Message.CONFIG_RELOADED.translate());
+                else getServer().getConsoleSender().sendMessage(getPrefix() + Message.CONFIG_NOT_RELOADED.translate());
             } else {
                 if (sender.hasPermission("advancedgift.reload")) {
-                    if (loadConfigFile()) sender.sendMessage(getPrefix() + ChatColor.GREEN + "Reloaded the config.");
-                    else sender.sendMessage(getPrefix() + ChatColor.RED + "Failed to reload the config. Check the console for errors.");
-                } else sender.sendMessage(getPrefix() + ChatColor.RED + "You don't have permission to use this command!");
+                    if (loadConfigFile()) sender.sendMessage(getPrefix() + Message.CONFIG_RELOADED.translate());
+                    else sender.sendMessage(getPrefix() + Message.CONFIG_NOT_RELOADED.translate() + Message.CHECK_CONSOLE.translate());
+                } else sender.sendMessage(getPrefix() + Message.COMMAND_NO_PERMISSION.translate());
             }
         }
         if (cmd.getName().equalsIgnoreCase("giftspy")) {
-            if (!(sender instanceof Player)) sender.sendMessage("This command can only be run by a player.");
+            if (!(sender instanceof Player)) sender.sendMessage(Message.COMMAND_FOR_PLAYER_ONLY.translate());
             else {
                 if (sender.hasPermission("advancedgift.gift.spy")) {
-                    String usage = ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/giftspy " + ChatColor.GRAY + "<on/off>";
                     Player s = (Player) sender;
                     UUID senderUUID = s.getUniqueId();
-                    String spyEnabled = getPrefix() + ChatColor.GREEN + "Gift Spy enabled.";
-                    String spyDisabled = getPrefix() + ChatColor.RED + "Gift Spy disabled.";
                     if (args.length == 0) {
                         if (!getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
                             getPlayerDataManager().addUUID(senderUUID, "spy", null);
-                            s.sendMessage(spyEnabled);
+                            s.sendMessage(getPrefix() + Message.SPY_ENABLED.translate());
                         } else {
                             getPlayerDataManager().removeUUID(senderUUID, "spy", null);
-                            s.sendMessage(spyDisabled);
+                            s.sendMessage(getPrefix() + Message.SPY_DISABLED.translate());
                         }
                     } else {
                         if (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("enable")) {
                             if (!getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
                                 getPlayerDataManager().addUUID(senderUUID, "spy", null);
-                                s.sendMessage(spyEnabled);
+                                s.sendMessage(getPrefix() + Message.SPY_ENABLED.translate());
                             } else {
-                                s.sendMessage(getPrefix() + ChatColor.GRAY + "Gift Spy is already enabled.");
+                                s.sendMessage(getPrefix() + Message.SPY_ALREADY_ENABLED.translate());
                             }
                         } else if (args[0].equalsIgnoreCase("off") || args [0].equalsIgnoreCase("disable")) {
                             if (getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
                                 getPlayerDataManager().removeUUID(senderUUID, "spy", null);
-                                s.sendMessage(spyDisabled);
+                                s.sendMessage(getPrefix() + Message.SPY_DISABLED.translate());
                             } else {
-                                s.sendMessage(getPrefix() + ChatColor.GRAY + "Gift Spy is already disabled.");
+                                s.sendMessage(getPrefix() + Message.SPY_ALREADY_DISABLED.translate());
                             }
                         } else {
-                            s.sendMessage(getPrefix() + ChatColor.RED + "Cannot understand " + args[0] + "!");
-                            s.sendMessage(usage);
+                            s.sendMessage(getPrefix() + Message.ARGUMENT_NOT_RECOGNIZED.translate(args[0]));
+                            s.sendMessage(Message.COMMAND_SPY_USAGE.translate());
                         }
                     }
                 } else {
-                    sender.sendMessage(getPrefix() + ChatColor.RED + "You don't have permission to use this!");
+                    sender.sendMessage(getPrefix() + Message.COMMAND_NO_PERMISSION.translate());
                 }
             }
         }

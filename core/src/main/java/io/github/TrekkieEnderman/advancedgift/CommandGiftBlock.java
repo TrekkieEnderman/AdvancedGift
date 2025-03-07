@@ -20,6 +20,7 @@ package io.github.TrekkieEnderman.advancedgift;
 import java.util.Set;
 import java.util.UUID;
 
+import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -45,15 +46,15 @@ public class CommandGiftBlock implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull final CommandSender commandSender, @NotNull final Command cmd, @NotNull final String label, @NotNull final String[] args) {
         if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage("This command can only be run by a player.");
+            commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_FOR_PLAYER_ONLY.translate());
             return true;
         }
         final Player sender = (Player) commandSender;
         final UUID senderUUID = sender.getUniqueId();
         if (cmd.getName().equalsIgnoreCase("giftblock")) {
             if (args.length == 0) {
-                sender.sendMessage(plugin.getPrefix() + ChatColor.YELLOW + "Block gifts from a player you dislike or find annoying!" + ChatColor.GRAY + " ...Or unblock them.");
-                sender.sendMessage(ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/giftblock [player]" + ChatColor.GRAY + "  ||  " + ChatColor.WHITE + "/giftunblock [player]");
+                sender.sendMessage(plugin.getPrefix() + Message.COMMAND_BLOCK_DESCRIPTION.translate());
+                sender.sendMessage(Message.COMMAND_BLOCK_USAGE.translate());
             } else {
                 String targetName = args[0];
                 Player targetPlayer = Bukkit.getServer().getPlayer(targetName);
@@ -61,14 +62,14 @@ public class CommandGiftBlock implements CommandExecutor {
                 if (targetPlayer == null) {
                     OfflinePlayer targetOffline = Bukkit.getOfflinePlayer(targetName);
                     if (!targetOffline.hasPlayedBefore()) {
-                        sender.sendMessage(plugin.getPrefix() + ChatColor.RED + "No player going by " + targetName + " has played on here before.");
+                        sender.sendMessage(plugin.getPrefix() + Message.PLAYER_NOT_FOUND.translate(targetName));
                         return true;
                     }
                     targetUUID = targetOffline.getUniqueId();
                     targetName = targetOffline.getName();
                 } else {
                     if (targetPlayer == sender.getPlayer()) {
-                        sender.sendMessage(plugin.getPrefix() + ChatColor.RED + "Are you trying to block yourself?");
+                        sender.sendMessage(plugin.getPrefix() + Message.BLOCK_SELF.translate());
                         return true;
                     }
                     targetUUID = targetPlayer.getUniqueId();
@@ -77,29 +78,29 @@ public class CommandGiftBlock implements CommandExecutor {
                 if (label.equalsIgnoreCase("giftblock") || label.equalsIgnoreCase("blockgift") || label.equalsIgnoreCase("gblock")) {
                     if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "block", targetUUID)) {
                         plugin.getPlayerDataManager().addUUID(senderUUID, "block", targetUUID);
-                        sender.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "Added " + targetName + " to your gift block list!");
+                        sender.sendMessage(plugin.getPrefix() + Message.BLOCK_OTHER.translate(targetName));
                     } else {
-                        sender.sendMessage(plugin.getPrefix() + ChatColor.GRAY + targetName + " is already on your gift block list.");
+                        sender.sendMessage(plugin.getPrefix() + Message.OTHER_BLOCKED_ALREADY.translate(targetName));
                     }
                 } else {
                     if (plugin.getPlayerDataManager().containsUUID(senderUUID, "block", targetUUID)) {
                         plugin.getPlayerDataManager().removeUUID(senderUUID, "block", targetUUID);
-                        sender.sendMessage(plugin.getPrefix() + ChatColor.AQUA + "Removed " + targetName + " from your gift block list!");
+                        sender.sendMessage(plugin.getPrefix() + Message.UNBLOCK_OTHER.translate(targetName));
                     } else {
-                        sender.sendMessage(plugin.getPrefix() + ChatColor.GRAY + targetName + " is not on your gift block list.");
+                        sender.sendMessage(plugin.getPrefix() + Message.OTHER_UNBLOCKED_ALREADY.translate(targetName));
                     }
                 }
             }
         } else {
             if (args.length == 0) {
                 final Set<UUID> blockList = plugin.getPlayerDataManager().getBlockList(senderUUID);
-                if (blockList == null || blockList.isEmpty()) sender.sendMessage(plugin.getPrefix() + ChatColor.GRAY + "Your gift block list is empty.");
+                if (blockList == null || blockList.isEmpty()) sender.sendMessage(plugin.getPrefix() + Message.BLOCK_LIST_EMPTY.translate());
                 else {
-                    sender.sendMessage(plugin.getPrefix() + ChatColor.GRAY + "Your gift block list:");
+                    sender.sendMessage(plugin.getPrefix() + Message.BLOCK_LIST_SHOW.translate());
                     ComponentBuilder builder = new ComponentBuilder(""); //main builder for showing the list
 
                     final String blankSpaceString = " ";
-                    final HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to unblock this player").create());
+                    final HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Message.TIP_CLICK_TO_UNBLOCK.translate()).create());
 
                     for (final UUID playerUUID : blockList) {
                         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
@@ -119,15 +120,15 @@ public class CommandGiftBlock implements CommandExecutor {
                         builder.event(hoverEvent).event(clickEvent);
                     }
                     sender.spigot().sendMessage(builder.create());
-                    sender.sendMessage(ChatColor.AQUA + "To unblock a player, click on their name in the list or use " + ChatColor.WHITE + "/giftunblock <player>");
-                    sender.sendMessage(ChatColor.AQUA + "To clear the list, use " + ChatColor.WHITE + "/giftblocklist clear");
+                    sender.sendMessage(Message.BLOCK_LIST_USAGE_1.translate());
+                    sender.sendMessage(Message.BLOCK_LIST_USAGE_2.translate());
                 }
             } else {
                 if (args[0].equalsIgnoreCase("clear")) {
-                    if (plugin.getPlayerDataManager().clearBlockList(senderUUID)) sender.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "Cleared your gift block list!");
-                    else sender.sendMessage(plugin.getPrefix() + ChatColor.GRAY + "Your gift block list is already empty.");
+                    if (plugin.getPlayerDataManager().clearBlockList(senderUUID)) sender.sendMessage(plugin.getPrefix() + Message.BLOCK_LIST_CLEARED.translate());
+                    else sender.sendMessage(plugin.getPrefix() + Message.BLOCK_LIST_ALREADY_CLEARED.translate());
                 } else {
-                    sender.sendMessage(plugin.getPrefix() + ChatColor.RED + "Cannot understand " + args[0] + "!");
+                    sender.sendMessage(plugin.getPrefix() + Message.ARGUMENT_NOT_RECOGNIZED.translate(args[0]));
                 }
             }
 

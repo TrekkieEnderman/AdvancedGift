@@ -19,7 +19,7 @@ package io.github.TrekkieEnderman.advancedgift;
 
 import java.util.UUID;
 
-import org.bukkit.ChatColor;
+import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -36,38 +36,37 @@ public class CommandGiftToggle implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull final CommandSender commandSender, @NotNull final Command cmd, @NotNull final String label, @NotNull final String[] args) {
         if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage("This command can only be run by a player.");
+            commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_FOR_PLAYER_ONLY.translate());
             return true;
         }
-        final String usage = ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/togglegift " + ChatColor.GRAY + "<on/off>";
         final Player sender = (Player) commandSender;
         final UUID senderUUID = sender.getUniqueId();
         if (args.length == 0) {
             if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
                 plugin.getPlayerDataManager().addUUID(senderUUID, "tg", null);
-                sender.sendMessage(plugin.getPrefix() + ChatColor.YELLOW + "You won't receive any more gifts now.");
+                sender.sendMessage(plugin.getPrefix() + Message.TOGGLED_OFF.translate());
             } else {
                 plugin.getPlayerDataManager().removeUUID(senderUUID, "tg", null);
-                sender.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "You will receive gifts from now on.");
+                sender.sendMessage(plugin.getPrefix() + Message.TOGGLED_ON.translate());
             }
         } else {
             if (args[0].equalsIgnoreCase("off") || args[0].equalsIgnoreCase("disable")) {
                 if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
                     plugin.getPlayerDataManager().addUUID(senderUUID, "tg", null);
-                    sender.sendMessage(plugin.getPrefix() + ChatColor.YELLOW + "You won't receive any more gifts now.");
+                    sender.sendMessage(plugin.getPrefix() + Message.TOGGLED_OFF.translate());
                 } else {
-                    sender.sendMessage(plugin.getPrefix() + ChatColor.RED + "Your ability to receive gifts is already disabled.");
+                    sender.sendMessage(plugin.getPrefix() + Message.ALREADY_TOGGLED_OFF.translate());
                 }
             } else if (args[0].equalsIgnoreCase("on") || args [0].equalsIgnoreCase("enable")) {
                 if (plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
                     plugin.getPlayerDataManager().removeUUID(senderUUID, "tg", null);
-                    sender.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "You will receive gifts from now on.");
+                    sender.sendMessage(plugin.getPrefix() + Message.TOGGLED_ON.translate());
                 } else {
-                    sender.sendMessage(plugin.getPrefix() + ChatColor.RED + "Your ability to receive gifts is already enabled.");
+                    sender.sendMessage(plugin.getPrefix() + Message.ALREADY_TOGGLED_ON.translate());
                 }
             } else {
-                sender.sendMessage(plugin.getPrefix() + ChatColor.RED + "Cannot understand " + args[0] + "!");
-                sender.sendMessage(usage);
+                sender.sendMessage(plugin.getPrefix() + Message.ARGUMENT_NOT_RECOGNIZED.translate(args[0]));
+                sender.sendMessage(Message.COMMAND_TOGGLE_USAGE.translate());
             }
         }
         return true;
