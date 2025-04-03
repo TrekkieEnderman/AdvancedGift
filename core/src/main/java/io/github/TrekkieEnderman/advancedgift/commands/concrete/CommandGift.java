@@ -180,8 +180,7 @@ public class CommandGift implements CommandExecutor {
 
     private int getTotalAmountHas(final PlayerInventory senderInventory, final ItemStack itemstack) {
         int hasAmount = 0;
-        final ItemStack[] contents = ServerVersion.getMinorVersion() > 8 ? senderInventory.getStorageContents() : senderInventory.getContents();
-        for (ItemStack item : contents) { //getContents also returns offhand and armor slots, which we don't want to
+        for (ItemStack item : getStorageContents(senderInventory)) {
             if (itemstack.isSimilar(item)) {
                 hasAmount += item.getAmount();
             }
@@ -266,7 +265,7 @@ public class CommandGift implements CommandExecutor {
         }
         if (targetInventory.firstEmpty() == -1) {
             int space = 0;
-            for (ItemStack item: targetInventory.getContents()) { // TODO change this to getStorageContents()
+            for (ItemStack item: getStorageContents(targetInventory)) {
                 if (itemstack.isSimilar(item)) {
                     space = item.getMaxStackSize() - item.getAmount();
                     if (space > 0) break;
@@ -492,4 +491,9 @@ public class CommandGift implements CommandExecutor {
     }
 
     private void logGiftWarning(final String message) {logMessage("Warning: " + message);}
+
+    private ItemStack[] getStorageContents(PlayerInventory inventory) {
+        //getContents also returns offhand and armor slots, which we want to avoid if possible
+        return ServerVersion.getMinorVersion() > 8 ? inventory.getStorageContents() : inventory.getContents();
+    }
 }
