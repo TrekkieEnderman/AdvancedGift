@@ -176,12 +176,13 @@ public class AdvancedGift extends JavaPlugin {
     }
 
     private void loadWorldGroupList() {
-        int key = 1;
+        worldList.clear();
+        int key = 0;
         for (String world : getConfig().getStringList("world-group-list")) {
             String[] array = world.split(", ");
             ArrayList<String> list = new ArrayList<>(Arrays.asList(array));
             worldList.put(key, list);
-            key += 1; //Previously "key = key + 1". If world restriction breaks, revert to this.
+            key += 1;
         }
     }
 
