@@ -15,10 +15,12 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.TrekkieEnderman.advancedgift;
+package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import java.util.*;
 
+import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
+import io.github.TrekkieEnderman.advancedgift.ServerVersion;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.locale.Translation;
 import me.Fupery.ArtMap.ArtMap;
@@ -49,7 +51,7 @@ public class CommandGift implements CommandExecutor {
     private final static char[] SPACE_DELIMITER = new char[]{' '};
     private final HashMap<UUID, Long> cooldown = new HashMap<>();
 
-    CommandGift(AdvancedGift plugin) {
+    public CommandGift(AdvancedGift plugin) {
         this.plugin = plugin;
     }
 

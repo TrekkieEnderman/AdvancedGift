@@ -15,10 +15,11 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.TrekkieEnderman.advancedgift;
+package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import java.util.UUID;
 
+import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 public class CommandGiftToggle implements CommandExecutor {
     private final AdvancedGift plugin;
 
-    CommandGiftToggle(AdvancedGift plugin) {
+    public CommandGiftToggle(AdvancedGift plugin) {
         this.plugin = plugin;
     }
 

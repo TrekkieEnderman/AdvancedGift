@@ -17,6 +17,9 @@
 
 package io.github.TrekkieEnderman.advancedgift;
 
+import io.github.TrekkieEnderman.advancedgift.commands.concrete.CommandGift;
+import io.github.TrekkieEnderman.advancedgift.commands.concrete.CommandGiftBlock;
+import io.github.TrekkieEnderman.advancedgift.commands.concrete.CommandGiftToggle;
 import io.github.TrekkieEnderman.advancedgift.data.LegacyDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.StandardDataManager;
@@ -145,7 +148,7 @@ public class AdvancedGift extends JavaPlugin {
         this.getPlayerDataManager().load();
     }
 
-    FileConfiguration getConfigFile() {
+    public FileConfiguration getConfigFile() {
         return getConfig();
     }
 
@@ -182,7 +185,7 @@ public class AdvancedGift extends JavaPlugin {
         }
     }
 
-    int getPlayerWorldGroup(Player player) {
+    public int getPlayerWorldGroup(Player player) {
         //int playerWorldGroup = -1;
         for (int key : worldList.keySet()) {
             ArrayList<String> values = worldList.get(key);

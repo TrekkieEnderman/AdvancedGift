@@ -15,11 +15,13 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.TrekkieEnderman.advancedgift;
+package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import java.util.Set;
 import java.util.UUID;
 
+import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
+import io.github.TrekkieEnderman.advancedgift.ServerVersion;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -38,7 +40,7 @@ import org.jetbrains.annotations.NotNull;
 public class CommandGiftBlock implements CommandExecutor {
     private final AdvancedGift plugin;
 
-    CommandGiftBlock(AdvancedGift plugin) {
+    public CommandGiftBlock(AdvancedGift plugin) {
         this.plugin = plugin;
     }
 
