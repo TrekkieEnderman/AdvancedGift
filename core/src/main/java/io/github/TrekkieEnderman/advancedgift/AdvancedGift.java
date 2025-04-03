@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 TrekkieEnderman
+ * Copyright (c) 2025 TrekkieEnderman
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
