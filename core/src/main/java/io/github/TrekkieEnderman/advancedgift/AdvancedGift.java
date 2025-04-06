@@ -17,9 +17,7 @@
 
 package io.github.TrekkieEnderman.advancedgift;
 
-import io.github.TrekkieEnderman.advancedgift.commands.concrete.CommandGift;
-import io.github.TrekkieEnderman.advancedgift.commands.concrete.CommandGiftBlock;
-import io.github.TrekkieEnderman.advancedgift.commands.concrete.CommandGiftToggle;
+import io.github.TrekkieEnderman.advancedgift.commands.concrete.*;
 import io.github.TrekkieEnderman.advancedgift.data.LegacyDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.StandardDataManager;
@@ -123,6 +121,8 @@ public class AdvancedGift extends JavaPlugin {
         CommandGiftBlock commandGiftBlock = new CommandGiftBlock(this);
         this.getCommand("giftblock").setExecutor(commandGiftBlock);
         this.getCommand("giftblocklist").setExecutor(commandGiftBlock);
+        this.getCommand("agreload").setExecutor(new CommandReload(this));
+        this.getCommand("giftspy").setExecutor(new CommandSpy(this));
         getLogger().info("===================================================");
         if (Bukkit.getPluginManager().getPlugin("ArtMap") != null) hasArtMap = true;
         startMetrics();
@@ -152,7 +152,7 @@ public class AdvancedGift extends JavaPlugin {
         return getConfig();
     }
 
-    private boolean loadConfigFile() {
+    public boolean loadConfigFile() {
         // Moved config creation to here so the plugin doesn't run into issues when reloading it on command later
         if (!configFile.exists()) {
             getLogger().info(Message.CONFIG_NOT_FOUND.translate());
@@ -206,60 +206,5 @@ public class AdvancedGift extends JavaPlugin {
 
     public boolean hasArtMap() {
         return hasArtMap;
-    }
-
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, @NotNull String[] args) {
-        if (cmd.getName().equalsIgnoreCase("agreload")) {
-            if (!(sender instanceof Player)) {
-                if (loadConfigFile()) getServer().getConsoleSender().sendMessage(getPrefix() + Message.CONFIG_RELOADED.translate());
-                else getServer().getConsoleSender().sendMessage(getPrefix() + Message.CONFIG_NOT_RELOADED.translate());
-            } else {
-                if (sender.hasPermission("advancedgift.reload")) {
-                    if (loadConfigFile()) sender.sendMessage(getPrefix() + Message.CONFIG_RELOADED.translate());
-                    else sender.sendMessage(getPrefix() + Message.CONFIG_NOT_RELOADED.translate() + Message.CHECK_CONSOLE.translate());
-                } else sender.sendMessage(getPrefix() + Message.COMMAND_NO_PERMISSION.translate());
-            }
-        }
-        if (cmd.getName().equalsIgnoreCase("giftspy")) {
-            if (!(sender instanceof Player)) sender.sendMessage(Message.COMMAND_FOR_PLAYER_ONLY.translate());
-            else {
-                if (sender.hasPermission("advancedgift.gift.spy")) {
-                    Player s = (Player) sender;
-                    UUID senderUUID = s.getUniqueId();
-                    if (args.length == 0) {
-                        if (!getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
-                            getPlayerDataManager().addUUID(senderUUID, "spy", null);
-                            s.sendMessage(getPrefix() + Message.SPY_ENABLED.translate());
-                        } else {
-                            getPlayerDataManager().removeUUID(senderUUID, "spy", null);
-                            s.sendMessage(getPrefix() + Message.SPY_DISABLED.translate());
-                        }
-                    } else {
-                        if (args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("enable")) {
-                            if (!getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
-                                getPlayerDataManager().addUUID(senderUUID, "spy", null);
-                                s.sendMessage(getPrefix() + Message.SPY_ENABLED.translate());
-                            } else {
-                                s.sendMessage(getPrefix() + Message.SPY_ALREADY_ENABLED.translate());
-                            }
-                        } else if (args[0].equalsIgnoreCase("off") || args [0].equalsIgnoreCase("disable")) {
-                            if (getPlayerDataManager().containsUUID(senderUUID, "spy", null)) {
-                                getPlayerDataManager().removeUUID(senderUUID, "spy", null);
-                                s.sendMessage(getPrefix() + Message.SPY_DISABLED.translate());
-                            } else {
-                                s.sendMessage(getPrefix() + Message.SPY_ALREADY_DISABLED.translate());
-                            }
-                        } else {
-                            s.sendMessage(getPrefix() + Message.ARGUMENT_NOT_RECOGNIZED.translate(args[0]));
-                            s.sendMessage(Message.COMMAND_SPY_USAGE.translate());
-                        }
-                    }
-                } else {
-                    sender.sendMessage(getPrefix() + Message.COMMAND_NO_PERMISSION.translate());
-                }
-            }
-        }
-        return true;
     }
 }
