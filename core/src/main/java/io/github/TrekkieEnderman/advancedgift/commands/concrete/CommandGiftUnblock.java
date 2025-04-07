@@ -17,8 +17,6 @@
 
 package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
-import java.util.UUID;
-
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.Bukkit;
@@ -27,52 +25,40 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import org.jetbrains.annotations.NotNull;
 
-public class CommandGiftBlock implements CommandExecutor {
+import java.util.UUID;
+
+public class CommandGiftUnblock implements CommandExecutor {
     private final AdvancedGift plugin;
 
-    public CommandGiftBlock(AdvancedGift plugin) {
+    public CommandGiftUnblock(final AdvancedGift plugin) {
         this.plugin = plugin;
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public boolean onCommand(@NotNull final CommandSender commandSender, @NotNull final Command cmd, @NotNull final String label, @NotNull final String[] args) {
+    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(commandSender instanceof Player)) {
             commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_FOR_PLAYER_ONLY.translate());
             return true;
         }
         if (args.length == 0) {
-            commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_BLOCK_DESCRIPTION.translate());
-            commandSender.sendMessage(Message.COMMAND_BLOCK_USAGE.translate());
+            commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_UNBLOCK_DESCRIPTION.translate());
+            commandSender.sendMessage(Message.COMMAND_UNBLOCK_USAGE.translate());
             return true;
         }
 
         final Player sender = (Player) commandSender;
-        final OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(args[0]);
-
-        if (targetPlayer.equals(sender)) {
-            sender.sendMessage(plugin.getPrefix() + Message.BLOCK_SELF.translate());
-            return true;
-        }
-        if (!targetPlayer.hasPlayedBefore()) {
-            sender.sendMessage(plugin.getPrefix() + Message.PLAYER_NOT_FOUND.translate(args[0]));
-            return true;
-        }
-
         final UUID senderUUID = sender.getUniqueId();
-        final UUID targetUUID = targetPlayer.getUniqueId();
-        final String targetName = targetPlayer.getName();
+        final OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
 
-        if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "block", targetUUID)) {
-            plugin.getPlayerDataManager().addUUID(senderUUID, "block", targetUUID);
-            sender.sendMessage(plugin.getPrefix() + Message.BLOCK_OTHER.translate(targetName));
+        if (plugin.getPlayerDataManager().containsUUID(senderUUID, "block", target.getUniqueId())) {
+            plugin.getPlayerDataManager().removeUUID(senderUUID, "block", target.getUniqueId());
+            sender.sendMessage(plugin.getPrefix() + Message.UNBLOCK_OTHER.translate(target.getName()));
         } else {
-            sender.sendMessage(plugin.getPrefix() + Message.OTHER_BLOCKED_ALREADY.translate(targetName));
+            sender.sendMessage(plugin.getPrefix() + Message.OTHER_UNBLOCKED_ALREADY.translate(target.getName()));
         }
         return true;
     }
-
 }

@@ -20,9 +20,13 @@ commands:
     description: "Spy on the gift exchanges to catch the offensive ones."
     aliases: [gspy]
   giftblock:
-    description: "Block gifts from a player you dislike or find annoying! ...Or unblock them."
+    description: "Block gifts from a player you dislike or find annoying!"
     usage: "/giftblock [player]"
-    aliases: [blockgift, gblock, giftunblock, unblockgift, gunblock, ungblock]
+    aliases: [blockgift, gblock]
+  giftunblock:
+    description: "Unblock a player, allowing them to send you gifts again."
+    usage: "/giftunblock [player]"
+    aliases: [unblockgift, gunblock, ungblock]
   giftblocklist:
     description: "Lists the players you've blocked gifts from, or clear the list."
     usage: "/giftblocklist (clear)"

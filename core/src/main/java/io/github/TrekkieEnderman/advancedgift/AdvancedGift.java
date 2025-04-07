@@ -118,9 +118,9 @@ public class AdvancedGift extends JavaPlugin {
         }
         this.getCommand("gift").setExecutor(new CommandGift(this));
         this.getCommand("togglegift").setExecutor(new CommandGiftToggle(this));
-        CommandGiftBlock commandGiftBlock = new CommandGiftBlock(this);
-        this.getCommand("giftblock").setExecutor(commandGiftBlock);
-        this.getCommand("giftblocklist").setExecutor(commandGiftBlock);
+        this.getCommand("giftblock").setExecutor(new CommandGiftBlock(this));
+        this.getCommand("giftunblock").setExecutor(new CommandGiftUnblock(this));
+        this.getCommand("giftblocklist").setExecutor(new CommandGiftBlockList(this));
         this.getCommand("agreload").setExecutor(new CommandReload(this));
         this.getCommand("giftspy").setExecutor(new CommandSpy(this));
         getLogger().info("===================================================");

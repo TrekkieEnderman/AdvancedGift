@@ -41,6 +41,8 @@ public enum Message {
     BLOCK_SELF("attemptedToBlockSelf"),
     BLOCK_OTHER("otherPlayerBlocked"),
     OTHER_BLOCKED_ALREADY("otherPlayerIsAlreadyBlocked"),
+    COMMAND_UNBLOCK_DESCRIPTION("giftUnblockCommandDescription"),
+    COMMAND_UNBLOCK_USAGE("giftUnblockCommandUsage"),
     UNBLOCK_OTHER("otherPlayerUnblocked"),
     OTHER_UNBLOCKED_ALREADY("otherPlayerIsAlreadyUnblocked"),
     BLOCK_LIST_DESCRIPTION("giftBlockListCommandDescription"),
