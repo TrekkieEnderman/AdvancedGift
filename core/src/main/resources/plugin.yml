@@ -35,6 +35,9 @@ commands:
     description: "Lists the players you've blocked gifts from, or clear the list."
     usage: "/<command> <clear>"
     aliases: [gblocklist, gblist]
+  agtranslate:
+    description: "Creates a customizable translation file for the target locale. If no locale is inputted, the locale set in the config would be used instead. Will accept just about any locale, even fake ones (check out sas_SY)."
+    usage: "/<command> <locale>"
 
 permissions:
   advancedgift.gift.send:
@@ -62,4 +65,7 @@ permissions:
     default: op
   advancedgift.reload:
     description: Allows reloading AdvancedGift's configuration files
+    default: op
+  advancedgift.translate:
+    description: Allows creating customizable translation files for this plugin
     default: op

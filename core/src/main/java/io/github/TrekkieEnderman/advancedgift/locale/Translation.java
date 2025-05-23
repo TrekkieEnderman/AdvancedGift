@@ -28,6 +28,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -39,10 +41,10 @@ hence the way this class is structured. */
 public class Translation {
     private static Translation instance;
     public static final Locale DEFAULT_LOCALE = Locale.US;
-    private static final Locale SILLY_LOCALE = new Locale("sas", "SY");
+    public static final Locale SILLY_LOCALE = new Locale("sas", "SY");
     private static final Pattern REMOVE_DOUBLE_QUOTE = Pattern.compile("''");
-    private static final String TRANSLATIONS_DIRECTORY_NAME = "translations";
-    private static final String BASE_BUNDLE_NAME = TRANSLATIONS_DIRECTORY_NAME + ".messages";
+    public static final String TRANSLATIONS_DIRECTORY_NAME = "translations";
+    public static final String BASE_BUNDLE_NAME = TRANSLATIONS_DIRECTORY_NAME + ".messages";
     private static final ResourceBundle EMPTY_BUNDLE = new ResourceBundle() {
         @Nullable
         @Override
@@ -136,6 +138,40 @@ public class Translation {
         return null;
     }
 
+    /* Exports the target locale's translation file if it exists to the plugin directory,
+    or creates a new one populated with entries from the base translation file.
+    Returns true if the export succeeds, false otherwise. */
+    public static boolean exportTranslation(final @NotNull Locale targetLocale) {
+        if (instance == null) {
+            throw new IllegalStateException("Translation class isn't initialized");
+        }
+
+        final ResourceBundle.Control control = ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES);
+        final Path destination = instance.plugin.getDataFolder().toPath().resolve(control.toResourceName(control.toBundleName(BASE_BUNDLE_NAME, targetLocale), "properties"));
+
+        if (Files.exists(destination)) {
+            instance.plugin.getLogger().warning("The destination file for '" + targetLocale + "' already exists.");
+            return false;
+        }
+
+        URL resource = instance.getClass().getClassLoader().getResource(control.toResourceName(control.toBundleName(BASE_BUNDLE_NAME, targetLocale), "properties"));
+        if (resource == null) {
+            resource = instance.getClass().getClassLoader().getResource(control.toResourceName(BASE_BUNDLE_NAME, "properties"));
+        }
+        if (resource == null) {
+            instance.plugin.getLogger().warning("Unable to find the embedded base translation file. This shouldn't happen.");
+            return false;
+        }
+
+        try (InputStream stream = resource.openStream()) {
+            Files.copy(stream, destination);
+            return true;
+        } catch (IOException e) {
+            instance.plugin.getLogger().log(Level.SEVERE, "Exception occurred while creating a custom translation file for " + targetLocale, e);
+        }
+        return false;
+    }
+
     // Instance methods
 
     /* Returns the cached resource bundle for the given locale.
@@ -181,7 +217,7 @@ public class Translation {
         try {
             string = getBundle(locale).getString(key);
         } catch (final MissingResourceException ex) {
-            plugin.getLogger().warning(String.format("Missing translation key '%s' in translation file %s", ex.getKey(), serverLocale));
+            plugin.getLogger().warning(String.format("Missing translation key '%s' in translation file '%s'", ex.getKey(), serverLocale));
         }
         return string != null && !string.isEmpty() ? string : defaultBundle.getString(key);
     }

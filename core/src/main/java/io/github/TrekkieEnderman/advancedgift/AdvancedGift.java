@@ -32,12 +32,9 @@ import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
@@ -123,6 +120,7 @@ public class AdvancedGift extends JavaPlugin {
         this.getCommand("giftblocklist").setExecutor(new CommandGiftBlockList(this));
         this.getCommand("agreload").setExecutor(new CommandReload(this));
         this.getCommand("giftspy").setExecutor(new CommandSpy(this));
+        this.getCommand("agtranslate").setExecutor(new CommandTranslate(this));
         getLogger().info("===================================================");
         if (Bukkit.getPluginManager().getPlugin("ArtMap") != null) hasArtMap = true;
         startMetrics();

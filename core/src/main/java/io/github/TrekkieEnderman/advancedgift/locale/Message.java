@@ -91,7 +91,12 @@ public enum Message {
     MESSAGE_LOGGED("messageLogged"),
     ENCHANTED_ITEM("enchantedItem"),
     PATTERNED_ITEM("patternedItem"),
-    NAMED_ITEM("namedItem");
+    NAMED_ITEM("namedItem"),
+    TRANSLATION_CREATED("translationCreated"),
+    TRANSLATION_NOT_CREATED("translationNotCreated"),
+    UNKNOWN_LOCALE("unknownLocale"),
+    COMMAND_TRANSLATE_DESCRIPTION("translateCommandDescription"),
+    COMMAND_TRANSLATE_USAGE("translateCommandUsage");
 
 
     private final String key;
