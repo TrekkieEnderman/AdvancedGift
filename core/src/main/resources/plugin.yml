@@ -8,28 +8,31 @@ api-version: 1.13
 commands:
   gift:
     description: "Send your friend or foe a gift, anywhere and anytime, in an instant!"
+    usage: "/<command> <player> <amount|hand|all> <message>"
     aliases: [sendgift, giftsend]
   togglegift:
     description: "Enable or disable your ability to receive gifts from everyone."
-    usage: "/togglegift <on/off>"
+    usage: "/<command> <on|off>"
     aliases: [gifttoggle, tg, gt]
   agreload:
     description: "Reload the AdvancedGift config."
+    usage: "/<command>"
     aliases: [agr]
   giftspy:
     description: "Spy on the gift exchanges to catch the offensive ones."
+    usage: "/<command> <on|off>"
     aliases: [gspy]
   giftblock:
     description: "Block gifts from a player you dislike or find annoying!"
-    usage: "/giftblock [player]"
+    usage: "/<command> [player]"
     aliases: [blockgift, gblock]
   giftunblock:
     description: "Unblock a player, allowing them to send you gifts again."
-    usage: "/giftunblock [player]"
+    usage: "/<command> [player]"
     aliases: [unblockgift, gunblock, ungblock]
   giftblocklist:
     description: "Lists the players you've blocked gifts from, or clear the list."
-    usage: "/giftblocklist (clear)"
+    usage: "/<command> <clear>"
     aliases: [gblocklist, gblist]
 
 permissions:
