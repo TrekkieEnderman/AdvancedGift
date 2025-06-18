@@ -18,6 +18,7 @@
 package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.ServerVersion;
@@ -77,8 +78,10 @@ public class CommandGift implements CommandExecutor {
         // Get target
         Player target = null;
         final PlayerInventory senderInventory = sender.getInventory();
-        final List<Player> matchList = Bukkit.matchPlayer(args[0]);
-        matchList.remove(sender);
+        final List<Player> matchList = Bukkit.matchPlayer(args[0]).stream()
+                .filter(player -> !player.equals(sender))
+                .filter(player -> !isVanished(player))
+                .collect(Collectors.toList());
 
         if (matchList.size() == 1) {
             target = matchList.get(0);
