@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CommandGiftToggle extends SimpleCommand {
     public CommandGiftToggle(AdvancedGift plugin) {
-        super(plugin, null);
+        super(plugin, "gifttoggle",  null);
     }
 
     @Override

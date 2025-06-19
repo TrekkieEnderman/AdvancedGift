@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CommandReload extends SimpleCommand {
     public CommandReload(AdvancedGift plugin) {
-        super(plugin, "advancedgift.reload");
+        super(plugin, "agreload", "advancedgift.reload");
     }
 
     @Override

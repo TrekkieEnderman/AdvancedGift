@@ -51,7 +51,7 @@ public class CommandGift extends SimpleCommand {
     private final HashMap<UUID, Long> cooldown = new HashMap<>();
 
     public CommandGift(AdvancedGift plugin) {
-        super(plugin, "advancedgift.gift.send");
+        super(plugin, "gift", "advancedgift.gift.send");
     }
 
     @Override
@@ -63,7 +63,8 @@ public class CommandGift extends SimpleCommand {
     @Override
     public boolean run(@NotNull final Player sender, @NotNull final String label, @NotNull final String[] args) {
         if (args.length == 0) {
-            return false;
+            showUsage(sender);
+            return true;
         }
 
         // Get target
@@ -103,11 +104,11 @@ public class CommandGift extends SimpleCommand {
 
         if (target == null || (isVanished(target) && !sender.hasPermission("advancedgift.bypass.vanish"))) {
             sender.sendMessage(plugin.getPrefix() + Message.TARGET_NOT_ONLINE.translate(args[0]));
-            return true;
+            return false;
         }
         if (target == sender.getPlayer()) {
             sender.sendMessage(plugin.getPrefix() + Message.SEND_GIFT_SELF.translate());
-            return true;
+            return false;
         }
 
         // Get ItemStack

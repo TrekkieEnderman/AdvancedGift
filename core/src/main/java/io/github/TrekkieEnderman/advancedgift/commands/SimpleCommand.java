@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 @AllArgsConstructor
 public abstract class SimpleCommand implements CommandExecutor {
     protected final AdvancedGift plugin;
+    protected final String name;
     @Getter
     private final String permission;
 
@@ -77,7 +78,7 @@ public abstract class SimpleCommand implements CommandExecutor {
         }
 
         if (!run(sender, label, args)) {
-            showUsage(sender);
+            sender.sendMessage(Message.COMMAND_USAGE_TIP.translate(name));
         }
         return true;
     }

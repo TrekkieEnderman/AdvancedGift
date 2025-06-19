@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class CommandGiftBlock extends SimpleCommand {
     public CommandGiftBlock(AdvancedGift plugin) {
-        super(plugin, null);
+        super(plugin, "giftblock", null);
     }
 
     @Override
@@ -44,18 +44,19 @@ public class CommandGiftBlock extends SimpleCommand {
     @Override
     protected boolean run(@NotNull final Player sender, @NotNull final String label, @NotNull final String[] args) {
         if (args.length == 0) {
-            return false;
+            showUsage(sender);
+            return true;
         }
 
         final OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(args[0]);
 
         if (targetPlayer.equals(sender)) {
             sender.sendMessage(plugin.getPrefix() + Message.BLOCK_SELF.translate());
-            return true;
+            return false;
         }
         if (!targetPlayer.hasPlayedBefore()) {
             sender.sendMessage(plugin.getPrefix() + Message.PLAYER_NOT_FOUND.translate(args[0]));
-            return true;
+            return false;
         }
 
         final UUID senderUUID = sender.getUniqueId();

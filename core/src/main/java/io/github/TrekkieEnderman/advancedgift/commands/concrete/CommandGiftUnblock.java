@@ -30,7 +30,7 @@ import java.util.UUID;
 
 public class CommandGiftUnblock extends SimpleCommand {
     public CommandGiftUnblock(final AdvancedGift plugin) {
-        super(plugin, null);
+        super(plugin, "giftunblock", null);
     }
 
     @Override
@@ -43,7 +43,8 @@ public class CommandGiftUnblock extends SimpleCommand {
     @Override
     public boolean run(@NotNull Player sender, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
-            return false;
+            showUsage(sender);
+            return true;
         }
 
         final UUID senderUUID = sender.getUniqueId();

@@ -28,7 +28,7 @@ import java.util.UUID;
 
 public class CommandSpy extends SimpleCommand {
     public CommandSpy(final AdvancedGift plugin) {
-        super(plugin, "advancedgift.gift.spy");
+        super(plugin, "giftspy", "advancedgift.gift.spy");
     }
 
     @Override

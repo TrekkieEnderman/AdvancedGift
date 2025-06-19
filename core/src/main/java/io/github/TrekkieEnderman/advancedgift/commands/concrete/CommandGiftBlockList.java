@@ -39,7 +39,7 @@ public class CommandGiftBlockList extends SimpleCommand {
     private final static String BLANK_SPACE = " ";
 
     public CommandGiftBlockList(final AdvancedGift plugin) {
-        super(plugin, null);
+        super(plugin, "giftblocklist", null);
     }
 
     @Override
@@ -91,6 +91,6 @@ public class CommandGiftBlockList extends SimpleCommand {
         }
 
         sender.sendMessage(plugin.getPrefix() + Message.ARGUMENT_NOT_RECOGNIZED.translate(args[0]));
-        return true;
+        return false;
     }
 }

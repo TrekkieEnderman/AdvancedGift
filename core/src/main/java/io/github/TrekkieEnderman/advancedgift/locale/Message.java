@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 public enum Message {
     COMMAND_NO_PERMISSION("commandNoPermission"),
     COMMAND_FOR_PLAYER_ONLY("commandIsForPlayerOnly"),
+    COMMAND_USAGE_TIP("commandUsageTip"),
     ARGUMENT_NOT_RECOGNIZED("argumentNotRecognized"),
     PLAYER_NOT_FOUND("playerNotFound"),
     CHECK_CONSOLE("checkServerConsole"),

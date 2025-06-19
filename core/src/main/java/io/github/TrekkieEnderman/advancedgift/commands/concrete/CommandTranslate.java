@@ -34,7 +34,7 @@ public class CommandTranslate extends SimpleCommand {
     private final Path translationsDirectory;
 
     public CommandTranslate(final AdvancedGift plugin) {
-        super(plugin, "advancedgift.translate");
+        super(plugin, "agtranslate", "advancedgift.translate");
         translationsDirectory = plugin.getDataFolder().toPath().resolve(Translation.TRANSLATIONS_DIRECTORY_NAME);
     }
 
