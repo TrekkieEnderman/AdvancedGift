@@ -57,8 +57,7 @@ public class CommandGift extends SimpleCommand {
     @Override
     protected void showUsage(CommandSender sender) {
         sender.sendMessage(plugin.getPrefix() + Message.COMMAND_GIFT_DESCRIPTION.translate());
-        sender.sendMessage(Message.COMMAND_GIFT_USAGE_1.translate());
-        sender.sendMessage(Message.COMMAND_GIFT_USAGE_2.translate()); // TODO any good way to hide the last argument if messages are disabled?
+        sender.sendMessage(Message.COMMAND_GIFT_USAGE.translate()); // TODO any good way to hide the last argument if messages are disabled?
     }
 
     @Override

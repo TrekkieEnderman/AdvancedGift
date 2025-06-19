@@ -45,8 +45,7 @@ public class CommandGiftBlockList extends SimpleCommand {
     @Override
     protected void showUsage(CommandSender sender) {
         sender.sendMessage(plugin.getPrefix() + Message.BLOCK_LIST_DESCRIPTION.translate());
-        sender.sendMessage(Message.BLOCK_LIST_USAGE_1.translate());
-        sender.sendMessage(Message.BLOCK_LIST_USAGE_2.translate());
+        sender.sendMessage(Message.BLOCK_LIST_USAGE.translate());
     }
 
     @Override
@@ -80,8 +79,7 @@ public class CommandGiftBlockList extends SimpleCommand {
                     builder.event(hoverEvent).event(clickEvent);
                 }
                 sender.spigot().sendMessage(builder.create());
-                sender.sendMessage(Message.BLOCK_LIST_USAGE_1.translate());
-                sender.sendMessage(Message.BLOCK_LIST_USAGE_2.translate());
+                sender.sendMessage(Message.BLOCK_LIST_USAGE.translate());
             }
             return true;
         }
