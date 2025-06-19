@@ -27,6 +27,8 @@ public enum Message {
     CHECK_CONSOLE("checkServerConsole"),
     CONFIG_NOT_FOUND("configNotFound"),
     CONFIG_LOADED("configLoaded"),
+    COMMAND_RELOAD_DESCRIPTION("reloadCommandDescription"),
+    COMMAND_RELOAD_USAGE("reloadCommandUsage"),
     CONFIG_RELOADED("configReloaded"),
     CONFIG_NOT_RELOADED("configNotReloaded"),
     OUTDATED_CONFIG("configIsOutdated"),

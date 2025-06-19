@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.ServerVersion;
+import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.locale.Translation;
 import me.Fupery.ArtMap.ArtMap;
@@ -31,8 +32,6 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -47,32 +46,25 @@ import net.md_5.bungee.api.ChatColor;
 import com.meowj.langutils.lang.LanguageHelper;
 import org.jetbrains.annotations.NotNull;
 
-public class CommandGift implements CommandExecutor {
-    private final AdvancedGift plugin;
+public class CommandGift extends SimpleCommand {
     private final static char[] SPACE_DELIMITER = new char[]{' '};
     private final HashMap<UUID, Long> cooldown = new HashMap<>();
 
     public CommandGift(AdvancedGift plugin) {
-        this.plugin = plugin;
+        super(plugin, "advancedgift.gift.send");
     }
 
     @Override
-    public boolean onCommand(@NotNull final CommandSender commandSender, @NotNull final Command cmd, @NotNull final String label, @NotNull final String[] args) {
-        if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_FOR_PLAYER_ONLY.translate());
-            return true;
-        }
-        final Player sender = (Player) commandSender;
-        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-            sender.sendMessage(plugin.getPrefix() + Message.COMMAND_GIFT_DESCRIPTION.translate());
-            sender.sendMessage(Message.COMMAND_GIFT_USAGE_1.translate());
-            sender.sendMessage(Message.COMMAND_GIFT_USAGE_2.translate()); // TODO any good way to hide the last argument if messages are disabled?
-            return true;
-        }
-        if (!(sender.hasPermission("advancedgift.gift.send"))) {
-            sender.sendMessage(plugin.getPrefix() + Message.COMMAND_NO_PERMISSION.translate());
-            logGiftDenied(sender.getName(), "Permission 'advancedgift.gift.send' is required to send gifts.");
-            return true;
+    protected void showUsage(CommandSender sender) {
+        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_GIFT_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_GIFT_USAGE_1.translate());
+        sender.sendMessage(Message.COMMAND_GIFT_USAGE_2.translate()); // TODO any good way to hide the last argument if messages are disabled?
+    }
+
+    @Override
+    public boolean run(@NotNull final Player sender, @NotNull final String label, @NotNull final String[] args) {
+        if (args.length == 0) {
+            return false;
         }
 
         // Get target
@@ -124,7 +116,7 @@ public class CommandGift implements CommandExecutor {
         final ItemStack giftItem = (ServerVersion.getMinorVersion() < 9 ? senderInventory.getItemInHand() : senderInventory.getItemInMainHand()).clone();
         if (giftItem.getType() == Material.AIR) {
             sender.sendMessage(plugin.getPrefix() + Message.GIFT_EMPTY.translate());
-            return true;
+            return false;
         }
 
         if (!canSendGift(sender, target, giftItem)) return true;
@@ -139,12 +131,12 @@ public class CommandGift implements CommandExecutor {
         // Validate gift amount
         if (giftAmount < 1) {
             sender.sendMessage(plugin.getPrefix() + Message.INVALID_GIFT_AMOUNT.translate());
-            return true;
+            return false;
         }
         if (!senderInventory.containsAtLeast(giftItem, giftAmount)) {
             sender.sendMessage(plugin.getPrefix() + Message.INSUFFICIENT_GIFT_AMOUNT.translate());
             logGiftDenied(sender.getName(), sender.getName() + " doesn't have the amount specified.");
-            return true;
+            return false;
         }
 
         if (args.length == 2 || !this.plugin.getConfigFile().getBoolean("allow-gift-message")) {

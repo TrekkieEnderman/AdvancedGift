@@ -18,27 +18,25 @@
 package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
+import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class CommandReload implements CommandExecutor {
-    private final AdvancedGift plugin;
-
+public class CommandReload extends SimpleCommand {
     public CommandReload(AdvancedGift plugin) {
-        this.plugin = plugin;
+        super(plugin, "advancedgift.reload");
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!sender.hasPermission("advancedgift.reload")) {
-            sender.sendMessage(plugin.getPrefix() + Message.COMMAND_NO_PERMISSION.translate());
-            return true;
-        }
+    public void showUsage(CommandSender sender) {
+        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_RELOAD_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_RELOAD_USAGE.translate());
+    }
 
+    @Override
+    public boolean run(@NotNull final CommandSender sender, @NotNull final String label,  @NotNull final String[] args) {
         if (plugin.loadConfigFile()) {
             sender.sendMessage(plugin.getPrefix() + Message.CONFIG_RELOADED.translate());
         } else {

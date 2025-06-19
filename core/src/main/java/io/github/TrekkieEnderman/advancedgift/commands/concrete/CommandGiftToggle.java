@@ -20,27 +20,25 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 import java.util.UUID;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
+import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class CommandGiftToggle implements CommandExecutor {
-    private final AdvancedGift plugin;
-
+public class CommandGiftToggle extends SimpleCommand {
     public CommandGiftToggle(AdvancedGift plugin) {
-        this.plugin = plugin;
+        super(plugin, null);
     }
 
     @Override
-    public boolean onCommand(@NotNull final CommandSender commandSender, @NotNull final Command cmd, @NotNull final String label, @NotNull final String[] args) {
-        if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_FOR_PLAYER_ONLY.translate());
-            return true;
-        }
-        final Player sender = (Player) commandSender;
+    public void showUsage(CommandSender sender) {
+        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_TOGGLE_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_TOGGLE_USAGE.translate());
+    }
+
+    @Override
+    public boolean run(@NotNull final Player sender, @NotNull final String label, @NotNull final String[] args) {
         final UUID senderUUID = sender.getUniqueId();
         if (args.length == 0) {
             if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
@@ -67,7 +65,7 @@ public class CommandGiftToggle implements CommandExecutor {
                 }
             } else {
                 sender.sendMessage(plugin.getPrefix() + Message.ARGUMENT_NOT_RECOGNIZED.translate(args[0]));
-                sender.sendMessage(Message.COMMAND_TOGGLE_USAGE.translate());
+                return false;
             }
         }
         return true;

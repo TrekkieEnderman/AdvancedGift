@@ -18,10 +18,9 @@
 package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
+import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.locale.Translation;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -31,22 +30,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
-public class CommandTranslate implements CommandExecutor {
-    private final AdvancedGift plugin;
+public class CommandTranslate extends SimpleCommand {
     private final Path translationsDirectory;
 
     public CommandTranslate(final AdvancedGift plugin) {
-        this.plugin = plugin;
+        super(plugin, "advancedgift.translate");
         translationsDirectory = plugin.getDataFolder().toPath().resolve(Translation.TRANSLATIONS_DIRECTORY_NAME);
     }
 
     @Override
-    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String[] args) {
-        if (!sender.hasPermission("advancedgift.translate")) {
-            sender.sendMessage(plugin.getPrefix() + Message.COMMAND_NO_PERMISSION.translate());
-            return true;
-        }
+    public void showUsage(CommandSender sender) {
+        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_TRANSLATE_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_TRANSLATE_USAGE.translate());
+    }
 
+    @Override
+    public boolean run(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String[] args) {
         if (!Files.exists(translationsDirectory)) {
             try {
                 Files.createDirectories(translationsDirectory);

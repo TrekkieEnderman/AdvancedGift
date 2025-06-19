@@ -19,6 +19,7 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.ServerVersion;
+import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -27,8 +28,6 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -36,22 +35,22 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 import java.util.UUID;
 
-public class CommandGiftBlockList implements CommandExecutor {
-    private final AdvancedGift plugin;
+public class CommandGiftBlockList extends SimpleCommand {
     private final static String BLANK_SPACE = " ";
 
     public CommandGiftBlockList(final AdvancedGift plugin) {
-        this.plugin = plugin;
+        super(plugin, null);
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_FOR_PLAYER_ONLY.translate());
-            return true;
-        }
+    protected void showUsage(CommandSender sender) {
+        sender.sendMessage(plugin.getPrefix() + Message.BLOCK_LIST_DESCRIPTION.translate());
+        sender.sendMessage(Message.BLOCK_LIST_USAGE_1.translate());
+        sender.sendMessage(Message.BLOCK_LIST_USAGE_2.translate());
+    }
 
-        final Player sender = (Player) commandSender;
+    @Override
+    protected boolean run(@NotNull Player sender, @NotNull String label, @NotNull String[] args) {
         final UUID senderUUID = sender.getUniqueId();
 
         if (args.length == 0) {

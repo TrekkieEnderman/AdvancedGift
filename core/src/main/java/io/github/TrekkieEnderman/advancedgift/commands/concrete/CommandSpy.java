@@ -18,35 +18,28 @@
 package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
+import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class CommandSpy implements CommandExecutor {
-    private final AdvancedGift plugin;
-
+public class CommandSpy extends SimpleCommand {
     public CommandSpy(final AdvancedGift plugin) {
-        this.plugin = plugin;
+        super(plugin, "advancedgift.gift.spy");
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(plugin.getPrefix()+ Message.COMMAND_FOR_PLAYER_ONLY.translate());
-            return true;
-        }
+    public void showUsage(CommandSender sender) {
+        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_SPY_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_SPY_USAGE.translate());
+    }
 
-        if (!sender.hasPermission("advancedgift.gift.spy")) {
-            sender.sendMessage(plugin.getPrefix() + Message.COMMAND_NO_PERMISSION.translate());
-            return true;
-        }
-
-        final UUID uuid = ((Player) sender).getUniqueId();
+    @Override
+    public boolean run(@NotNull Player sender, @NotNull String label, @NotNull String[] args) {
+        final UUID uuid = sender.getUniqueId();
 
         if (args.length < 1) {
             final boolean spy = !plugin.getPlayerDataManager().containsUUID(uuid, "spy", null);
@@ -78,8 +71,7 @@ public class CommandSpy implements CommandExecutor {
         }
 
         sender.sendMessage(plugin.getPrefix() + Message.ARGUMENT_NOT_RECOGNIZED.translate(args[0]));
-        sender.sendMessage(Message.COMMAND_SPY_USAGE.translate());
-        return true;
+        return false;
     }
 
     /* Returns true if successfully changes player's spy mode */

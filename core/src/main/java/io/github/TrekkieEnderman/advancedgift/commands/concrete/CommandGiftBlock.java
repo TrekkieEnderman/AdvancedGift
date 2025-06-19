@@ -20,37 +20,33 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 import java.util.UUID;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
+import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import org.jetbrains.annotations.NotNull;
 
-public class CommandGiftBlock implements CommandExecutor {
-    private final AdvancedGift plugin;
-
+public class CommandGiftBlock extends SimpleCommand {
     public CommandGiftBlock(AdvancedGift plugin) {
-        this.plugin = plugin;
+        super(plugin, null);
+    }
+
+    @Override
+    protected void showUsage(CommandSender sender) {
+        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_BLOCK_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_BLOCK_USAGE.translate());
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public boolean onCommand(@NotNull final CommandSender commandSender, @NotNull final Command cmd, @NotNull final String label, @NotNull final String[] args) {
-        if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_FOR_PLAYER_ONLY.translate());
-            return true;
-        }
+    protected boolean run(@NotNull final Player sender, @NotNull final String label, @NotNull final String[] args) {
         if (args.length == 0) {
-            commandSender.sendMessage(plugin.getPrefix() + Message.COMMAND_BLOCK_DESCRIPTION.translate());
-            commandSender.sendMessage(Message.COMMAND_BLOCK_USAGE.translate());
-            return true;
+            return false;
         }
 
-        final Player sender = (Player) commandSender;
         final OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(args[0]);
 
         if (targetPlayer.equals(sender)) {
