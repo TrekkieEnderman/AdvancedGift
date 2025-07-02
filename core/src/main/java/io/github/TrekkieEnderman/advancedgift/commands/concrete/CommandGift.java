@@ -70,10 +70,14 @@ public class CommandGift extends SimpleCommand {
         // Get target
         Player target = null;
         final PlayerInventory senderInventory = sender.getInventory();
-        final List<Player> matchList = Bukkit.matchPlayer(args[0]).stream()
+        List<Player> matchList = Bukkit.matchPlayer(args[0]).stream()
                 .filter(player -> !player.equals(sender))
-                .filter(player -> !isVanished(player))
                 .collect(Collectors.toList());
+        if (!sender.hasPermission("advancedgift.bypass.vanish")) {
+            matchList = matchList.stream()
+                    .filter(player -> !isVanished(player))
+                    .collect(Collectors.toList());
+        }
 
         if (matchList.size() == 1) {
             target = matchList.get(0);
