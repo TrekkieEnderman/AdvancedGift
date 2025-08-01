@@ -70,15 +70,19 @@ public class CommandGift extends SimpleCommand {
         // Get target
         Player target = null;
         final PlayerInventory senderInventory = sender.getInventory();
-        List<Player> matchList = Bukkit.matchPlayer(args[0]).stream()
-                .filter(player -> !player.equals(sender))
-                .collect(Collectors.toList());
+        List<Player> matchList = Bukkit.matchPlayer(args[0]);
         if (!sender.hasPermission("advancedgift.bypass.vanish")) {
             matchList = matchList.stream()
                     .filter(player -> !isVanished(player))
                     .collect(Collectors.toList());
         }
 
+        if (matchList.size() == 1 && matchList.get(0).equals(sender)) {
+            sender.sendMessage(plugin.getPrefix() + Message.SEND_GIFT_SELF.translate());
+            return false;
+        }
+
+        matchList = matchList.stream().filter(player -> !player.equals(sender)).collect(Collectors.toList());
         if (matchList.size() == 1) {
             target = matchList.get(0);
         } else if (matchList.size() > 1) {
@@ -108,10 +112,6 @@ public class CommandGift extends SimpleCommand {
 
         if (target == null || (isVanished(target) && !sender.hasPermission("advancedgift.bypass.vanish"))) {
             sender.sendMessage(plugin.getPrefix() + Message.TARGET_NOT_ONLINE.translate(args[0]));
-            return false;
-        }
-        if (target == sender.getPlayer()) {
-            sender.sendMessage(plugin.getPrefix() + Message.SEND_GIFT_SELF.translate());
             return false;
         }
 
