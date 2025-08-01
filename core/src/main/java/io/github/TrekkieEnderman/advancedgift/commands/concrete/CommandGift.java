@@ -110,7 +110,7 @@ public class CommandGift extends SimpleCommand {
             return true;
         }
 
-        if (target == null || (isVanished(target) && !sender.hasPermission("advancedgift.bypass.vanish"))) {
+        if (target == null) {
             sender.sendMessage(plugin.getPrefix() + Message.TARGET_NOT_ONLINE.translate(args[0]));
             return false;
         }
