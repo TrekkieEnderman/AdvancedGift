@@ -87,16 +87,12 @@ public class AdvancedGift extends JavaPlugin {
             getLogger().info("");
             nms = initNMS();
             if (!nms.equals(NO_TOOLTIPS)) {
-                getLogger().info("This version is supported!");
+                getLogger().info("This version is supported. Gift notifications will have item tooltip.");
                 textTooltipEnabled = true;
             } else {
-                getLogger().warning("Warning!");
-                getLogger().warning("This plugin doesn't have support for this version!");
-                getLogger().warning("In order to maintain compatibility with this server,");
-                getLogger().warning("Item text hover over has been disabled in this plugin!");
+                getLogger().warning("No NMS support found. Gift notifications will have basic text formatting only.");
+                getLogger().warning("Plugin should still be functional though.");
                 getLogger().warning("Check for updates at www.spigotmc.org/resources/advancedgift.46458/");
-                getLogger().warning("");
-                getLogger().warning("If this plugin still breaks, please contact TrekkieEnderman immediately.");
                 textTooltipEnabled = false;
             }
         } else {
