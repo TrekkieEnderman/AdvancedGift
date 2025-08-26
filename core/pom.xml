@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>advancedgift-core</artifactId>
-    <version>1.13</version>
+    <version>1.13.1-alpha</version>
     <build>
         <directory>../target</directory>
         <finalName>AdvancedGift-${project.version}</finalName>
@@ -71,13 +71,21 @@
             </resource>
         </resources>
     </build>
+
     <repositories>
         <repository>
             <id>lang-utils-repo</id>
             <url>https://raw.github.com/MascusJeoraly/LanguageUtils/mvn-repo/</url>
         </repository>
     </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.15.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.meowj</groupId>
             <artifactId>LangUtils</artifactId>
@@ -170,6 +178,36 @@
             <groupId>io.github.TrekkieEnderman</groupId>
             <artifactId>advancedgift-1_20_R3</artifactId>
             <version>1_20_R3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.TrekkieEnderman</groupId>
+            <artifactId>advancedgift-1_20_R4</artifactId>
+            <version>parent</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.TrekkieEnderman</groupId>
+            <artifactId>advancedgift-1_21_R1</artifactId>
+            <version>parent</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.TrekkieEnderman</groupId>
+            <artifactId>advancedgift-1_21_R2</artifactId>
+            <version>parent</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.TrekkieEnderman</groupId>
+            <artifactId>advancedgift-1_21_R3</artifactId>
+            <version>parent</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.TrekkieEnderman</groupId>
+            <artifactId>advancedgift-1_21_R4</artifactId>
+            <version>parent</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.TrekkieEnderman</groupId>
+            <artifactId>advancedgift-1_21_R5</artifactId>
+            <version>parent</version>
         </dependency>
         <dependency>
             <groupId>com.gitlab.blockstack</groupId>

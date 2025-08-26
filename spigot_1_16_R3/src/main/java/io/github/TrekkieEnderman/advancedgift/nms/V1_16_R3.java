@@ -17,14 +17,28 @@
 
 package io.github.TrekkieEnderman.advancedgift.nms;
 
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_16_R3.NBTTagCompound;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class V1_16_R3 implements NMSInterface {
-    public String convertItemToJson(ItemStack item) {
+    @Override
+    @NotNull public String getAsJsonString(ItemStack item) {
         net.minecraft.server.v1_16_R3.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(item);
         NBTTagCompound compound = new NBTTagCompound();
         return nmsItemStack.save(compound).toString();
+    }
+
+    @SuppressWarnings("deprecation") //itemMeta.getAsString() is not available in this version, can't use the new way
+    @Override
+    @NotNull public Optional<HoverEvent> getAsHoverEvent(ItemStack item) {
+        final HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM,
+                new TextComponent[]{new TextComponent(getAsJsonString(item))});
+        return Optional.of(event);
     }
 }

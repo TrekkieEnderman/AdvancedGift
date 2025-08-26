@@ -17,8 +17,24 @@
 
 package io.github.TrekkieEnderman.advancedgift.nms;
 
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public interface NMSInterface {
-    public String convertItemToJson(ItemStack item);
+    /**
+     * Converts the item to a JSON string representation
+     * @param item item stack to be converted
+     * @return a JSON string representing the item
+     */
+    @NotNull String getAsJsonString(ItemStack item);
+
+    /**
+     * Converts the item to a hover event representation
+     * @param item item stack to be converted
+     * @return a hover event representing the item
+     */
+    @NotNull Optional<HoverEvent> getAsHoverEvent(ItemStack item);
 }

@@ -383,14 +383,11 @@ public class CommandGift extends SimpleCommand {
         final TextComponent targetComponent = new TextComponent(TextComponent.fromLegacyText(targetNotification));
         final TextComponent spyComponent = new TextComponent(TextComponent.fromLegacyText(spyNotification));
 
-        if (plugin.isTextTooltipEnabled()) {
-            final BaseComponent[] hoverMessage = new ComponentBuilder(plugin.getNms().convertItemToJson(itemstack)).create();
-            final HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM, hoverMessage);
-
+        plugin.getNms().getAsHoverEvent(itemstack).ifPresent(event -> {
             senderComponent.setHoverEvent(event);
             targetComponent.setHoverEvent(event);
             spyComponent.setHoverEvent(event);
-        }
+        });
 
         sender.spigot().sendMessage(senderComponent);
         target.spigot().sendMessage(targetComponent);

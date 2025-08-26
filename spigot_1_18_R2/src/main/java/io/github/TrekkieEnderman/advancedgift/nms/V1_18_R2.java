@@ -17,15 +17,27 @@
 
 package io.github.TrekkieEnderman.advancedgift.nms;
 
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.nbt.CompoundTag;
 import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class V1_18_R2 implements NMSInterface {
     @Override
-    public String convertItemToJson(ItemStack item) {
+    @NotNull public String getAsJsonString(ItemStack item) {
         net.minecraft.world.item.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(item);
         CompoundTag compound = new CompoundTag();
         return nmsItemStack.save(compound).toString();
+    }
+
+    @Override
+    @NotNull public Optional<HoverEvent> getAsHoverEvent(ItemStack item) {
+        final HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_ITEM,
+                new TextComponent[]{new TextComponent(getAsJsonString(item))});
+        return Optional.of(event);
     }
 }

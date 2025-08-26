@@ -28,13 +28,16 @@ import io.github.TrekkieEnderman.advancedgift.nms.NMSInterface;
 import io.github.TrekkieEnderman.advancedgift.nms.Reflect;
 import io.github.TrekkieEnderman.advancedgift.locale.Translation;
 import lombok.Getter;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
@@ -56,6 +59,19 @@ public class AdvancedGift extends JavaPlugin {
     private final GiftCounter giftCounter = new GiftCounter();
     @Getter
     private PlayerDataManager playerDataManager;
+    private static final NMSInterface NO_TOOLTIPS = new NMSInterface() {
+        @NotNull
+        @Override
+        public String getAsJsonString(ItemStack item) {
+            return "{}";
+        }
+
+        @NotNull
+        @Override
+        public Optional<HoverEvent> getAsHoverEvent(ItemStack item) {
+            return Optional.empty();
+        }
+    };
 
     @Override
     public void onEnable() {
@@ -69,23 +85,8 @@ public class AdvancedGift extends JavaPlugin {
         if (getConfigFile().getBoolean("enable-tooltip")) {
             getLogger().info("NMS Version used: " + ServerVersion.getNMSVersion());
             getLogger().info("");
-            try {
-                final Class<?> classy = Class.forName("io.github.TrekkieEnderman.advancedgift.nms." + ServerVersion.getNMSVersion().toUpperCase());
-                if (NMSInterface.class.isAssignableFrom(classy)) {
-                    nms = (NMSInterface) classy.getConstructor().newInstance();
-                }
-            } catch (final Exception ignored) {
-                // Attempt to use the reflection class only if the server is 1.20.5 or newer.
-                if (ServerVersion.getMinorVersion() == 20 && ServerVersion.getRevisionVersion() >= 5 || ServerVersion.getMinorVersion() >= 21) {
-                    try {
-                        nms = new Reflect(ServerVersion.getNMSVersion());
-                    } catch (Throwable ex) {
-                        getLogger().log(Level.WARNING, "Couldn't set up reflection for hover over text tooltip", ex);
-                        nms = null;
-                    }
-                }
-            }
-            if (nms != null) {
+            nms = initNMS();
+            if (!nms.equals(NO_TOOLTIPS)) {
                 getLogger().info("This version is supported!");
                 textTooltipEnabled = true;
             } else {
@@ -125,6 +126,40 @@ public class AdvancedGift extends JavaPlugin {
         if (Bukkit.getPluginManager().getPlugin("ArtMap") != null) hasArtMap = true;
         startMetrics();
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+    }
+
+    private NMSInterface initNMS() {
+        // Likely Paper. Just use reflection in this case.
+        if (ServerVersion.getNMSVersion().equalsIgnoreCase("unknown")) {
+            return getReflection();
+        }
+
+        // Tries to set up a version-dependent NMS provider instead
+        try {
+            final Class<?> classy = Class.forName("io.github.TrekkieEnderman.advancedgift.nms." +
+                    ServerVersion.getNMSVersion().toUpperCase());
+            if (NMSInterface.class.isAssignableFrom(classy)) {
+                return (NMSInterface) classy.getConstructor().newInstance();
+            }
+        } catch (final Exception ignored) {}
+
+        // Attempts to use the reflection class only if the server is 1.21.6 or newer.
+        if ((ServerVersion.getMinorVersion() == 21 && ServerVersion.getRevisionVersion() >= 6)
+                || ServerVersion.getMinorVersion() > 21) {
+            return getReflection();
+        }
+
+        // No valid support available, return an empty interface.
+        return NO_TOOLTIPS;
+    }
+
+    private NMSInterface getReflection() {
+        try {
+            return new Reflect();
+        } catch (Throwable ex) {
+            getLogger().log(Level.WARNING, "Exception occurred while setting up NMS reflection: " + ex.getMessage());
+            return NO_TOOLTIPS;
+        }
     }
 
     private void loadFiles() {
