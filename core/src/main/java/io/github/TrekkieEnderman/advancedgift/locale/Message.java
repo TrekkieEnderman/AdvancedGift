@@ -17,7 +17,10 @@
 
 package io.github.TrekkieEnderman.advancedgift.locale;
 
+import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public enum Message {
     COMMAND_NO_PERMISSION("commandNoPermission"),
@@ -99,14 +102,47 @@ public enum Message {
     COMMAND_TRANSLATE_DESCRIPTION("translateCommandDescription"),
     COMMAND_TRANSLATE_USAGE("translateCommandUsage");
 
-
+    private static final Component NO_PREFIX = Component.text("");
+    private static Component prefix = NO_PREFIX;
     private final String key;
 
     Message(final @NotNull String key) {
         this.key = key;
     }
 
-    public String translate(Object... objects) {
+    public static void setPrefix(@Nullable String string) {
+        if (string == null || string.isBlank()) {
+            prefix = NO_PREFIX;
+            return;
+        }
+        prefix = ComponentUtils.fromLegacyText(string).appendSpace();
+    }
+
+    /**
+     * Gets a translation string without any chat formatting applied. Placeholder replacements will still be applied.
+     * This is typically used for combining multiple message parts together.
+     * @param objects placeholder replacements.
+     * @return translated message with placeholders replaced.
+     */
+    public String translateRaw(Object... objects) {
         return Translation.translate(Translation.getServerLocale(), key, objects);
+    }
+
+    /**
+     * Gets a translation component with all chat formatting and placeholder replacements applied.
+     * @param objects placeholder replacements.
+     * @return translated message.
+     */
+    public Component translate(Object... objects) {
+        return ComponentUtils.fromLegacyText(translateRaw(objects));
+    }
+
+    /**
+     * Does the same thing as {@link #translate(Object...)}, but appends the plugin prefix to the beginning of the message.
+     * @param objects placeholder replacements.
+     * @return translated message.
+     */
+    public Component translatePrefixed(Object... objects) {
+        return prefix.append(translate(objects));
     }
 }

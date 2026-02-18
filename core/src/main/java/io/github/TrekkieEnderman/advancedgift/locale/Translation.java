@@ -18,7 +18,6 @@
 package io.github.TrekkieEnderman.advancedgift.locale;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
-import io.github.TrekkieEnderman.advancedgift.util.ChatFormatUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -117,10 +116,9 @@ public class Translation {
         }
 
         if (objects == null || objects.length == 0) {
-            final String string = REMOVE_DOUBLE_QUOTE.matcher(instance.getString(locale, key)).replaceAll("'");
-            return ChatFormatUtils.format(string);
+            return REMOVE_DOUBLE_QUOTE.matcher(instance.getString(locale, key)).replaceAll("'");
         }
-        return ChatFormatUtils.format(instance.format(locale, key, objects));
+        return instance.format(locale, key, objects);
     }
 
     public static Locale parseLocale(String string) {

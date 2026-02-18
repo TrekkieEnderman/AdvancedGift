@@ -35,7 +35,7 @@ public class CommandGiftUnblock extends SimpleCommand {
 
     @Override
     public void showUsage(CommandSender sender) {
-        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_UNBLOCK_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_UNBLOCK_DESCRIPTION.translatePrefixed());
         sender.sendMessage(Message.COMMAND_UNBLOCK_USAGE.translate());
     }
 
@@ -52,9 +52,9 @@ public class CommandGiftUnblock extends SimpleCommand {
 
         if (plugin.getPlayerDataManager().containsUUID(senderUUID, "block", target.getUniqueId())) {
             plugin.getPlayerDataManager().removeUUID(senderUUID, "block", target.getUniqueId());
-            sender.sendMessage(plugin.getPrefix() + Message.UNBLOCK_OTHER.translate(target.getName()));
+            sender.sendMessage(Message.UNBLOCK_OTHER.translatePrefixed(target.getName()));
         } else {
-            sender.sendMessage(plugin.getPrefix() + Message.OTHER_UNBLOCKED_ALREADY.translate(target.getName()));
+            sender.sendMessage(Message.OTHER_UNBLOCKED_ALREADY.translatePrefixed(target.getName()));
         }
         return true;
     }

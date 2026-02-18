@@ -36,7 +36,7 @@ public class PlayerJoinListener implements Listener {
     public void onPlayerJoin(@NotNull final PlayerJoinEvent joinEvent) {
         Player player = joinEvent.getPlayer();
         if (player.isOp() && plugin.isConfigOutdated()) {
-            player.sendMessage(plugin.getPrefix() + Message.OUTDATED_CONFIG.translate());
+            player.sendMessage(Message.OUTDATED_CONFIG.translatePrefixed());
         }
     }
 }

@@ -40,7 +40,7 @@ public class CommandTranslate extends SimpleCommand {
 
     @Override
     public void showUsage(CommandSender sender) {
-        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_TRANSLATE_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_TRANSLATE_DESCRIPTION.translatePrefixed());
         sender.sendMessage(Message.COMMAND_TRANSLATE_USAGE.translate());
     }
 
@@ -62,15 +62,15 @@ public class CommandTranslate extends SimpleCommand {
         }
 
         if (targetLocale == null) {
-            sender.sendMessage(plugin.getPrefix() + Message.UNKNOWN_LOCALE.translate(args[0]));
+            sender.sendMessage(Message.UNKNOWN_LOCALE.translatePrefixed(args[0]));
             return false;
         }
 
         if (Translation.exportTranslation(targetLocale)) {
-            sender.sendMessage(plugin.getPrefix() + Message.TRANSLATION_CREATED.translate(targetLocale, translationsDirectory));
+            sender.sendMessage(Message.TRANSLATION_CREATED.translatePrefixed(targetLocale, translationsDirectory));
         } else {
-            sender.sendMessage(plugin.getPrefix() + Message.TRANSLATION_NOT_CREATED.translate(targetLocale, translationsDirectory));
-            if (sender instanceof Player) sender.sendMessage(plugin.getPrefix() + Message.CHECK_CONSOLE.translate());
+            sender.sendMessage(Message.TRANSLATION_NOT_CREATED.translatePrefixed(targetLocale, translationsDirectory));
+            if (sender instanceof Player) sender.sendMessage(Message.CHECK_CONSOLE.translatePrefixed());
         }
         return true;
     }

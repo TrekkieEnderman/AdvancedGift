@@ -33,7 +33,7 @@ public class CommandGiftToggle extends SimpleCommand {
 
     @Override
     public void showUsage(CommandSender sender) {
-        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_TOGGLE_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_TOGGLE_DESCRIPTION.translatePrefixed());
         sender.sendMessage(Message.COMMAND_TOGGLE_USAGE.translate());
     }
 
@@ -43,28 +43,28 @@ public class CommandGiftToggle extends SimpleCommand {
         if (args.length == 0) {
             if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
                 plugin.getPlayerDataManager().addUUID(senderUUID, "tg", null);
-                sender.sendMessage(plugin.getPrefix() + Message.TOGGLED_OFF.translate());
+                sender.sendMessage(Message.TOGGLED_OFF.translatePrefixed());
             } else {
                 plugin.getPlayerDataManager().removeUUID(senderUUID, "tg", null);
-                sender.sendMessage(plugin.getPrefix() + Message.TOGGLED_ON.translate());
+                sender.sendMessage(Message.TOGGLED_ON.translatePrefixed());
             }
         } else {
             if (args[0].equalsIgnoreCase("off") || args[0].equalsIgnoreCase("disable")) {
                 if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
                     plugin.getPlayerDataManager().addUUID(senderUUID, "tg", null);
-                    sender.sendMessage(plugin.getPrefix() + Message.TOGGLED_OFF.translate());
+                    sender.sendMessage(Message.TOGGLED_OFF.translatePrefixed());
                 } else {
-                    sender.sendMessage(plugin.getPrefix() + Message.ALREADY_TOGGLED_OFF.translate());
+                    sender.sendMessage(Message.ALREADY_TOGGLED_OFF.translatePrefixed());
                 }
             } else if (args[0].equalsIgnoreCase("on") || args [0].equalsIgnoreCase("enable")) {
                 if (plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
                     plugin.getPlayerDataManager().removeUUID(senderUUID, "tg", null);
-                    sender.sendMessage(plugin.getPrefix() + Message.TOGGLED_ON.translate());
+                    sender.sendMessage(Message.TOGGLED_ON.translatePrefixed());
                 } else {
-                    sender.sendMessage(plugin.getPrefix() + Message.ALREADY_TOGGLED_ON.translate());
+                    sender.sendMessage(Message.ALREADY_TOGGLED_ON.translatePrefixed());
                 }
             } else {
-                sender.sendMessage(plugin.getPrefix() + Message.ARGUMENT_NOT_RECOGNIZED.translate(args[0]));
+                sender.sendMessage(Message.ARGUMENT_NOT_RECOGNIZED.translatePrefixed(args[0]));
                 return false;
             }
         }

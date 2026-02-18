@@ -31,17 +31,17 @@ public class CommandReload extends SimpleCommand {
 
     @Override
     public void showUsage(CommandSender sender) {
-        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_RELOAD_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_RELOAD_DESCRIPTION.translatePrefixed());
         sender.sendMessage(Message.COMMAND_RELOAD_USAGE.translate());
     }
 
     @Override
     public boolean run(@NotNull final CommandSender sender, @NotNull final String label,  @NotNull final String[] args) {
         if (plugin.loadConfigFile()) {
-            sender.sendMessage(plugin.getPrefix() + Message.CONFIG_RELOADED.translate());
+            sender.sendMessage(Message.CONFIG_RELOADED.translatePrefixed());
         } else {
-            sender.sendMessage(plugin.getPrefix() + Message.CONFIG_NOT_RELOADED.translate());
-            if (sender instanceof Player) sender.sendMessage(plugin.getPrefix() + Message.CHECK_CONSOLE.translate());
+            sender.sendMessage(Message.CONFIG_NOT_RELOADED.translatePrefixed());
+            if (sender instanceof Player) sender.sendMessage(Message.CHECK_CONSOLE.translatePrefixed());
         }
         return true;
     }

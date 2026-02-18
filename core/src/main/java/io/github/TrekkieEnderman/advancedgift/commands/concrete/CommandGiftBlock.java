@@ -36,11 +36,10 @@ public class CommandGiftBlock extends SimpleCommand {
 
     @Override
     protected void showUsage(CommandSender sender) {
-        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_BLOCK_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_BLOCK_DESCRIPTION.translatePrefixed());
         sender.sendMessage(Message.COMMAND_BLOCK_USAGE.translate());
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected boolean run(@NotNull final Player sender, @NotNull final String label, @NotNull final String[] args) {
         if (args.length == 0) {
@@ -51,11 +50,11 @@ public class CommandGiftBlock extends SimpleCommand {
         final OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(args[0]);
 
         if (targetPlayer.equals(sender)) {
-            sender.sendMessage(plugin.getPrefix() + Message.BLOCK_SELF.translate());
+            sender.sendMessage(Message.BLOCK_SELF.translatePrefixed());
             return false;
         }
         if (!targetPlayer.hasPlayedBefore()) {
-            sender.sendMessage(plugin.getPrefix() + Message.PLAYER_NOT_FOUND.translate(args[0]));
+            sender.sendMessage(Message.PLAYER_NOT_FOUND.translatePrefixed(args[0]));
             return false;
         }
 
@@ -65,9 +64,9 @@ public class CommandGiftBlock extends SimpleCommand {
 
         if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "block", targetUUID)) {
             plugin.getPlayerDataManager().addUUID(senderUUID, "block", targetUUID);
-            sender.sendMessage(plugin.getPrefix() + Message.BLOCK_OTHER.translate(targetName));
+            sender.sendMessage(Message.BLOCK_OTHER.translatePrefixed(targetName));
         } else {
-            sender.sendMessage(plugin.getPrefix() + Message.OTHER_BLOCKED_ALREADY.translate(targetName));
+            sender.sendMessage(Message.OTHER_BLOCKED_ALREADY.translatePrefixed(targetName));
         }
         return true;
     }

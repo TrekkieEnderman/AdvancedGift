@@ -27,7 +27,11 @@ import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.locale.Translation;
 import me.Fupery.ArtMap.ArtMap;
 import me.Fupery.ArtMap.Painting.ArtistHandler;
-import net.md_5.bungee.api.chat.*;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentBuilder;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
@@ -40,8 +44,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
-
-import net.md_5.bungee.api.ChatColor;
 
 import com.meowj.langutils.lang.LanguageHelper;
 import org.jetbrains.annotations.NotNull;
@@ -56,7 +58,7 @@ public class CommandGift extends SimpleCommand {
 
     @Override
     protected void showUsage(CommandSender sender) {
-        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_GIFT_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_GIFT_DESCRIPTION.translatePrefixed());
         sender.sendMessage(Message.COMMAND_GIFT_USAGE.translate()); // TODO any good way to hide the last argument if messages are disabled?
     }
 
@@ -78,7 +80,7 @@ public class CommandGift extends SimpleCommand {
         }
 
         if (matchList.size() == 1 && matchList.get(0).equals(sender)) {
-            sender.sendMessage(plugin.getPrefix() + Message.SEND_GIFT_SELF.translate());
+            sender.sendMessage(Message.SEND_GIFT_SELF.translatePrefixed());
             return false;
         }
 
@@ -86,32 +88,28 @@ public class CommandGift extends SimpleCommand {
         if (matchList.size() == 1) {
             target = matchList.get(0);
         } else if (matchList.size() > 1) {
-            sender.sendMessage(plugin.getPrefix() + Message.MULTIPLE_TARGET_FOUND.translate());
-            final ComponentBuilder builder = new ComponentBuilder("");
+            sender.sendMessage(Message.MULTIPLE_TARGET_FOUND.translatePrefixed());
+            final ComponentBuilder<TextComponent, TextComponent.Builder> builder = Component.text();
 
-            final HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(Message.TIP_CLICK_TO_SEND_GIFT.translate()).create());
+            HoverEvent<Component> hoverEvent = Message.TIP_CLICK_TO_SEND_GIFT.translate().asHoverEvent();
             final String[] argsClone = args.clone(); //we want to reuse the exact command the player used, and just change the target name
+            boolean first = true;
             for (Player player : matchList) {
-                TextComponent textComponent = new TextComponent(TextComponent.fromLegacyText(player.getDisplayName()));
-
                 argsClone[0] = player.getName(); //replace the original 1st argument with new name
                 final String commandString = "/gift " + String.join(" ", argsClone);
-                ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, commandString);
+                ClickEvent clickEvent = net.kyori.adventure.text.event.ClickEvent.suggestCommand(commandString);
+                Component entry = player.displayName().hoverEvent(hoverEvent).clickEvent(clickEvent);
 
-                if (builder.getCursor() != 0) builder.append(" ", ComponentBuilder.FormatRetention.NONE);
-                if (ServerVersion.getMinorVersion() < 12) {
-                    builder.append(textComponent.toLegacyText());
-                } else {
-                    builder.append(textComponent);
-                }
-                builder.event(hoverEvent).event(clickEvent);
+                if (!first) builder.appendSpace();
+                first = false;
+                builder.append(entry);
             }
-            sender.spigot().sendMessage(builder.create());
+            sender.sendMessage(builder);
             return true;
         }
 
         if (target == null) {
-            sender.sendMessage(plugin.getPrefix() + Message.TARGET_NOT_ONLINE.translate(args[0]));
+            sender.sendMessage(Message.TARGET_NOT_ONLINE.translatePrefixed(args[0]));
             return false;
         }
 
@@ -119,7 +117,7 @@ public class CommandGift extends SimpleCommand {
         @SuppressWarnings("deprecation")
         final ItemStack giftItem = (ServerVersion.getMinorVersion() < 9 ? senderInventory.getItemInHand() : senderInventory.getItemInMainHand()).clone();
         if (giftItem.getType() == Material.AIR) {
-            sender.sendMessage(plugin.getPrefix() + Message.GIFT_EMPTY.translate());
+            sender.sendMessage(Message.GIFT_EMPTY.translatePrefixed());
             return false;
         }
 
@@ -134,11 +132,11 @@ public class CommandGift extends SimpleCommand {
 
         // Validate gift amount
         if (giftAmount < 1) {
-            sender.sendMessage(plugin.getPrefix() + Message.INVALID_GIFT_AMOUNT.translate());
+            sender.sendMessage(Message.INVALID_GIFT_AMOUNT.translatePrefixed());
             return false;
         }
         if (!senderInventory.containsAtLeast(giftItem, giftAmount)) {
-            sender.sendMessage(plugin.getPrefix() + Message.INSUFFICIENT_GIFT_AMOUNT.translate());
+            sender.sendMessage(Message.INSUFFICIENT_GIFT_AMOUNT.translatePrefixed());
             logGiftDenied(sender.getName(), sender.getName() + " doesn't have the amount specified.");
             return false;
         }
@@ -148,7 +146,7 @@ public class CommandGift extends SimpleCommand {
             return true;
         }
         if (!sender.hasPermission("advancedgift.gift.message")) {
-            sender.sendMessage(plugin.getPrefix() + Message.MESSAGE_REMOVED_NO_PERMISSION.translate());
+            sender.sendMessage(Message.MESSAGE_REMOVED_NO_PERMISSION.translatePrefixed());
             logGiftWarning("Removed " + sender.getName() + "'s gift message; 'advancedgift.gift.message' is required to send messages");
             sendItem(sender, target, giftItem, giftAmount, null);
             return true;
@@ -209,23 +207,23 @@ public class CommandGift extends SimpleCommand {
             final int senderWorldGroup = plugin.getPlayerWorldGroup(sender);
             final int targetWorldGroup = plugin.getPlayerWorldGroup(target);
             if (senderWorldGroup == -1 && !(sender.hasPermission("advancedgift.bypass.world.blacklist"))) {
-                sender.sendMessage(plugin.getPrefix() + Message.SENDER_IN_BLACKLISTED_WORLD.translate());
+                sender.sendMessage(Message.SENDER_IN_BLACKLISTED_WORLD.translatePrefixed());
                 logGiftDenied(senderName, senderName + " is in " + sender.getWorld().getName() + ", a blacklisted world.");
                 return false;
             }
             if (targetWorldGroup == -1 && !(sender.hasPermission("advancedgift.bypass.world.blacklist"))) {
-                sender.sendMessage(plugin.getPrefix() + Message.TARGET_IN_BLACKLISTED_WORLD.translate(targetName));
+                sender.sendMessage(Message.TARGET_IN_BLACKLISTED_WORLD.translatePrefixed(targetName));
                 logGiftDenied(senderName, "Target " + targetName + " is in " + target.getWorld().getName() + ", a blacklisted world.");
                 return false;
             }
             if (senderWorldGroup != (targetWorldGroup) && !(sender.hasPermission("advancedgift.bypass.world.restriction"))) {
-                sender.sendMessage(plugin.getPrefix() + Message.INTERWORLD_GIFT_PROHIBITED.translate(targetName));
+                sender.sendMessage(Message.INTERWORLD_GIFT_PROHIBITED.translatePrefixed(targetName));
                 logGiftDenied(senderName, senderName + " and " + targetName + " are not in the same group of worlds.");
                 return false;
             }
         }
         if (!(target.hasPermission("advancedgift.gift.receive"))) {
-            sender.sendMessage(plugin.getPrefix() + Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translate(targetName));
+            sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed(targetName));
             logGiftDenied(senderName, "permission 'advancedgift.gift.receive' is required to receive gifts.");
             return false;
         }
@@ -235,11 +233,11 @@ public class CommandGift extends SimpleCommand {
             if (artMap.getConfiguration().FORCE_ART_KIT) {
                 ArtistHandler artistHandler = artMap.getArtistHandler();
                 if (artistHandler.containsPlayer(sender)) {
-                    sender.sendMessage(plugin.getPrefix() + Message.GIFT_DENIED_GENERIC.translate());
+                    sender.sendMessage(Message.GIFT_DENIED_GENERIC.translatePrefixed());
                     logGiftDenied(senderName, "ArtMap has force-artkit enabled and " + senderName + "is currently making an artmap.");
                     return false;
                 } else if (artistHandler.containsPlayer(target)) {
-                    sender.sendMessage(plugin.getPrefix() + Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translate(targetName));
+                    sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed(targetName));
                     logGiftDenied(senderName, "ArtMap has force-artkit enabled and " + targetName + "is currently making an artmap.");
                     return false;
                 }
@@ -247,18 +245,18 @@ public class CommandGift extends SimpleCommand {
             }
         }
         if (plugin.getPlayerDataManager().containsUUID(targetUUID, "tg", null)) {
-            sender.sendMessage(plugin.getPrefix() + Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translate(targetName));
+            sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
             logGiftDenied(senderName, targetName + " doesn't currently accept gifts.");
             return false;
         }
         if (plugin.getPlayerDataManager().containsUUID(targetUUID, "block", senderUUID)) {
-            sender.sendMessage(plugin.getPrefix() + Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translate(targetName));
+            sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
             logGiftDenied(senderName, targetName + " has " + senderName + " blocked.");
             return false;
         }
         int timeRemaining;
         if ((timeRemaining = getPlayerCooldownTime(sender)) > 0) {
-            sender.sendMessage(plugin.getPrefix() + Message.GIFT_COOLDOWN_NOT_OVER.translate(timeRemaining));
+            sender.sendMessage(Message.GIFT_COOLDOWN_NOT_OVER.translatePrefixed(timeRemaining));
             logGiftDenied(senderName, senderName + "is still on a /gift cooldown.");
             return false;
         }
@@ -271,8 +269,8 @@ public class CommandGift extends SimpleCommand {
                 }
             }
             if (space == 0) {
-                sender.sendMessage(plugin.getPrefix() + Message.TARGET_INVENTORY_FULL.translate(targetName));
-                target.sendMessage(plugin.getPrefix() + Message.YOUR_INVENTORY_FULL.translate(senderName));
+                sender.sendMessage(Message.TARGET_INVENTORY_FULL.translatePrefixed(targetName));
+                target.sendMessage(Message.YOUR_INVENTORY_FULL.translatePrefixed(senderName));
                 logGiftDenied(senderName, targetName + "'s inventory is full.");
                 return false;
             }
@@ -336,8 +334,8 @@ public class CommandGift extends SimpleCommand {
         senderInventory.removeItem(giftItem);
         final HashMap<Integer, ItemStack> excess = targetInventory.addItem(giftItem);
         if (!excess.isEmpty()) {
-            sender.sendMessage(plugin.getPrefix() + Message.TARGET_INVENTORY_ALMOST_FULL.translate(target.getName()));
-            target.sendMessage(plugin.getPrefix() + Message.YOUR_INVENTORY_ALMOST_FULL.translate(sender.getName()));
+            sender.sendMessage(Message.TARGET_INVENTORY_ALMOST_FULL.translatePrefixed(target.getName()));
+            target.sendMessage(Message.YOUR_INVENTORY_ALMOST_FULL.translatePrefixed(sender.getName()));
             logGiftWarning("Sent only a part of " + sender.getName() + "'s gift: " + target.getName() + "'s inventory was nearly full.");
             for (ItemStack extra : excess.values()) {
                 giftAmount -= extra.getAmount();
@@ -362,35 +360,26 @@ public class CommandGift extends SimpleCommand {
 
         //add prefix
         if (hasItemMeta && meta.hasEnchants()) {
-            itemDetails = Message.ENCHANTED_ITEM.translate(itemDetails);
+            itemDetails = Message.ENCHANTED_ITEM.translateRaw(itemDetails);
         }
         if (isPatternedBanner(itemstack)) {
-            itemDetails = Message.PATTERNED_ITEM.translate(itemDetails);
+            itemDetails = Message.PATTERNED_ITEM.translateRaw(itemDetails);
         }
 
         //add suffix
         if (hasItemMeta && meta.hasDisplayName()) {
-            itemDetails = Message.NAMED_ITEM.translate(itemDetails, meta.getDisplayName());
+            itemDetails = Message.NAMED_ITEM.translateRaw(itemDetails, meta.getDisplayName());
         }
 
         final String senderName = sender.getName();
         final String targetName = target.getName();
 
-        final String senderNotification = plugin.getPrefix() + Message.GIFT_SENT.translate(targetName, giftAmount, itemDetails);
-        final String targetNotification = plugin.getPrefix() + Message.GIFT_RECEIVED.translate(senderName, giftAmount, itemDetails);
-        final String spyNotification = plugin.getPrefix() + Message.GIFT_LOGGED.translate(senderName, targetName, giftAmount, itemDetails);
-        final TextComponent senderComponent = new TextComponent(TextComponent.fromLegacyText(senderNotification));
-        final TextComponent targetComponent = new TextComponent(TextComponent.fromLegacyText(targetNotification));
-        final TextComponent spyComponent = new TextComponent(TextComponent.fromLegacyText(spyNotification));
+        final Component senderComp = Message.GIFT_SENT.translatePrefixed(targetName, giftAmount, itemDetails).hoverEvent(itemstack.asHoverEvent());
+        final Component targetComp = Message.GIFT_RECEIVED.translatePrefixed(senderName, giftAmount, itemDetails).hoverEvent(itemstack.asHoverEvent());
+        final Component spyComp = Message.GIFT_LOGGED.translatePrefixed(senderName, targetName, giftAmount, itemDetails).hoverEvent(itemstack.asHoverEvent());
 
-        plugin.getNms().getAsHoverEvent(itemstack).ifPresent(event -> {
-            senderComponent.setHoverEvent(event);
-            targetComponent.setHoverEvent(event);
-            spyComponent.setHoverEvent(event);
-        });
-
-        sender.spigot().sendMessage(senderComponent);
-        target.spigot().sendMessage(targetComponent);
+        sender.sendMessage(senderComp);
+        target.sendMessage(targetComp);
         if (!message.isEmpty()) {
             sender.sendMessage(Message.MESSAGE_SENT.translate(message));
             target.sendMessage(Message.MESSAGE_RECEIVED.translate(message));
@@ -399,7 +388,7 @@ public class CommandGift extends SimpleCommand {
         for (final Player player : Bukkit.getOnlinePlayers()) {
             if (player == sender || player == target) continue;
             if (plugin.getPlayerDataManager().containsUUID(player.getUniqueId(), "spy", null)) {
-                player.spigot().sendMessage(spyComponent);
+                player.sendMessage(spyComp);
                 if (!message.isEmpty()) player.sendMessage(Message.MESSAGE_LOGGED.translate(senderName, message));
             }
         }
@@ -423,7 +412,7 @@ public class CommandGift extends SimpleCommand {
 
     @SuppressWarnings("deprecation")
     private void logGiftSent(final String message, final String senderName, final String targetName, final ItemStack itemstack, final String itemDetails) {
-        logMessage(senderName + " gave " + targetName + " " + ChatColor.stripColor(itemDetails) + ".");
+        logMessage(senderName + " gave " + targetName + " " + itemDetails + ".");
         if (itemstack.hasItemMeta()) {
             final ItemMeta itemmeta = itemstack.getItemMeta();
             if (itemmeta.hasEnchants() || itemmeta.hasLore() || (ServerVersion.getMinorVersion() >= 11 && itemmeta.isUnbreakable())) {

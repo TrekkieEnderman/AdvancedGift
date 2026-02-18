@@ -48,7 +48,7 @@ public abstract class SimpleCommand implements CommandExecutor {
     }
 
     protected boolean run(@NotNull final ConsoleCommandSender sender, @NotNull final String commandLabel, @NotNull final String[] args) {
-        sender.sendMessage(Message.COMMAND_FOR_PLAYER_ONLY.translate());
+        sender.sendMessage(Message.COMMAND_FOR_PLAYER_ONLY.translatePrefixed());
         return true;
     }
 
@@ -63,7 +63,7 @@ public abstract class SimpleCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!isAuthorized(sender)) {
-            sender.sendMessage(Message.COMMAND_NO_PERMISSION.translate());
+            sender.sendMessage(Message.COMMAND_NO_PERMISSION.translatePrefixed());
             return true;
         }
 
@@ -78,7 +78,7 @@ public abstract class SimpleCommand implements CommandExecutor {
         }
 
         if (!run(sender, label, args)) {
-            sender.sendMessage(Message.COMMAND_USAGE_TIP.translate(name));
+            sender.sendMessage(Message.COMMAND_USAGE_TIP.translatePrefixed(name));
         }
         return true;
     }

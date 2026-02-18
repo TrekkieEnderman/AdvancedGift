@@ -33,7 +33,7 @@ public class CommandSpy extends SimpleCommand {
 
     @Override
     public void showUsage(CommandSender sender) {
-        sender.sendMessage(plugin.getPrefix() + Message.COMMAND_SPY_DESCRIPTION.translate());
+        sender.sendMessage(Message.COMMAND_SPY_DESCRIPTION.translatePrefixed());
         sender.sendMessage(Message.COMMAND_SPY_USAGE.translate());
     }
 
@@ -45,9 +45,9 @@ public class CommandSpy extends SimpleCommand {
             final boolean spy = !plugin.getPlayerDataManager().containsUUID(uuid, "spy", null);
             setSpy(uuid, spy);
             if (spy) {
-                sender.sendMessage(plugin.getPrefix() + Message.SPY_ENABLED.translate());
+                sender.sendMessage(Message.SPY_ENABLED.translatePrefixed());
             } else {
-                sender.sendMessage(plugin.getPrefix() + Message.SPY_DISABLED.translate());
+                sender.sendMessage(Message.SPY_DISABLED.translatePrefixed());
             }
             return true;
         }
@@ -55,22 +55,22 @@ public class CommandSpy extends SimpleCommand {
         final String arg = args[0];
         if (arg.equalsIgnoreCase("true") || arg.equalsIgnoreCase("on") || arg.equalsIgnoreCase("enable")) {
             if (setSpy(uuid, true)) {
-                sender.sendMessage(plugin.getPrefix() + Message.SPY_ENABLED.translate());
+                sender.sendMessage(Message.SPY_ENABLED.translatePrefixed());
             } else {
-                sender.sendMessage(plugin.getPrefix() + Message.SPY_ALREADY_ENABLED.translate());
+                sender.sendMessage(Message.SPY_ALREADY_ENABLED.translatePrefixed());
             }
             return true;
         }
         if (arg.equalsIgnoreCase("false") || arg.equalsIgnoreCase("off") || arg.equalsIgnoreCase("disable")) {
             if (setSpy(uuid, false)) {
-                sender.sendMessage(plugin.getPrefix() + Message.SPY_DISABLED.translate());
+                sender.sendMessage(Message.SPY_DISABLED.translatePrefixed());
             } else {
-                sender.sendMessage(plugin.getPrefix() + Message.SPY_ALREADY_DISABLED.translate());
+                sender.sendMessage(Message.SPY_ALREADY_DISABLED.translatePrefixed());
             }
             return true;
         }
 
-        sender.sendMessage(plugin.getPrefix() + Message.ARGUMENT_NOT_RECOGNIZED.translate(args[0]));
+        sender.sendMessage(Message.ARGUMENT_NOT_RECOGNIZED.translatePrefixed(args[0]));
         return false;
     }
 
