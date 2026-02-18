@@ -56,13 +56,14 @@ public class AdvancedGift extends JavaPlugin {
         this.getCommand("agreload").setExecutor(new CommandReload(this));
         this.getCommand("giftspy").setExecutor(new CommandSpy(this));
         this.getCommand("agtranslate").setExecutor(new CommandTranslate(this));
-        if (Bukkit.getPluginManager().getPlugin("ArtMap") != null) hasArtMap = true;
+        hasArtMap = Bukkit.getPluginManager().isPluginEnabled("ArtMap");
         startMetrics();
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
     }
 
     private void loadFiles() {
         if(!getDataFolder().exists()) {
+            //noinspection ResultOfMethodCallIgnored
             getDataFolder().mkdirs();
         }
         Translation.init(this);

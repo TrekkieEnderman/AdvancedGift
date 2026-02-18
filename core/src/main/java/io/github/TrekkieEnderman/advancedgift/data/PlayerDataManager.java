@@ -36,7 +36,8 @@ public abstract class PlayerDataManager {
 
     protected final AdvancedGift plugin;
     protected final File playerInfoFile;
-    protected Set<UUID> togglePlayers = new HashSet<>(), spyPlayers = new HashSet<>();
+    protected Set<UUID> togglePlayers = new HashSet<>();
+    protected Set<UUID> spyPlayers = new HashSet<>();
     protected Map<UUID, Set<UUID>> blockPlayers = new HashMap<>();
 
     public PlayerDataManager(final AdvancedGift plugin) {
@@ -78,6 +79,7 @@ public abstract class PlayerDataManager {
                 try {
                     savePlayerInfo();
                     plugin.getLogger().info("Done. Removing the old file as it's no longer needed.");
+                    //noinspection ResultOfMethodCallIgnored
                     oldBlockFile.delete();
                 } catch (IOException e) {
                     plugin.getLogger().log(Level.SEVERE, "Unable to write to " + playerInfoFile.getName() + ". The old file will remain for a retry next time.", e);
@@ -99,7 +101,7 @@ public abstract class PlayerDataManager {
     }
 
     private void createPlayerInfo() {
-        try (PrintWriter pw = new PrintWriter(playerInfoFile, StandardCharsets.UTF_8.name())) {
+        try (PrintWriter pw = new PrintWriter(playerInfoFile, StandardCharsets.UTF_8)) {
             pw.print("{");
             pw.print("}");
         } catch (IOException ignored) {
@@ -162,7 +164,7 @@ public abstract class PlayerDataManager {
                 break;
             case "block":
                 blockPlayers.get(playerUUID).remove(secondUUID);
-                if (blockPlayers.get(playerUUID).isEmpty()) blockPlayers.keySet().remove(playerUUID);
+                if (blockPlayers.get(playerUUID).isEmpty()) blockPlayers.remove(playerUUID);
                 break;
         }
     }
@@ -173,7 +175,7 @@ public abstract class PlayerDataManager {
 
     public boolean clearBlockList(final UUID playerUUID) {
         if (blockPlayers.containsKey(playerUUID)) {
-            blockPlayers.keySet().remove(playerUUID);
+            blockPlayers.remove(playerUUID);
             return true;
         }
         return false;

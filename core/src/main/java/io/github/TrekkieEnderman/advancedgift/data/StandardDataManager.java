@@ -48,7 +48,7 @@ public class StandardDataManager extends PlayerDataManager {
         // Still using try/catch so the BufferReader will still get closed regardless of whether the attempt succeeds or not
         try (BufferedReader buffer = Files.newBufferedReader(playerInfoFile.toPath())) {
             //Check what happens if a list being loaded is empty (aka is null). May need to use isJsonNull() before loading it.
-            JsonObject object = new JsonParser().parse(new JsonReader(buffer)).getAsJsonObject();
+            JsonObject object = JsonParser.parseReader(new JsonReader(buffer)).getAsJsonObject();
             String name;
             if (object.has(name = "ToggleList")) togglePlayers = gson.fromJson(object.get(name), uuidSetType);
             if (object.has(name = "SpyList")) spyPlayers = gson.fromJson(object.get(name), uuidSetType);
@@ -78,7 +78,9 @@ public class StandardDataManager extends PlayerDataManager {
         }
     }
 
-    //Converts a set of UUIDs to/from json
+    /**
+     * Converts a set of UUIDs to/from json.
+     */
     static class uuidSetJsonAdapter implements JsonSerializer<Set<UUID>>, JsonDeserializer<Set<UUID>> {
         @Override
         public Set<UUID> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {

@@ -105,6 +105,7 @@
             <version>3.0.0</version>
             <scope>compile</scope>
         </dependency>
+        <!-- ArtMap has to be compiled locally -->
         <dependency>
             <groupId>com.gitlab.blockstack</groupId>
             <artifactId>ArtMap</artifactId>

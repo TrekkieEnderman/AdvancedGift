@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
-import io.github.TrekkieEnderman.advancedgift.locale.Translation;
 import me.Fupery.ArtMap.ArtMap;
 import me.Fupery.ArtMap.Painting.ArtistHandler;
 import net.kyori.adventure.text.Component;
@@ -31,8 +30,8 @@ import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -44,7 +43,6 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 
-import com.meowj.langutils.lang.LanguageHelper;
 import org.jetbrains.annotations.NotNull;
 
 public class CommandGift extends SimpleCommand {
@@ -78,14 +76,14 @@ public class CommandGift extends SimpleCommand {
                     .collect(Collectors.toList());
         }
 
-        if (matchList.size() == 1 && matchList.get(0).equals(sender)) {
+        if (matchList.size() == 1 && matchList.getFirst().equals(sender)) {
             sender.sendMessage(Message.SEND_GIFT_SELF.translatePrefixed());
             return false;
         }
 
         matchList = matchList.stream().filter(player -> !player.equals(sender)).collect(Collectors.toList());
         if (matchList.size() == 1) {
-            target = matchList.get(0);
+            target = matchList.getFirst();
         } else if (matchList.size() > 1) {
             sender.sendMessage(Message.MULTIPLE_TARGET_FOUND.translatePrefixed());
             final ComponentBuilder<TextComponent, TextComponent.Builder> builder = Component.text();
@@ -156,7 +154,7 @@ public class CommandGift extends SimpleCommand {
 
         // Validate message
         if (!Arrays.equals(originalMessage, giftMessage)) {
-            final String sendCensoredMessage = plugin.getConfigFile().getString("send-censored-message");
+            final String sendCensoredMessage = plugin.getConfigFile().getString("send-censored-message", "block");
             if (sendCensoredMessage.equalsIgnoreCase("with")) {
                 logGiftWarning("Censored the blocked words in " + sender.getName() + "'s gift message.");
             } else if (sendCensoredMessage.equalsIgnoreCase("without")) {
@@ -173,9 +171,9 @@ public class CommandGift extends SimpleCommand {
         return true;
     }
 
-    private int getTotalAmountHas(final PlayerInventory senderInventory, final ItemStack itemstack) {
+    @SuppressWarnings("DataFlowIssue") // Item couldn't be null if #isSimilar() passes.
+    private int getTotalAmountHas(final PlayerInventory senderInventory, final @NotNull ItemStack itemstack) {
         int hasAmount = 0;
-        //getContents also returns offhand and armor slots, which we want to avoid if possible
         for (ItemStack item : senderInventory.getStorageContents()) {
             if (itemstack.isSimilar(item)) {
                 hasAmount += item.getAmount();
@@ -228,7 +226,6 @@ public class CommandGift extends SimpleCommand {
         }
         if (plugin.hasArtMap()) {
             final ArtMap artMap = ArtMap.instance();
-            /* ArtMap has to be compiled and added locally for the IDE to refer to. */
             if (artMap.getConfiguration().FORCE_ART_KIT) {
                 ArtistHandler artistHandler = artMap.getArtistHandler();
                 if (artistHandler.containsPlayer(sender)) {
@@ -261,9 +258,9 @@ public class CommandGift extends SimpleCommand {
         }
         if (targetInventory.firstEmpty() == -1) {
             int space = 0;
-            //getContents also returns offhand and armor slots, which we want to avoid if possible
             for (ItemStack item: targetInventory.getStorageContents()) {
                 if (itemstack.isSimilar(item)) {
+                    //noinspection DataFlowIssue Item couldn't be null if #isSimilar() passes.
                     space = item.getMaxStackSize() - item.getAmount();
                     if (space > 0) break;
                 }
@@ -393,9 +390,8 @@ public class CommandGift extends SimpleCommand {
 
     private boolean isPatternedBanner(final ItemStack itemstack) {
         if (itemstack.getType().toString().toUpperCase().contains("BANNER")) {
-            if (itemstack.getItemMeta() instanceof BannerMeta) {
-                BannerMeta meta = (BannerMeta)itemstack.getItemMeta();
-                return (meta.numberOfPatterns() > 0);
+            if (itemstack.getItemMeta() instanceof BannerMeta meta) {
+                return meta.numberOfPatterns() > 0;
             }
         }
         return false;

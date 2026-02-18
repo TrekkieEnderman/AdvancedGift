@@ -38,7 +38,7 @@ hence the way this class is structured. */
 public class Translation {
     private static Translation instance;
     public static final Locale DEFAULT_LOCALE = Locale.US;
-    public static final Locale SILLY_LOCALE = new Locale("sas", "SY");
+    public static final Locale SILLY_LOCALE = Locale.of("sas", "SY");
     private static final Pattern REMOVE_DOUBLE_QUOTE = Pattern.compile("''");
     public static final String TRANSLATIONS_DIRECTORY_NAME = "translations";
     public static final String BASE_BUNDLE_NAME = TRANSLATIONS_DIRECTORY_NAME + ".messages";
@@ -124,11 +124,11 @@ public class Translation {
         }
         final String[] parts = string.split("[_.-]");
         if (parts.length == 1) {
-            return new Locale(parts[0]);
+            return Locale.of(parts[0]);
         } else if (parts.length == 2) {
-            return new Locale(parts[0], parts[1]);
+            return Locale.of(parts[0], parts[1]);
         } else if (parts.length == 3) {
-            return new Locale(parts[0], parts[1], parts[2]);
+            return Locale.of(parts[0], parts[1], parts[2]);
         }
         return null;
     }
@@ -224,6 +224,7 @@ public class Translation {
         FileBundleClassLoader(AdvancedGift plugin, ClassLoader classLoader) {
             super(classLoader);
             this.pluginDataFolder = plugin.getDataFolder();
+            //noinspection ResultOfMethodCallIgnored
             new File(pluginDataFolder, TRANSLATIONS_DIRECTORY_NAME).mkdirs();
         }
 
