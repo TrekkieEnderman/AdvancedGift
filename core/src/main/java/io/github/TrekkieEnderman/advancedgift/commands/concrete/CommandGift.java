@@ -1,24 +1,21 @@
 /*
- * Copyright (c) 2025 TrekkieEnderman
+ * Copyright (c) 2025-2026 TrekkieEnderman
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package io.github.TrekkieEnderman.advancedgift.commands.concrete;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
@@ -30,8 +27,8 @@ import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -42,8 +39,10 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
-
 import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CommandGift extends SimpleCommand {
     private final static char[] SPACE_DELIMITER = new char[]{' '};
