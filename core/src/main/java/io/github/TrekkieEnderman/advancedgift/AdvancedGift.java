@@ -18,7 +18,6 @@
 package io.github.TrekkieEnderman.advancedgift;
 
 import io.github.TrekkieEnderman.advancedgift.commands.concrete.*;
-import io.github.TrekkieEnderman.advancedgift.data.LegacyDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.StandardDataManager;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
@@ -40,8 +39,6 @@ import java.util.*;
 public class AdvancedGift extends JavaPlugin {
     private final File configFile = new File(getDataFolder(),"config.yml");
     private final HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
-    @Getter
-    private String extLib;
     private boolean hasArtMap = false;
     @Getter
     private final GiftCounter giftCounter = new GiftCounter();
@@ -50,21 +47,7 @@ public class AdvancedGift extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        ServerVersion.init();
-        getLogger().info("===================================================");
-        getLogger().info("Loading files  --------------------");
         loadFiles();
-        getLogger().info("");
-
-        getLogger().info("Searching for a material library  -----------------");
-        if (Bukkit.getPluginManager().getPlugin("LangUtils") != null) {
-            getLogger().info("Language Utils found. This library will be used.");
-            extLib = "LangUtils";
-        } else {
-            getLogger().info("No supported material library found.");
-            getLogger().info("Spigot's material enum will be used instead. Material names won't be translated.");
-            extLib = "none"; //If you're wondering why this isn't left null instead, I don't know!
-        }
         this.getCommand("gift").setExecutor(new CommandGift(this));
         this.getCommand("togglegift").setExecutor(new CommandGiftToggle(this));
         this.getCommand("giftblock").setExecutor(new CommandGiftBlock(this));
@@ -73,7 +56,6 @@ public class AdvancedGift extends JavaPlugin {
         this.getCommand("agreload").setExecutor(new CommandReload(this));
         this.getCommand("giftspy").setExecutor(new CommandSpy(this));
         this.getCommand("agtranslate").setExecutor(new CommandTranslate(this));
-        getLogger().info("===================================================");
         if (Bukkit.getPluginManager().getPlugin("ArtMap") != null) hasArtMap = true;
         startMetrics();
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
@@ -88,13 +70,7 @@ public class AdvancedGift extends JavaPlugin {
         if (isConfigOutdated()) {
             getLogger().warning(ComponentUtils.toPlainText(Message.OUTDATED_CONFIG.translate()));
         }
-
-        if (ServerVersion.getMinorVersion() > 11) {
-            playerDataManager = new StandardDataManager(this);
-        } else {
-            playerDataManager = new LegacyDataManager(this);
-        }
-
+        playerDataManager = new StandardDataManager(this);
         this.getPlayerDataManager().load();
     }
 

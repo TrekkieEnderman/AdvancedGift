@@ -25,8 +25,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -64,7 +62,6 @@ public class Translation {
     private final Map<Locale, ResourceBundle> loadedBundles = new HashMap<>();
     private final Map<Locale, Map<String, MessageFormat>> messageFormatCache = new HashMap<>();
     private final ClassLoader fileBundleClassLoader;
-    private final ResourceBundle.Control utf8BundleCtrl = new UTF8ResourceBundleControl();
     private final ResourceBundle defaultBundle;
 
     public Translation(AdvancedGift plugin) {
@@ -178,7 +175,7 @@ public class Translation {
     private ResourceBundle getBundle(final @NotNull Locale locale) {
         return loadedBundles.computeIfAbsent(locale, loc -> {
             try {
-                return ResourceBundle.getBundle(BASE_BUNDLE_NAME, loc, fileBundleClassLoader, utf8BundleCtrl);
+                return ResourceBundle.getBundle(BASE_BUNDLE_NAME, loc, fileBundleClassLoader);
             } catch (MissingResourceException ignored) {
                 return getEmbeddedBundle(loc);
             }
@@ -188,7 +185,7 @@ public class Translation {
     /* Returns the resource bundle stored within the jar. */
     private ResourceBundle getEmbeddedBundle(final @NotNull Locale locale) {
         try {
-            return ResourceBundle.getBundle(BASE_BUNDLE_NAME, locale, utf8BundleCtrl);
+            return ResourceBundle.getBundle(BASE_BUNDLE_NAME, locale);
         } catch (MissingResourceException ex) {
             // Not even the base bundle is found. Things must be messed up somewhere for this to happen.
             plugin.getLogger().log(Level.SEVERE, "Unable to find the embedded base translation file. This shouldn't happen.", ex);
@@ -252,43 +249,6 @@ public class Translation {
                 }
             }
             return null;
-        }
-    }
-
-    /* In Java 8, PropertiesResourceBundle doesn't read the file as UTF-8 by default, so this forces it to. */
-    private static class UTF8ResourceBundleControl extends ResourceBundle.Control {
-        public List<String> getFormats(String baseName) {
-            if (baseName == null) {
-                throw new NullPointerException();
-            }
-            return FORMAT_PROPERTIES;
-        }
-
-        public ResourceBundle newBundle(final String baseName, final Locale locale, final String format, final ClassLoader loader, final boolean reload) throws IOException {
-            final String resourceName = toResourceName(toBundleName(baseName, locale), "properties");
-            ResourceBundle bundle = null;
-            InputStream stream = null;
-            if (reload) {
-                URL url = loader.getResource(resourceName);
-                if (url != null) {
-                    URLConnection connection = url.openConnection();
-                    if (connection != null) {
-                        connection.setUseCaches(false);
-                        stream = connection.getInputStream();
-                    }
-                }
-            } else {
-                stream = loader.getResourceAsStream(resourceName);
-            }
-            if (stream != null) {
-                try {
-                    //This is when the language file gets loaded. Must use UTF-8 here.
-                    bundle = new PropertyResourceBundle(new InputStreamReader(stream, StandardCharsets.UTF_8));
-                } finally {
-                    stream.close();
-                }
-            }
-            return bundle;
         }
     }
 

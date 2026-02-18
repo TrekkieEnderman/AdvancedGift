@@ -42,7 +42,6 @@
 
     <modules>
         <module>core</module>
-        <module>API</module>
     </modules>
 
     <repositories>

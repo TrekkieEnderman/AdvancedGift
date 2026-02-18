@@ -94,12 +94,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.meowj</groupId>
-            <artifactId>LangUtils</artifactId>
-            <version>1.9</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bukkit</artifactId>
             <version>3.0.0</version>
@@ -110,11 +104,6 @@
             <artifactId>bstats-base</artifactId>
             <version>3.0.0</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-api</artifactId>
-            <version>API</version>
         </dependency>
         <dependency>
             <groupId>com.gitlab.blockstack</groupId>

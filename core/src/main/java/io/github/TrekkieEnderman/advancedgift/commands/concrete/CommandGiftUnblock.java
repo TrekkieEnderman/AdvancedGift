@@ -39,7 +39,6 @@ public class CommandGiftUnblock extends SimpleCommand {
         sender.sendMessage(Message.COMMAND_UNBLOCK_USAGE.translate());
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public boolean run(@NotNull Player sender, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
