@@ -2,7 +2,7 @@ name: AdvancedGift
 main: io.github.TrekkieEnderman.advancedgift.AdvancedGift
 version: ${project.version}
 author: "TrekkieEndermom (Old name: TrekkieEnderman)"
-website: https://www.spigotmc.org/resources/advancedgift-1-8-8.46458/
+website: https://github.com/TrekkieEnderman/AdvancedGift
 softdepend: [LangUtils, ArtMap]
 api-version: 1.13
 
