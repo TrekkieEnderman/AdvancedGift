@@ -5,6 +5,10 @@ version: 2
 # How you want the plugin name to be displayed in chat. Leave it blank to hide the name.
 prefix: '&6[AdvancedGift]'
 
+# Allows the plugin to share some data about itself and the server using it with BStats.
+# Shared data will not include any private or secure information.
+enable-metrics: true
+
 # Server language the plugin should translate messages in.
 # Currently, the plugin only have translations for 'en_US' and 'sas_SY', both English,
 # but will give you a copy of the base translation file for any chosen locale for editing.

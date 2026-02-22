@@ -60,7 +60,9 @@ public class AdvancedGift extends JavaPlugin {
         this.getCommand("giftspy").setExecutor(new CommandSpy(this));
         this.getCommand("agtranslate").setExecutor(new CommandTranslate(this));
         hasArtMap = Bukkit.getPluginManager().isPluginEnabled("ArtMap");
-        startMetrics();
+        if (getConfigFile().getBoolean("enable-metrics")) {
+            startMetrics();
+        }
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
     }
 
