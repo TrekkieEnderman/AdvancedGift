@@ -110,12 +110,12 @@ public enum Message {
         this.key = key;
     }
 
-    public static void setPrefix(@Nullable String string) {
-        if (string == null || string.isBlank()) {
+    public static void setPrefix(@Nullable Component newPrefix) {
+        if (newPrefix == null) {
             prefix = NO_PREFIX;
             return;
         }
-        prefix = ComponentUtils.fromLegacyText(string).appendSpace();
+        prefix = newPrefix.appendSpace();
     }
 
     /**

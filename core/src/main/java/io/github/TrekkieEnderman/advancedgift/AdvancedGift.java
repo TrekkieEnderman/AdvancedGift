@@ -29,24 +29,16 @@ import lombok.Getter;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class AdvancedGift extends JavaPlugin {
-    private final File configFile = new File(getDataFolder(),"config.yml");
-    private final Map<Integer, List<String>> worldGroups = new HashMap<>();
     private boolean hasArtMap = false;
     @Getter
     private final GiftCounter giftCounter = new GiftCounter();
     @Getter
     private PlayerDataManager playerDataManager;
+    @Getter
+    private Config configuration;
 
     @Override
     public void onEnable() {
@@ -60,7 +52,7 @@ public class AdvancedGift extends JavaPlugin {
         this.getCommand("giftspy").setExecutor(new CommandSpy(this));
         this.getCommand("agtranslate").setExecutor(new CommandTranslate(this));
         hasArtMap = Bukkit.getPluginManager().isPluginEnabled("ArtMap");
-        if (getConfigFile().getBoolean("enable-metrics")) {
+        if (configuration.isMetricsEnabled()) {
             startMetrics();
         }
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
@@ -72,77 +64,17 @@ public class AdvancedGift extends JavaPlugin {
             getDataFolder().mkdirs();
         }
         Translation.init(this);
-        loadConfigFile();
-        if (isConfigOutdated()) {
+        configuration = new Config(this);
+        if (configuration.isOutdated()) {
             getLogger().warning(ComponentUtils.toPlainText(Message.OUTDATED_CONFIG.translate()));
         }
         playerDataManager = new StandardDataManager(this);
         this.getPlayerDataManager().load();
     }
 
-    public FileConfiguration getConfigFile() {
-        return getConfig();
-    }
-
-    public boolean loadConfigFile() {
-        // Moved config creation to here so the plugin doesn't run into issues when reloading it on command later
-        if (!configFile.exists()) {
-            getLogger().info(ComponentUtils.toPlainText(Message.CONFIG_NOT_FOUND.translate()));
-            saveDefaultConfig();
-        }
-        reloadConfig();
-        Translation.updateLocale(getConfigFile().getString("locale"));
-        loadWorldGroupList();
-        Message.setPrefix(getConfigFile().getString("prefix"));
-        getLogger().info(ComponentUtils.toPlainText(Message.CONFIG_LOADED.translate()));
-        return true;
-    }
-
-    public boolean isConfigOutdated() {
-        return getCurrentConfigVersion() != getDefaultConfigVersion();
-    }
-
-    public int getCurrentConfigVersion() {
-        if (!getConfigFile().isSet("version")) return -1;
-        return getConfigFile().getInt("version");
-    }
-
-    @SuppressWarnings("DataFlowIssue") // Let it throw NPE. Would only happen if the jar is packed incorrectly.
-    public int getDefaultConfigVersion() {
-        return getConfigFile().getDefaults().getInt("version");
-    }
-
     @Override
     public void onDisable() {
         this.getPlayerDataManager().save();
-    }
-
-    @SuppressWarnings("DataFlowIssue")
-    private void loadWorldGroupList() {
-        final String worldGroupPath = "interworld-restriction.world-groups";
-        if (!getConfigFile().isConfigurationSection(worldGroupPath)) {
-            getLogger().warning("Unable to get world groups in the config file! Is it misconfigured?");
-            return;
-        }
-        worldGroups.clear();
-        final Set<String> groupKeys = getConfigFile().getConfigurationSection(worldGroupPath).getKeys(false);
-        int index = 0;
-        for (String groupKey : groupKeys) {
-            worldGroups.put(index, getConfigFile().getStringList(worldGroupPath + "." + groupKey));
-            index++;
-        }
-    }
-
-    public int getPlayerWorldGroup(Player player) {
-        for (int index : worldGroups.keySet()) {
-            List<String> worlds = worldGroups.get(index);
-            for (String world : worlds) {
-                if (player.getWorld().getName().equalsIgnoreCase(world)) {
-                    return index;
-                }
-            }
-        }
-        return -1;
     }
 
     private void startMetrics() {

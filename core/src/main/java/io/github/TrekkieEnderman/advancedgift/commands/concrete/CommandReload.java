@@ -21,7 +21,6 @@ import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class CommandReload extends SimpleCommand {
@@ -37,12 +36,8 @@ public class CommandReload extends SimpleCommand {
 
     @Override
     public boolean run(@NotNull final CommandSender sender, @NotNull final String label,  @NotNull final String[] args) {
-        if (plugin.loadConfigFile()) {
-            sender.sendMessage(Message.CONFIG_RELOADED.translatePrefixed());
-        } else {
-            sender.sendMessage(Message.CONFIG_NOT_RELOADED.translatePrefixed());
-            if (sender instanceof Player) sender.sendMessage(Message.CHECK_CONSOLE.translatePrefixed());
-        }
+        plugin.getConfiguration().reload();
+        sender.sendMessage(Message.CONFIG_RELOADED.translatePrefixed());
         return true;
     }
 }

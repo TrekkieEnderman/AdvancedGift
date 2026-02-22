@@ -19,6 +19,7 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.CensorshipOptions;
+import io.github.TrekkieEnderman.advancedgift.Config;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import me.Fupery.ArtMap.ArtMap;
@@ -46,11 +47,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CommandGift extends SimpleCommand {
+    private final Config config;
     private final static char[] SPACE_DELIMITER = new char[]{' '};
     private final HashMap<UUID, Long> cooldown = new HashMap<>();
 
     public CommandGift(AdvancedGift plugin) {
         super(plugin, "gift", "advancedgift.gift.send");
+        this.config = plugin.getConfiguration();
     }
 
     @Override
@@ -137,7 +140,7 @@ public class CommandGift extends SimpleCommand {
             return false;
         }
 
-        if (args.length == 2 || !this.plugin.getConfigFile().getBoolean("allow-gift-message")) {
+        if (args.length == 2 || !config.isGiftMessageEnabled()) {
             sendItem(sender, target, giftItem, giftAmount, null);
             return true;
         }
@@ -154,7 +157,7 @@ public class CommandGift extends SimpleCommand {
 
         // Validate message
         if (!Arrays.equals(originalMessage, giftMessage)) {
-            final CensorshipOptions option = CensorshipOptions.valueOf(plugin.getConfigFile().getString("message-censorship.mode", "REMOVE").toUpperCase());
+            final CensorshipOptions option = config.getCensorshipMode();
             if (option == CensorshipOptions.CENSOR) {
                 logGiftWarning("Censored the blocked words in " + sender.getName() + "'s gift message.");
             } else if (option == CensorshipOptions.REMOVE) {
@@ -200,9 +203,9 @@ public class CommandGift extends SimpleCommand {
         final String senderName = sender.getName();
         final String targetName = target.getName();
 
-        if (plugin.getConfigFile().getBoolean("interworld-restriction.enabled")) {
-            final int senderWorldGroup = plugin.getPlayerWorldGroup(sender);
-            final int targetWorldGroup = plugin.getPlayerWorldGroup(target);
+        if (config.isInterworldGiftRestricted()) {
+            final int senderWorldGroup = config.getGroupID(sender.getWorld());
+            final int targetWorldGroup = config.getGroupID(target.getWorld());
             if (senderWorldGroup == -1 && !(sender.hasPermission("advancedgift.bypass.world.blacklist"))) {
                 sender.sendMessage(Message.SENDER_IN_BLACKLISTED_WORLD.translatePrefixed());
                 logGiftDenied(senderName, senderName + " is in " + sender.getWorld().getName() + ", a blacklisted world.");
@@ -283,7 +286,7 @@ public class CommandGift extends SimpleCommand {
     }
 
     private int getPlayerCooldownTime(final Player player) {
-        if (!plugin.getConfigFile().getBoolean("cooldown.enabled")) return 0;
+        if (!config.isCooldownEnabled()) return 0;
         if (player.hasPermission("advancedgift.bypass.cooldown")) return 0;
         final UUID senderUUID = player.getUniqueId();
         if (!cooldown.containsKey(senderUUID)) return 0;
@@ -296,7 +299,7 @@ public class CommandGift extends SimpleCommand {
         if (originalMessage == null || originalMessage.length == 0) {
             return originalMessage;
         }
-        if (!plugin.getConfigFile().getBoolean("message-censorship.enabled")) {
+        if (!config.isCensorshipEnabled()) {
             return originalMessage;
         }
         final String[] cleanedMessage = originalMessage.clone();
@@ -304,7 +307,7 @@ public class CommandGift extends SimpleCommand {
             String word = cleanedMessage[i].replaceAll("\\W", "").replace("_", "").toLowerCase();
             if (word.isEmpty()) continue;
             boolean isBlockedWord;
-            for (String blockedWord : plugin.getConfigFile().getStringList("message-censorship.filter")) {
+            for (String blockedWord : config.getWordFilters()) {
                 String blockedWordCleaned = blockedWord.replace("*", "").toLowerCase();
                 if (blockedWord.startsWith("*") && blockedWord.endsWith("*"))
                     isBlockedWord = word.contains(blockedWordCleaned);
@@ -323,8 +326,8 @@ public class CommandGift extends SimpleCommand {
         final ItemStack giftItem = itemStack.clone();
         giftItem.setAmount(giftAmount);
 
-        if (plugin.getConfigFile().getBoolean("cooldown.enabled"))
-            cooldown.put(sender.getUniqueId(), System.currentTimeMillis() + plugin.getConfigFile().getLong("cooldown.duration")*1000);
+        if (config.isCooldownEnabled())
+            cooldown.put(sender.getUniqueId(), System.currentTimeMillis() + config.getCooldownDuration()*1000);
         plugin.getGiftCounter().increment();
         final PlayerInventory senderInventory = sender.getInventory();
         final PlayerInventory targetInventory = target.getInventory();

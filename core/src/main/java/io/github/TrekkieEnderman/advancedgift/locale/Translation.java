@@ -78,15 +78,13 @@ public class Translation {
     }
 
     /* Reloads and rereads custom language files */
-    public static void updateLocale(final String locale) {
+    public static void updateLocale(final Locale newLocale) {
         if (instance == null) {
             throw new IllegalStateException("Translation class isn't initialized");
         }
 
         final Locale previousLocale = serverLocale;
 
-        // Parse locale
-        final Locale newLocale = parseLocale(locale);
         if (newLocale != null) {
             serverLocale = newLocale;
         }
