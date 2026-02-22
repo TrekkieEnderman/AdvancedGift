@@ -49,7 +49,7 @@ interworld-restriction:
   enabled: false
   # Here you can choose which group each world belongs to.
   # When restricted, gifts that have a destination in a world group different from their origin group will be denied.
-  # Any world not listed ia considered blacklisted and all gifts sending to, from and within the world will be denied.
+  # Any world not listed ia considered blacklisted and all gifts sent to, from and within the world will be denied.
   # You can have any number of groups and any number of worlds in each group.
   # Keep in mind if you put a world in two or more groups, only the first group the world is
   # listed in will be considered when the plugin evaluates the groups for a gift's origin and destination worlds.
