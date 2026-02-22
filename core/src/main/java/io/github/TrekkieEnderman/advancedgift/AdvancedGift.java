@@ -34,13 +34,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class AdvancedGift extends JavaPlugin {
     private final File configFile = new File(getDataFolder(),"config.yml");
-    private final HashMap<Integer, ArrayList<String>> worldList = new HashMap<>();
+    private final Map<Integer, List<String>> worldGroups = new HashMap<>();
     private boolean hasArtMap = false;
     @Getter
     private final GiftCounter giftCounter = new GiftCounter();
@@ -96,7 +97,17 @@ public class AdvancedGift extends JavaPlugin {
     }
 
     public boolean isConfigOutdated() {
-        return !this.getConfig().isSet("locale");
+        return getCurrentConfigVersion() != getDefaultConfigVersion();
+    }
+
+    public int getCurrentConfigVersion() {
+        if (!getConfigFile().isSet("version")) return -1;
+        return getConfigFile().getInt("version");
+    }
+
+    @SuppressWarnings("DataFlowIssue") // Let it throw NPE. Would only happen if the jar is packed incorrectly.
+    public int getDefaultConfigVersion() {
+        return getConfigFile().getDefaults().getInt("version");
     }
 
     @Override
@@ -104,24 +115,28 @@ public class AdvancedGift extends JavaPlugin {
         this.getPlayerDataManager().save();
     }
 
+    @SuppressWarnings("DataFlowIssue")
     private void loadWorldGroupList() {
-        worldList.clear();
-        int key = 0;
-        for (String world : getConfig().getStringList("world-group-list")) {
-            String[] array = world.split(", ");
-            ArrayList<String> list = new ArrayList<>(Arrays.asList(array));
-            worldList.put(key, list);
-            key += 1;
+        final String worldGroupPath = "interworld-restriction.world-groups";
+        if (!getConfigFile().isConfigurationSection(worldGroupPath)) {
+            getLogger().warning("Unable to get world groups in the config file! Is it misconfigured?");
+            return;
+        }
+        worldGroups.clear();
+        final Set<String> groupKeys = getConfigFile().getConfigurationSection(worldGroupPath).getKeys(false);
+        int index = 0;
+        for (String groupKey : groupKeys) {
+            worldGroups.put(index, getConfigFile().getStringList(worldGroupPath + "." + groupKey));
+            index++;
         }
     }
 
     public int getPlayerWorldGroup(Player player) {
-        //int playerWorldGroup = -1;
-        for (int key : worldList.keySet()) {
-            ArrayList<String> values = worldList.get(key);
-            for (String w : values) {
-                if (player.getWorld().getName().equalsIgnoreCase(w)) {
-                    return key;
+        for (int index : worldGroups.keySet()) {
+            List<String> worlds = worldGroups.get(index);
+            for (String world : worlds) {
+                if (player.getWorld().getName().equalsIgnoreCase(world)) {
+                    return index;
                 }
             }
         }

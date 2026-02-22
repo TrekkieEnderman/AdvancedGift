@@ -1,43 +1,59 @@
-prefix: '&6[AdvancedGift]'
-# No need to add a space at the end of the prefix. The plugin adds it automatically.
+# Configuration version. Please don't touch. I will ridicule you if you do and then
+# come to me for support when the plugin behaves strangely. Only half-joking.
+version: 2
 
+# How you want the plugin name to be displayed in chat. Leave it blank to hide the name.
+prefix: '&6[AdvancedGift]'
+
+# Server language the plugin should translate messages in.
+# Currently, the plugin only have translations for 'en_US' and 'sas_SY', both English,
+# but will give you a copy of the base translation file for any chosen locale for editing.
+# Generated translation files could be found in 'translations' folder in the same place as this config file.
 locale: en_us
 
-enable-tooltip: true
-# Whether to show item tooltip on hover over the gift notification
-# RESTART REQUIRED TO TAKE EFFECT
+# Adds a cooldown period between gifts. The cooldown is enforced per-player.
+cooldown:
+  enabled: false
+  duration: 10 # Amount in SECONDS
 
-enable-cooldown: false
-
-cooldown-time: 10
-# The amount of time in SECONDS before the players can use the gift command again.
-
+# Set this false to completely remove the messaging feature for everyone.
 allow-gift-message: true
-# If false, the messaging feature will not be available to any and all players.
 
-message-censorship: false
-# If true, gifts with messages will be checked for any words from "word-filter" list below.
+# A basic filter system to catch offending gift messages.
+message-censorship:
+  enabled: false
+  # How the plugin should handle offending gift messages.
+  # Your options are to CENSOR the message, REMOVE it, or DENY the entire gift.
+  mode: REMOVE
+  # A list of offensive words the plugin should look out for in gift messages.
+  # Wildcards (*) are supported. Placing them on either or both ends of a word will affect
+  # how it is compared to words in a gift message.
+  #
+  # NOTE: Words starting with a wildcard MUST be surrounded by quotes or
+  # the config file will become unparsable!
+  filter:
+    - fuck*
+    - shit*
+    - ass
+    - dumbass
+    - bitch
+    - bastard
 
-send-censored-message: BLOCK
-# Whether to send the gift with censored message, or without, or don't send the gift at all.
-# Accepted variables are: WITH, WITHOUT, and BLOCK.
-
-word-filter:
-  # List of words that will be censored in the gift message. Wildcards "*" are supported.
-  # Usage and placement of wildcards will affect how the words are compared.
-  # Please refer to AdvancedGift resource page for information on how to use wildcards.
-  - fuck*
-  - shit*
-  - ass
-  - dumbass
-  - bitch
-  - bastard
-
-restrict-interworld-gift: false
-
-world-group-list:
-  # Gift exchanges will not go between worlds not in the same group as set below.
-  # Any world not listed will be considered as being blacklisted, and all gift activities will be blocked in these worlds.
-  - 'test1'
-  - 'test2, test3'
-  - 'world, world_nether, world_the_end'
+# Places a restriction on gifts that go between worlds. This is useful if
+# your server has custom worlds with separate inventories.
+interworld-restriction:
+  enabled: false
+  # Here you can choose which group each world belongs to.
+  # When restricted, gifts that have a destination in a world group different from their origin group will be denied.
+  # Any world not listed ia considered blacklisted and all gifts sending to, from and within the world will be denied.
+  # You can have any number of groups and any number of worlds in each group.
+  # Keep in mind if you put a world in two or more groups, only the first group the world is
+  # listed in will be considered when the plugin evaluates the groups for a gift's origin and destination worlds.
+  # Name each group whatever you want. The plugin doesn't care as long as the file remains parsable.
+  world-groups:
+    example-group:
+      - example_world
+    group:
+      - world
+      - world_nether
+      - world_the_end
