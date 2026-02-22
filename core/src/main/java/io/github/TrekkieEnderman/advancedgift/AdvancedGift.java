@@ -42,7 +42,17 @@ public class AdvancedGift extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        loadFiles();
+        if(!getDataFolder().exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            getDataFolder().mkdirs();
+        }
+        Translation.init(this);
+        configuration = new Config(this);
+        if (configuration.isOutdated()) {
+            getLogger().warning(ComponentUtils.toPlainText(Message.OUTDATED_CONFIG.translate()));
+        }
+        playerDataManager = new StandardDataManager(this);
+        this.getPlayerDataManager().load();
         this.getCommand("gift").setExecutor(new CommandGift(this));
         this.getCommand("togglegift").setExecutor(new CommandGiftToggle(this));
         this.getCommand("giftblock").setExecutor(new CommandGiftBlock(this));
@@ -56,20 +66,6 @@ public class AdvancedGift extends JavaPlugin {
             startMetrics();
         }
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
-    }
-
-    private void loadFiles() {
-        if(!getDataFolder().exists()) {
-            //noinspection ResultOfMethodCallIgnored
-            getDataFolder().mkdirs();
-        }
-        Translation.init(this);
-        configuration = new Config(this);
-        if (configuration.isOutdated()) {
-            getLogger().warning(ComponentUtils.toPlainText(Message.OUTDATED_CONFIG.translate()));
-        }
-        playerDataManager = new StandardDataManager(this);
-        this.getPlayerDataManager().load();
     }
 
     @Override
