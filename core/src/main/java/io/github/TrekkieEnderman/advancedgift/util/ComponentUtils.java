@@ -54,8 +54,7 @@ public class ComponentUtils {
      * @return component.
      */
     public static @Nullable Component fromLegacyText(@Nullable String legacy) {
-        if (legacy == null) return null;
-        //legacy = legacy.replaceAll("§", "&");
+        if (legacy == null || legacy.isBlank()) return null;
         return LEGACY_TEXT_SERIALIZER.deserialize(legacy);
     }
 }
