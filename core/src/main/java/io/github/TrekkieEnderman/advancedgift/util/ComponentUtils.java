@@ -57,4 +57,14 @@ public class ComponentUtils {
         if (legacy == null || legacy.isBlank()) return null;
         return LEGACY_TEXT_SERIALIZER.deserialize(legacy);
     }
+
+    /**
+     * Converts component to a legacy text with color and formatting preserved.
+     * @param component component to convert
+     * @return legacy text
+     */
+    public static @Nullable String toLegacyText(@Nullable Component component) {
+        if (component == null) return null;
+        return LEGACY_TEXT_SERIALIZER.serialize(component);
+    }
 }

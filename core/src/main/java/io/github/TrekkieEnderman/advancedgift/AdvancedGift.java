@@ -39,6 +39,8 @@ public class AdvancedGift extends JavaPlugin {
     private PlayerDataManager playerDataManager;
     @Getter
     private Config configuration;
+    @Getter
+    private GiftManager giftManager;
 
     @Override
     public void onEnable() {
@@ -53,6 +55,7 @@ public class AdvancedGift extends JavaPlugin {
         }
         playerDataManager = new StandardDataManager(this);
         this.getPlayerDataManager().load();
+        giftManager = new GiftManager(this);
         this.getCommand("gift").setExecutor(new CommandGift(this));
         this.getCommand("togglegift").setExecutor(new CommandGiftToggle(this));
         this.getCommand("giftblock").setExecutor(new CommandGiftBlock(this));
