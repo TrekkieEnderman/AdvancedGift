@@ -21,8 +21,6 @@ import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import io.github.TrekkieEnderman.advancedgift.util.ItemUtils;
 import io.github.TrekkieEnderman.advancedgift.util.PlayerUtils;
-import me.Fupery.ArtMap.ArtMap;
-import me.Fupery.ArtMap.Painting.ArtistHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
@@ -170,19 +168,13 @@ public class GiftManager {
             sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed(targetName));
             return false;
         }
-        if (plugin.hasArtMap()) {
-            final ArtMap artMap = ArtMap.instance();
-            if (artMap.getConfiguration().FORCE_ART_KIT) {
-                ArtistHandler artistHandler = artMap.getArtistHandler();
-                if (artistHandler.containsPlayer(sender)) {
-                    sender.sendMessage(Message.GIFT_DENIED_GENERIC.translatePrefixed());
-                    return false;
-                } else if (artistHandler.containsPlayer(target)) {
-                    sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed(targetName));
-                    return false;
-                }
-
-            }
+        if (plugin.isPainting(sender)) {
+            sender.sendMessage(Message.GIFT_DENIED_GENERIC.translatePrefixed());
+            return false;
+        }
+        if (plugin.isPainting(target)) {
+            sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed(targetName));
+            return false;
         }
         if (plugin.getPlayerDataManager().containsUUID(targetUUID, "tg", null)) {
             sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));

@@ -26,9 +26,11 @@ import io.github.TrekkieEnderman.advancedgift.locale.Translation;
 import io.github.TrekkieEnderman.advancedgift.metrics.GiftCounter;
 import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import lombok.Getter;
+import me.Fupery.ArtMap.ArtMap;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class AdvancedGift extends JavaPlugin {
@@ -83,5 +85,12 @@ public class AdvancedGift extends JavaPlugin {
 
     public boolean hasArtMap() {
         return hasArtMap;
+    }
+
+    public boolean isPainting(Player player) {
+        if (!hasArtMap) return false;
+        final ArtMap artMap = ArtMap.instance();
+        if (!artMap.getConfiguration().FORCE_ART_KIT) return false;
+        return artMap.getArtistHandler().containsPlayer(player);
     }
 }
