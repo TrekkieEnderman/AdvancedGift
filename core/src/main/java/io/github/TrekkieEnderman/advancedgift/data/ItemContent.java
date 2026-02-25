@@ -42,6 +42,10 @@ public class ItemContent implements GiftContent {
         return itemStack.clone();
     }
 
+    public int getAmount() {
+        return itemStack.getAmount();
+    }
+
     @Override
     public boolean canGive(Player target) {
         return PlayerUtils.hasSpace(target, itemStack);
@@ -83,7 +87,6 @@ public class ItemContent implements GiftContent {
             itemDetails = Message.NAMED_ITEM.translateRaw(itemDetails, ComponentUtils.toLegacyText(meta.displayName()));
         }
 
-        // TODO Need to include item amount as well, need a new message for that.
-        return Component.text(itemDetails).hoverEvent(itemStack.asHoverEvent());
+        return Message.ITEM_DETAILS_BASE.translatePrefixed(getAmount(), itemDetails).hoverEvent(itemStack.asHoverEvent());
     }
 }

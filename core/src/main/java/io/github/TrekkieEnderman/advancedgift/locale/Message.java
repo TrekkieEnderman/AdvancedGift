@@ -93,6 +93,7 @@ public enum Message {
     MESSAGE_RECEIVED("messageReceived"),
     GIFT_LOGGED("giftLogged"),
     MESSAGE_LOGGED("messageLogged"),
+    ITEM_DETAILS_BASE("itemDetailsBase"),
     ENCHANTED_ITEM("enchantedItem"),
     PATTERNED_ITEM("patternedItem"),
     NAMED_ITEM("namedItem"),
