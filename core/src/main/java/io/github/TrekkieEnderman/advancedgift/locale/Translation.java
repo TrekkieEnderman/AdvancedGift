@@ -96,6 +96,7 @@ public class Translation {
             }
             instance.plugin.getLogger().info("Now using locale '" + serverLocale.toString() + "'.");
         }
+        exportTranslation(serverLocale);
 
         // Clear cache and reload files
         ResourceBundle.clearCache();
@@ -133,36 +134,35 @@ public class Translation {
 
     /* Exports the target locale's translation file if it exists to the plugin directory,
     or creates a new one populated with entries from the base translation file.
-    Returns true if the export succeeds, false otherwise. */
-    public static boolean exportTranslation(final @NotNull Locale targetLocale) {
+    */
+    public static void exportTranslation(final @NotNull Locale targetLocale) {
         if (instance == null) {
             throw new IllegalStateException("Translation class isn't initialized");
         }
 
+        final String suffix = "properties";
         final ResourceBundle.Control control = ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES);
-        final Path destination = instance.plugin.getDataFolder().toPath().resolve(control.toResourceName(control.toBundleName(BASE_BUNDLE_NAME, targetLocale), "properties"));
+        final String targetBundle = control.toResourceName(control.toBundleName(BASE_BUNDLE_NAME, targetLocale), suffix);
+        final Path destination = instance.plugin.getDataFolder().toPath().resolve(targetBundle);
 
         if (Files.exists(destination)) {
-            instance.plugin.getLogger().warning("The destination file for '" + targetLocale + "' already exists.");
-            return false;
+            return;
         }
 
-        URL resource = instance.getClass().getClassLoader().getResource(control.toResourceName(control.toBundleName(BASE_BUNDLE_NAME, targetLocale), "properties"));
+        URL resource = instance.getClass().getClassLoader().getResource(targetBundle);
         if (resource == null) {
-            resource = instance.getClass().getClassLoader().getResource(control.toResourceName(BASE_BUNDLE_NAME, "properties"));
+            resource = instance.getClass().getClassLoader().getResource(control.toResourceName(BASE_BUNDLE_NAME, suffix));
         }
         if (resource == null) {
             instance.plugin.getLogger().warning("Unable to find the embedded base translation file. This shouldn't happen.");
-            return false;
+            return;
         }
 
         try (InputStream stream = resource.openStream()) {
             Files.copy(stream, destination);
-            return true;
         } catch (IOException e) {
             instance.plugin.getLogger().log(Level.SEVERE, "Exception occurred while creating a custom translation file for " + targetLocale, e);
         }
-        return false;
     }
 
     // Instance methods

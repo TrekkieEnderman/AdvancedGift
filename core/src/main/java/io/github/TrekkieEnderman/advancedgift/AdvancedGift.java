@@ -65,7 +65,6 @@ public class AdvancedGift extends JavaPlugin {
         this.getCommand("giftblocklist").setExecutor(new CommandGiftBlockList(this));
         this.getCommand("agreload").setExecutor(new CommandReload(this));
         this.getCommand("giftspy").setExecutor(new CommandSpy(this));
-        this.getCommand("agtranslate").setExecutor(new CommandTranslate(this));
         hasArtMap = Bukkit.getPluginManager().isPluginEnabled("ArtMap");
         if (configuration.isMetricsEnabled()) {
             startMetrics();
