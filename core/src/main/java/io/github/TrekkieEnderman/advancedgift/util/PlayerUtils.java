@@ -17,11 +17,13 @@
 
 package io.github.TrekkieEnderman.advancedgift.util;
 
+import lombok.experimental.UtilityClass;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 
+@UtilityClass
 public class PlayerUtils {
 
     public static boolean isVanished(final Player player) {
