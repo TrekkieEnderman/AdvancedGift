@@ -19,6 +19,7 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
+import io.github.TrekkieEnderman.advancedgift.data.ItemContent;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.util.PlayerUtils;
 import net.kyori.adventure.text.Component;
@@ -34,6 +35,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -108,9 +110,17 @@ public class CommandGift extends SimpleCommand {
             sender.sendMessage(Message.GIFT_EMPTY.translatePrefixed());
             return false;
         }
+        if (plugin.isPainting(sender)) {
+            sender.sendMessage(Message.GIFT_DENIED_GENERIC.translatePrefixed());
+            return true;
+        }
+        if (plugin.isPainting(target)) {
+            sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed());
+            return true;
+        }
 
         if (args.length == 1) {
-            plugin.getGiftManager().sendGift(sender, target, giftItem, giftItem.getAmount(), null);
+            sendItem(sender, target, giftItem, giftItem.getAmount(), null);
             return true;
         }
 
@@ -126,18 +136,18 @@ public class CommandGift extends SimpleCommand {
         }
 
         if (args.length == 2) {
-            plugin.getGiftManager().sendGift(sender, target, giftItem, giftAmount, null);
+            sendItem(sender, target, giftItem, giftAmount, null);
             return true;
         }
         if (!sender.hasPermission("advancedgift.gift.message")) {
             sender.sendMessage(Message.MESSAGE_REMOVED_NO_PERMISSION.translatePrefixed());
-            plugin.getGiftManager().sendGift(sender, target, giftItem, giftAmount, null);
+            sendItem(sender, target, giftItem, giftAmount, null);
             return true;
         }
 
         // Get message
         final String[] giftMessage = Arrays.copyOfRange(args, 2, args.length);
-        plugin.getGiftManager().sendGift(sender, target, giftItem, giftAmount, String.join(" ", giftMessage));
+        sendItem(sender, target, giftItem, giftAmount, String.join(" ", giftMessage));
         return true;
     }
 
@@ -149,5 +159,11 @@ public class CommandGift extends SimpleCommand {
             return PlayerUtils.getTotalAmountHas(sender, itemStack);
         }
         return NumberUtils.toInt(amountInput);
+    }
+
+    private void sendItem(final Player sender, final Player target, final ItemStack itemStack, final int amount, final @Nullable String message) {
+        final ItemContent gift = new ItemContent(itemStack, amount);
+        sender.getInventory().removeItem(gift.getItemStack());
+        plugin.getGiftManager().sendGift(sender, target, gift, message);
     }
 }
