@@ -133,7 +133,7 @@ public class GiftManager {
 
         for (final Player player : Bukkit.getOnlinePlayers()) {
             if (player == sender || player == target) continue;
-            if (plugin.getPlayerDataManager().containsUUID(player.getUniqueId(), "spy", null)) {
+            if (plugin.getPlayerDataManager().isSpy(player.getUniqueId())) {
                 player.sendMessage(spyComp);
                 if (giftMessage != null) player.sendMessage(Message.MESSAGE_LOGGED.translate(sender.getName(), giftMessage));
             }
@@ -176,11 +176,11 @@ public class GiftManager {
             sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed(targetName));
             return false;
         }
-        if (plugin.getPlayerDataManager().containsUUID(targetUUID, "tg", null)) {
+        if (plugin.getPlayerDataManager().isGiftDisabled(targetUUID)) {
             sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
             return false;
         }
-        if (plugin.getPlayerDataManager().containsUUID(targetUUID, "block", senderUUID)) {
+        if (plugin.getPlayerDataManager().hasPlayerBlocked(targetUUID, senderUUID)) {
             sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
             return false;
         }

@@ -26,8 +26,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
 public class CommandGiftBlock extends SimpleCommand {
     public CommandGiftBlock(AdvancedGift plugin) {
         super(plugin, "giftblock", null);
@@ -57,12 +55,8 @@ public class CommandGiftBlock extends SimpleCommand {
             return false;
         }
 
-        final UUID senderUUID = sender.getUniqueId();
-        final UUID targetUUID = targetPlayer.getUniqueId();
         final String targetName = targetPlayer.getName();
-
-        if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "block", targetUUID)) {
-            plugin.getPlayerDataManager().addUUID(senderUUID, "block", targetUUID);
+        if (plugin.getPlayerDataManager().blockPlayer(sender.getUniqueId(), targetPlayer.getUniqueId())) {
             sender.sendMessage(Message.BLOCK_OTHER.translatePrefixed(targetName));
         } else {
             sender.sendMessage(Message.OTHER_BLOCKED_ALREADY.translatePrefixed(targetName));

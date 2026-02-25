@@ -26,8 +26,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
 public class CommandGiftUnblock extends SimpleCommand {
     public CommandGiftUnblock(final AdvancedGift plugin) {
         super(plugin, "giftunblock", null);
@@ -46,11 +44,8 @@ public class CommandGiftUnblock extends SimpleCommand {
             return true;
         }
 
-        final UUID senderUUID = sender.getUniqueId();
         final OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-
-        if (plugin.getPlayerDataManager().containsUUID(senderUUID, "block", target.getUniqueId())) {
-            plugin.getPlayerDataManager().removeUUID(senderUUID, "block", target.getUniqueId());
+        if (plugin.getPlayerDataManager().unblockPlayer(sender.getUniqueId(), target.getUniqueId())) {
             sender.sendMessage(Message.UNBLOCK_OTHER.translatePrefixed(target.getName()));
         } else {
             sender.sendMessage(Message.OTHER_UNBLOCKED_ALREADY.translatePrefixed(target.getName()));

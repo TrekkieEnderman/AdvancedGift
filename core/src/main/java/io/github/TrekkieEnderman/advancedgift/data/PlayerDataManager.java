@@ -112,61 +112,48 @@ public abstract class PlayerDataManager {
 
     protected abstract void savePlayerInfo() throws IOException;
 
-    //Bad. Just bad. Unfortunately this is not something I can easily fix without a major rewrite.
-    public final void addUUID(final UUID playerUUID, final String var, final UUID secondUUID) {
-        if (playerUUID == null) return;
-        switch (var) {
-            case "tg":
-                togglePlayers.add(playerUUID);
-                break;
-            case "spy":
-                spyPlayers.add(playerUUID);
-                break;
-            case "block":
-                if (!blockPlayers.containsKey(playerUUID)) {
-                    Set<UUID> list = new HashSet<>();
-                    list.add(secondUUID);
-                    blockPlayers.put(playerUUID, list);
-                } else blockPlayers.get(playerUUID).add(secondUUID);
-                break;
+    public boolean isSpy(final UUID uuid) {
+        return spyPlayers.contains(uuid);
+    }
+
+    public void setSpy(final UUID uuid, boolean enabled) {
+        if (enabled) {
+            spyPlayers.add(uuid);
+        } else {
+            spyPlayers.remove(uuid);
         }
     }
 
-    //Why did I do this way?
-    public final boolean containsUUID(final UUID playerUUID, final String var, final UUID secondUUID) {
-        if (playerUUID == null) return false;
-        boolean bool = false;
-        switch (var) {
-            case "tg":
-                bool = togglePlayers.contains(playerUUID);
-                break;
-            case "spy":
-                bool = spyPlayers.contains(playerUUID);
-                break;
-            case "block":
-                if (blockPlayers.containsKey(playerUUID)) {
-                    bool = blockPlayers.get(playerUUID).contains(secondUUID);
-                }
-                break;
-        }
-        return bool;
+    public boolean isGiftDisabled(final UUID uuid) {
+        return togglePlayers.contains(uuid);
     }
 
-    //Seriously, why?
-    public final void removeUUID(final UUID playerUUID, final String var, final UUID secondUUID) {
-        if (playerUUID == null) return;
-        switch (var) {
-            case "tg":
-                togglePlayers.remove(playerUUID);
-                break;
-            case "spy":
-                spyPlayers.remove(playerUUID);
-                break;
-            case "block":
-                blockPlayers.get(playerUUID).remove(secondUUID);
-                if (blockPlayers.get(playerUUID).isEmpty()) blockPlayers.remove(playerUUID);
-                break;
+    public void setGiftDisabled(final UUID uuid, boolean disabled) {
+        if (disabled) {
+            togglePlayers.add(uuid);
+        } else {
+            togglePlayers.remove(uuid);
         }
+    }
+
+    public boolean hasPlayerBlocked(final UUID blocker, final UUID blocked) {
+        if (!blockPlayers.containsKey(blocker)) return false;
+        return blockPlayers.get(blocker).contains(blocked);
+    }
+
+    public boolean blockPlayer(final UUID blocker, final UUID blocked) {
+        Set<UUID> set = blockPlayers.computeIfAbsent(blocker, uuid -> new HashSet<>());
+        return set.add(blocked);
+    }
+
+    public boolean unblockPlayer(final UUID blocker, final UUID blocked) {
+        if (!blockPlayers.containsKey(blocker)) return false;
+        Set<UUID> set = blockPlayers.get(blocker);
+        boolean result = set.remove(blocked);
+        if (set.isEmpty()) {
+            blockPlayers.remove(blocker);
+        }
+        return result;
     }
 
     public Set<UUID> getBlockList(final UUID playerUUID) {

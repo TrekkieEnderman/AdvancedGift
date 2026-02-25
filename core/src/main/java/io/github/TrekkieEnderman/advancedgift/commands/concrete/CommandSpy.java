@@ -19,12 +19,11 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
+import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
 
 public class CommandSpy extends SimpleCommand {
     public CommandSpy(final AdvancedGift plugin) {
@@ -39,54 +38,38 @@ public class CommandSpy extends SimpleCommand {
 
     @Override
     public boolean run(@NotNull Player sender, @NotNull String label, @NotNull String[] args) {
-        final UUID uuid = sender.getUniqueId();
-
-        if (args.length < 1) {
-            final boolean spy = !plugin.getPlayerDataManager().containsUUID(uuid, "spy", null);
-            setSpy(uuid, spy);
-            if (spy) {
-                sender.sendMessage(Message.SPY_ENABLED.translatePrefixed());
-            } else {
-                sender.sendMessage(Message.SPY_DISABLED.translatePrefixed());
-            }
+        if (args.length == 0) {
+            toggle(sender, !plugin.getPlayerDataManager().isSpy(sender.getUniqueId()));
             return true;
         }
 
         final String arg = args[0];
         if (arg.equalsIgnoreCase("true") || arg.equalsIgnoreCase("on") || arg.equalsIgnoreCase("enable")) {
-            if (setSpy(uuid, true)) {
-                sender.sendMessage(Message.SPY_ENABLED.translatePrefixed());
-            } else {
-                sender.sendMessage(Message.SPY_ALREADY_ENABLED.translatePrefixed());
-            }
-            return true;
+            toggle(sender, true);
+        } else if (arg.equalsIgnoreCase("false") || arg.equalsIgnoreCase("off") || arg.equalsIgnoreCase("disable")) {
+            toggle(sender, false);
+        } else {
+            sender.sendMessage(Message.ARGUMENT_NOT_RECOGNIZED.translatePrefixed(arg));
+            return false;
         }
-        if (arg.equalsIgnoreCase("false") || arg.equalsIgnoreCase("off") || arg.equalsIgnoreCase("disable")) {
-            if (setSpy(uuid, false)) {
-                sender.sendMessage(Message.SPY_DISABLED.translatePrefixed());
+        return true;
+    }
+
+    private void toggle(Player sender, boolean enabled) {
+        final PlayerDataManager data = plugin.getPlayerDataManager();
+        if (data.isSpy(sender.getUniqueId()) == enabled) {
+            if (enabled) {
+                sender.sendMessage(Message.SPY_ALREADY_ENABLED.translatePrefixed());
             } else {
                 sender.sendMessage(Message.SPY_ALREADY_DISABLED.translatePrefixed());
             }
-            return true;
+            return;
         }
-
-        sender.sendMessage(Message.ARGUMENT_NOT_RECOGNIZED.translatePrefixed(args[0]));
-        return false;
-    }
-
-    /* Returns true if successfully changes player's spy mode */
-    private boolean setSpy(final UUID uuid, final boolean bool) {
-        if (bool) {
-            if (!plugin.getPlayerDataManager().containsUUID(uuid, "spy", null)) {
-                plugin.getPlayerDataManager().addUUID(uuid, "spy", null);
-                return true;
-            }
+        data.setSpy(sender.getUniqueId(), enabled);
+        if (enabled) {
+            sender.sendMessage(Message.SPY_ENABLED.translatePrefixed());
         } else {
-            if (plugin.getPlayerDataManager().containsUUID(uuid, "spy", null)) {
-                plugin.getPlayerDataManager().removeUUID(uuid, "spy", null);
-                return true;
-            }
+            sender.sendMessage(Message.SPY_DISABLED.translatePrefixed());
         }
-        return false;
     }
 }

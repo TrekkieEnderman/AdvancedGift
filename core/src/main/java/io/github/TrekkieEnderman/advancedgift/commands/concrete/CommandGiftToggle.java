@@ -19,12 +19,11 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
+import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
 
 public class CommandGiftToggle extends SimpleCommand {
     public CommandGiftToggle(AdvancedGift plugin) {
@@ -39,35 +38,39 @@ public class CommandGiftToggle extends SimpleCommand {
 
     @Override
     public boolean run(@NotNull final Player sender, @NotNull final String label, @NotNull final String[] args) {
-        final UUID senderUUID = sender.getUniqueId();
         if (args.length == 0) {
-            if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
-                plugin.getPlayerDataManager().addUUID(senderUUID, "tg", null);
-                sender.sendMessage(Message.TOGGLED_OFF.translatePrefixed());
-            } else {
-                plugin.getPlayerDataManager().removeUUID(senderUUID, "tg", null);
-                sender.sendMessage(Message.TOGGLED_ON.translatePrefixed());
-            }
+            toggle(sender, !plugin.getPlayerDataManager().isGiftDisabled(sender.getUniqueId()));
+            return true;
+        }
+
+        final String arg = args[0];
+        if (arg.equalsIgnoreCase("off") || arg.equalsIgnoreCase("disable")) {
+            toggle(sender, true);
+        } else if (arg.equalsIgnoreCase("on") || arg.equalsIgnoreCase("enable")) {
+            toggle(sender, false);
         } else {
-            if (args[0].equalsIgnoreCase("off") || args[0].equalsIgnoreCase("disable")) {
-                if (!plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
-                    plugin.getPlayerDataManager().addUUID(senderUUID, "tg", null);
-                    sender.sendMessage(Message.TOGGLED_OFF.translatePrefixed());
-                } else {
-                    sender.sendMessage(Message.ALREADY_TOGGLED_OFF.translatePrefixed());
-                }
-            } else if (args[0].equalsIgnoreCase("on") || args [0].equalsIgnoreCase("enable")) {
-                if (plugin.getPlayerDataManager().containsUUID(senderUUID, "tg", null)) {
-                    plugin.getPlayerDataManager().removeUUID(senderUUID, "tg", null);
-                    sender.sendMessage(Message.TOGGLED_ON.translatePrefixed());
-                } else {
-                    sender.sendMessage(Message.ALREADY_TOGGLED_ON.translatePrefixed());
-                }
-            } else {
-                sender.sendMessage(Message.ARGUMENT_NOT_RECOGNIZED.translatePrefixed(args[0]));
-                return false;
-            }
+            sender.sendMessage(Message.ARGUMENT_NOT_RECOGNIZED.translatePrefixed(arg));
+            return false;
         }
         return true;
+    }
+
+    private void toggle(Player player, boolean disabled) {
+        final PlayerDataManager dataManager = plugin.getPlayerDataManager();
+        if (dataManager.isGiftDisabled(player.getUniqueId()) == disabled) {
+            if (disabled) {
+                player.sendMessage(Message.ALREADY_TOGGLED_OFF.translatePrefixed());
+            } else {
+                player.sendMessage(Message.ALREADY_TOGGLED_ON.translatePrefixed());
+            }
+            return;
+        }
+
+        dataManager.setGiftDisabled(player.getUniqueId(), disabled);
+        if (disabled) {
+            player.sendMessage(Message.TOGGLED_OFF.translatePrefixed());
+        } else {
+            player.sendMessage(Message.TOGGLED_ON.translatePrefixed());
+        }
     }
 }
