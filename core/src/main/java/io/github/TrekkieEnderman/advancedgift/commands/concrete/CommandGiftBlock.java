@@ -56,7 +56,7 @@ public class CommandGiftBlock extends SimpleCommand {
         }
 
         final String targetName = targetPlayer.getName();
-        if (plugin.getPlayerDataManager().blockPlayer(sender.getUniqueId(), targetPlayer.getUniqueId())) {
+        if (plugin.getPlayerDataManager().getData(sender).blockPlayer(targetPlayer.getUniqueId())) {
             sender.sendMessage(Message.BLOCK_OTHER.translatePrefixed(targetName));
         } else {
             sender.sendMessage(Message.OTHER_BLOCKED_ALREADY.translatePrefixed(targetName));

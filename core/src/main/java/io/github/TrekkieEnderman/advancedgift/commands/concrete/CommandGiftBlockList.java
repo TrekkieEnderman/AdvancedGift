@@ -52,8 +52,8 @@ public class CommandGiftBlockList extends SimpleCommand {
         final UUID senderUUID = sender.getUniqueId();
 
         if (args.length == 0) {
-            final Set<UUID> blockList = plugin.getPlayerDataManager().getBlockList(senderUUID);
-            if (blockList == null || blockList.isEmpty()) sender.sendMessage(Message.BLOCK_LIST_EMPTY.translatePrefixed());
+            final Set<UUID> blockList = plugin.getPlayerDataManager().getData(sender).getBlockList();
+            if (blockList.isEmpty()) sender.sendMessage(Message.BLOCK_LIST_EMPTY.translatePrefixed());
             else {
                 sender.sendMessage(Message.BLOCK_LIST_SHOW.translatePrefixed());
                 ComponentBuilder<TextComponent, TextComponent.Builder> builder = Component.text(); //main builder for showing the list
@@ -81,8 +81,8 @@ public class CommandGiftBlockList extends SimpleCommand {
         }
 
         if (args[0].equalsIgnoreCase("clear")) {
-            if (plugin.getPlayerDataManager().clearBlockList(senderUUID)) sender.sendMessage(Message.BLOCK_LIST_CLEARED.translatePrefixed());
-            else sender.sendMessage(Message.BLOCK_LIST_ALREADY_CLEARED.translatePrefixed());
+            plugin.getPlayerDataManager().getData(sender).clearBlockList();
+            sender.sendMessage(Message.BLOCK_LIST_CLEARED.translatePrefixed());
             return true;
         }
 

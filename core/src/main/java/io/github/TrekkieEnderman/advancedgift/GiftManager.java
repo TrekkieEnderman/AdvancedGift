@@ -18,6 +18,7 @@
 package io.github.TrekkieEnderman.advancedgift;
 
 import io.github.TrekkieEnderman.advancedgift.data.GiftContent;
+import io.github.TrekkieEnderman.advancedgift.data.PlayerData;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import net.kyori.adventure.text.Component;
@@ -67,6 +68,7 @@ public class GiftManager {
 
         // Check if it is OK to send the gift
         final String targetName = target.getName();
+        final PlayerData targetData = plugin.getPlayerDataManager().getData(target);
         if (config.isInterworldGiftRestricted()) {
             final int senderWorldGroup = config.getGroupID(sender.getWorld());
             final int targetWorldGroup = config.getGroupID(target.getWorld());
@@ -87,11 +89,11 @@ public class GiftManager {
             sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed(targetName));
             return;
         }
-        if (plugin.getPlayerDataManager().isGiftDisabled(target.getUniqueId())) {
+        if (!targetData.isGiftEnabled()) {
             sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
             return;
         }
-        if (plugin.getPlayerDataManager().hasPlayerBlocked(target.getUniqueId(), sender.getUniqueId())) {
+        if (targetData.hasPlayerBlocked(sender.getUniqueId())) {
             sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
             return;
         }
@@ -129,7 +131,7 @@ public class GiftManager {
         final Component spyMessage = Message.MESSAGE_LOGGED.translate(sender.getName(), message);
         for (final Player player : Bukkit.getOnlinePlayers()) {
             if (player == sender || player == target) continue;
-            if (plugin.getPlayerDataManager().isSpy(player.getUniqueId())) {
+            if (plugin.getPlayerDataManager().getData(player).isSpy()) {
                 player.sendMessage(spyNotification);
                 if (message != null) player.sendMessage(spyMessage);
             }

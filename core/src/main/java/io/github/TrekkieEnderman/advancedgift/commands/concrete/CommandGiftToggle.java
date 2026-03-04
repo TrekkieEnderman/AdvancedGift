@@ -19,7 +19,7 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
-import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
+import io.github.TrekkieEnderman.advancedgift.data.PlayerData;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -39,15 +39,15 @@ public class CommandGiftToggle extends SimpleCommand {
     @Override
     public boolean run(@NotNull final Player sender, @NotNull final String label, @NotNull final String[] args) {
         if (args.length == 0) {
-            toggle(sender, !plugin.getPlayerDataManager().isGiftDisabled(sender.getUniqueId()));
+            toggle(sender, !plugin.getPlayerDataManager().getData(sender).isGiftEnabled());
             return true;
         }
 
         final String arg = args[0];
         if (arg.equalsIgnoreCase("off") || arg.equalsIgnoreCase("disable")) {
-            toggle(sender, true);
-        } else if (arg.equalsIgnoreCase("on") || arg.equalsIgnoreCase("enable")) {
             toggle(sender, false);
+        } else if (arg.equalsIgnoreCase("on") || arg.equalsIgnoreCase("enable")) {
+            toggle(sender, true);
         } else {
             sender.sendMessage(Message.ARGUMENT_NOT_RECOGNIZED.translatePrefixed(arg));
             return false;
@@ -55,22 +55,22 @@ public class CommandGiftToggle extends SimpleCommand {
         return true;
     }
 
-    private void toggle(Player player, boolean disabled) {
-        final PlayerDataManager dataManager = plugin.getPlayerDataManager();
-        if (dataManager.isGiftDisabled(player.getUniqueId()) == disabled) {
-            if (disabled) {
-                player.sendMessage(Message.ALREADY_TOGGLED_OFF.translatePrefixed());
-            } else {
+    private void toggle(Player player, boolean enabled) {
+        final PlayerData data = plugin.getPlayerDataManager().getData(player);
+        if (data.isGiftEnabled() == enabled) {
+            if (enabled) {
                 player.sendMessage(Message.ALREADY_TOGGLED_ON.translatePrefixed());
+            } else {
+                player.sendMessage(Message.ALREADY_TOGGLED_OFF.translatePrefixed());
             }
             return;
         }
 
-        dataManager.setGiftDisabled(player.getUniqueId(), disabled);
-        if (disabled) {
-            player.sendMessage(Message.TOGGLED_OFF.translatePrefixed());
-        } else {
+        data.setGiftEnabled(enabled);
+        if (enabled) {
             player.sendMessage(Message.TOGGLED_ON.translatePrefixed());
+        } else {
+            player.sendMessage(Message.TOGGLED_OFF.translatePrefixed());
         }
     }
 }

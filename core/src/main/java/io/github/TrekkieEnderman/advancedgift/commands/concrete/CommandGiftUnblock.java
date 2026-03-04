@@ -45,7 +45,7 @@ public class CommandGiftUnblock extends SimpleCommand {
         }
 
         final OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        if (plugin.getPlayerDataManager().unblockPlayer(sender.getUniqueId(), target.getUniqueId())) {
+        if (plugin.getPlayerDataManager().getData(sender).unblockPlayer(target.getUniqueId())) {
             sender.sendMessage(Message.UNBLOCK_OTHER.translatePrefixed(target.getName()));
         } else {
             sender.sendMessage(Message.OTHER_UNBLOCKED_ALREADY.translatePrefixed(target.getName()));

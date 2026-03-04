@@ -23,6 +23,7 @@ import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,14 @@ public abstract class PlayerDataManager {
     public PlayerDataManager(final AdvancedGift plugin) {
         this.plugin = plugin;
         playerInfoFile = new File(plugin.getDataFolder(), "playerinfo.json");
+    }
+
+    public PlayerData getData(Player pLayer) {
+        return getData(pLayer.getUniqueId());
+    }
+
+    public PlayerData getData(UUID uuid) {
+        return new PlayerData(this, uuid);
     }
 
     public final void load() {

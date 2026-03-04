@@ -19,7 +19,7 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
-import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
+import io.github.TrekkieEnderman.advancedgift.data.PlayerData;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -39,7 +39,7 @@ public class CommandSpy extends SimpleCommand {
     @Override
     public boolean run(@NotNull Player sender, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
-            toggle(sender, !plugin.getPlayerDataManager().isSpy(sender.getUniqueId()));
+            toggle(sender, !plugin.getPlayerDataManager().getData(sender).isSpy());
             return true;
         }
 
@@ -56,8 +56,8 @@ public class CommandSpy extends SimpleCommand {
     }
 
     private void toggle(Player sender, boolean enabled) {
-        final PlayerDataManager data = plugin.getPlayerDataManager();
-        if (data.isSpy(sender.getUniqueId()) == enabled) {
+        final PlayerData data = plugin.getPlayerDataManager().getData(sender);
+        if (data.isSpy() == enabled) {
             if (enabled) {
                 sender.sendMessage(Message.SPY_ALREADY_ENABLED.translatePrefixed());
             } else {
@@ -65,7 +65,7 @@ public class CommandSpy extends SimpleCommand {
             }
             return;
         }
-        data.setSpy(sender.getUniqueId(), enabled);
+        data.setSpy(enabled);
         if (enabled) {
             sender.sendMessage(Message.SPY_ENABLED.translatePrefixed());
         } else {
