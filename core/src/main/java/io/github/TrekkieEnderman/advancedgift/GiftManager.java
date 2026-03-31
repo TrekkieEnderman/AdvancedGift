@@ -59,6 +59,7 @@ public class GiftManager {
                     sender.sendMessage(Message.MESSAGE_REMOVED_INAPPROPRIATE.translate());
                 } else if (option == CensorshipOptions.DENY) {
                     sender.sendMessage(Message.GIFT_DENIED_INAPPROPRIATE_MESSAGE.translate());
+                    gift.giveContent(sender);
                     return;
                 }
             }
@@ -71,43 +72,8 @@ public class GiftManager {
         final Component giftMessage = message != null ? Component.text(message) : null;
 
         // Check if it is OK to send the gift
-        final Component targetName = target.name();
-        final PlayerData targetData = plugin.getPlayerDataManager().getData(target);
-        if (config.isInterworldGiftRestricted()) {
-            final int senderWorldGroup = config.getGroupID(sender.getWorld());
-            final int targetWorldGroup = config.getGroupID(target.getWorld());
-            if (senderWorldGroup == -1 && !(sender.hasPermission("advancedgift.bypass.world.blacklist"))) {
-                sender.sendMessage(Message.SENDER_IN_BLACKLISTED_WORLD.translatePrefixed());
-                return;
-            }
-            if (targetWorldGroup == -1 && !(sender.hasPermission("advancedgift.bypass.world.blacklist"))) {
-                sender.sendMessage(Message.TARGET_IN_BLACKLISTED_WORLD.translatePrefixed(targetName));
-                return;
-            }
-            if (senderWorldGroup != (targetWorldGroup) && !(sender.hasPermission("advancedgift.bypass.world.restriction"))) {
-                sender.sendMessage(Message.INTERWORLD_GIFT_PROHIBITED.translatePrefixed(targetName));
-                return;
-            }
-        }
-        if (!(target.hasPermission("advancedgift.gift.receive"))) {
-            sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed(targetName));
-            return;
-        }
-        if (!targetData.isGiftEnabled()) {
-            sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
-            return;
-        }
-        if (targetData.hasPlayerBlocked(sender.getUniqueId())) {
-            sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
-            return;
-        }
-        int timeRemaining;
-        if ((timeRemaining = getPlayerCooldownTime(sender)) > 0) {
-            sender.sendMessage(Message.GIFT_COOLDOWN_NOT_OVER.translatePrefixed(Component.text(timeRemaining), Argument.tagResolver(Formatter.choice("choice", timeRemaining))));
-            return;
-        }
-        if (!gift.canGive(target)) {
-            sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed());
+        if (!canSendGift(sender, target, gift)) {
+            gift.giveContent(sender);
             return;
         }
 
@@ -141,6 +107,49 @@ public class GiftManager {
         }
         plugin.getLogger().info(ComponentUtils.toPlainText(spyNotification));
         if (spyMessage != null) plugin.getLogger().info(ComponentUtils.toPlainText(spyMessage));
+    }
+
+    private boolean canSendGift(Player sender, Player target, GiftContent gift) {
+        final Component targetName = target.name();
+        final PlayerData targetData = plugin.getPlayerDataManager().getData(target);
+        if (config.isInterworldGiftRestricted()) {
+            final int senderWorldGroup = config.getGroupID(sender.getWorld());
+            final int targetWorldGroup = config.getGroupID(target.getWorld());
+            if (senderWorldGroup == -1 && !(sender.hasPermission("advancedgift.bypass.world.blacklist"))) {
+                sender.sendMessage(Message.SENDER_IN_BLACKLISTED_WORLD.translatePrefixed());
+                return false;
+            }
+            if (targetWorldGroup == -1 && !(sender.hasPermission("advancedgift.bypass.world.blacklist"))) {
+                sender.sendMessage(Message.TARGET_IN_BLACKLISTED_WORLD.translatePrefixed(targetName));
+                return false;
+            }
+            if (senderWorldGroup != (targetWorldGroup) && !(sender.hasPermission("advancedgift.bypass.world.restriction"))) {
+                sender.sendMessage(Message.INTERWORLD_GIFT_PROHIBITED.translatePrefixed(targetName));
+                return false;
+            }
+        }
+        if (!(target.hasPermission("advancedgift.gift.receive"))) {
+            sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed(targetName));
+            return false;
+        }
+        if (!targetData.isGiftEnabled()) {
+            sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
+            return false;
+        }
+        if (targetData.hasPlayerBlocked(sender.getUniqueId())) {
+            sender.sendMessage(Message.TARGET_NOT_ACCEPTING_GIFTS_CURRENTLY.translatePrefixed(targetName));
+            return false;
+        }
+        int timeRemaining;
+        if ((timeRemaining = getPlayerCooldownTime(sender)) > 0) {
+            sender.sendMessage(Message.GIFT_COOLDOWN_NOT_OVER.translatePrefixed(Component.text(timeRemaining), Argument.tagResolver(Formatter.choice("choice", timeRemaining))));
+            return false;
+        }
+        if (!gift.canGive(target)) {
+            sender.sendMessage(Message.TARGET_CANNOT_RECEIVE_GIFTS_CURRENTLY.translatePrefixed());
+            return false;
+        }
+        return true;
     }
 
     private int getPlayerCooldownTime(final Player player) {
