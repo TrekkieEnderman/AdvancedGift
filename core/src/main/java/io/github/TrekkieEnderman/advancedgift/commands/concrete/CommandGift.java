@@ -100,7 +100,7 @@ public class CommandGift extends SimpleCommand {
         }
 
         if (target == null) {
-            sender.sendMessage(Message.TARGET_NOT_ONLINE.translatePrefixed(args[0]));
+            sender.sendMessage(Message.TARGET_NOT_ONLINE.translatePrefixed(Component.text(args[0])));
             return false;
         }
 

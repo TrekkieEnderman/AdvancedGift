@@ -17,10 +17,13 @@
 
 package io.github.TrekkieEnderman.advancedgift.locale;
 
-import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
 
 public enum Message {
     COMMAND_NO_PERMISSION("commandNoPermission"),
@@ -119,31 +122,49 @@ public enum Message {
         prefix = newPrefix.appendSpace();
     }
 
-    /**
-     * Gets a translation string without any chat formatting applied. Placeholder replacements will still be applied.
-     * This is typically used for combining multiple message parts together.
-     * @param objects placeholder replacements.
-     * @return translated message with placeholders replaced.
-     */
-    public String translateRaw(Object... objects) {
-        return Translation.translate(Translation.getServerLocale(), key, objects);
+    private TranslatableComponent getTranslatable(@NotNull ComponentLike @NotNull... args) {
+        return Component.translatable(key, args);
     }
 
     /**
-     * Gets a translation component with all chat formatting and placeholder replacements applied.
-     * @param objects placeholder replacements.
+     * Gets a translation component with all chat formatting applied and placeholders replaced.
+     * @param args component arguments.
      * @return translated message.
      */
-    public Component translate(Object... objects) {
-        return ComponentUtils.fromLegacyText(translateRaw(objects));
+    public Component translate(@NotNull ComponentLike @NotNull... args) {
+        return TranslationManager.render(getTranslatable(args));
     }
 
     /**
-     * Does the same thing as {@link #translate(Object...)}, but appends the plugin prefix to the beginning of the message.
-     * @param objects placeholder replacements.
+     * Gets a translation component with all chat formatting applied and placeholders replaced.
+     * @param locale translation locale
+     * @param args component arguments.
      * @return translated message.
      */
-    public Component translatePrefixed(Object... objects) {
-        return prefix.append(translate(objects));
+    public Component translate(@NotNull Locale locale, @NotNull ComponentLike @NotNull... args) {
+        return TranslationManager.render(getTranslatable(args), locale);
+    }
+
+    /**
+     * Does the same thing as {@link #translate(ComponentLike...)}, but appends the plugin prefix to the beginning of the message.
+     * @param args component arguments.
+     * @return translated message.
+     */
+    public Component translatePrefixed(@NotNull ComponentLike @NotNull... args) {
+        return prefix.append(translate(args));
+    }
+
+    /**
+     * Does the same thing as {@link #translate(Locale, ComponentLike...)}, but appends the plugin prefix to the beginning of the message.
+     * @param locale translation locale
+     * @param args component arguments.
+     * @return translated message.
+     */
+    public Component translatePrefixed(@NotNull Locale locale, @NotNull ComponentLike @NotNull... args) {
+        return prefix.append(translate(locale, args));
+    }
+
+    public String translationKey() {
+        return key;
     }
 }

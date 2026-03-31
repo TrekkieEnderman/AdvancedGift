@@ -22,7 +22,7 @@ import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
 import io.github.TrekkieEnderman.advancedgift.data.StandardDataManager;
 import io.github.TrekkieEnderman.advancedgift.listener.PlayerJoinListener;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
-import io.github.TrekkieEnderman.advancedgift.locale.Translation;
+import io.github.TrekkieEnderman.advancedgift.locale.TranslationManager;
 import io.github.TrekkieEnderman.advancedgift.metrics.GiftCounter;
 import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import lombok.Getter;
@@ -43,6 +43,8 @@ public class AdvancedGift extends JavaPlugin {
     private Config configuration;
     @Getter
     private GiftManager giftManager;
+    @Getter
+    private TranslationManager localization;
 
     @Override
     public void onEnable() {
@@ -50,7 +52,7 @@ public class AdvancedGift extends JavaPlugin {
             //noinspection ResultOfMethodCallIgnored
             getDataFolder().mkdirs();
         }
-        Translation.init(this);
+        localization = new TranslationManager(this);
         configuration = new Config(this);
         if (configuration.isOutdated()) {
             getLogger().warning(ComponentUtils.toPlainText(Message.OUTDATED_CONFIG.translate()));

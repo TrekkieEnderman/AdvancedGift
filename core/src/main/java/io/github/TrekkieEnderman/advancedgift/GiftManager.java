@@ -22,6 +22,8 @@ import io.github.TrekkieEnderman.advancedgift.data.PlayerData;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
+import net.kyori.adventure.text.minimessage.translation.Argument;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -66,8 +68,10 @@ public class GiftManager {
             message = null;
         }
 
+        final Component giftMessage = message != null ? Component.text(message) : null;
+
         // Check if it is OK to send the gift
-        final String targetName = target.getName();
+        final Component targetName = target.name();
         final PlayerData targetData = plugin.getPlayerDataManager().getData(target);
         if (config.isInterworldGiftRestricted()) {
             final int senderWorldGroup = config.getGroupID(sender.getWorld());
@@ -99,7 +103,7 @@ public class GiftManager {
         }
         int timeRemaining;
         if ((timeRemaining = getPlayerCooldownTime(sender)) > 0) {
-            sender.sendMessage(Message.GIFT_COOLDOWN_NOT_OVER.translatePrefixed(timeRemaining));
+            sender.sendMessage(Message.GIFT_COOLDOWN_NOT_OVER.translatePrefixed(Component.text(timeRemaining), Argument.tagResolver(Formatter.choice("choice", timeRemaining))));
             return;
         }
         if (!gift.canGive(target)) {
@@ -113,31 +117,30 @@ public class GiftManager {
         plugin.getGiftCounter().increment();
         gift.giveContent(target).ifPresent(excess -> {
             // TODO either generalize these messages or make new ones more suitable for this
-            sender.sendMessage(Message.TARGET_INVENTORY_ALMOST_FULL.translatePrefixed(target.getName()));
-            target.sendMessage(Message.YOUR_INVENTORY_ALMOST_FULL.translatePrefixed(sender.getName()));
+            sender.sendMessage(Message.TARGET_INVENTORY_ALMOST_FULL.translatePrefixed(target.name()));
+            target.sendMessage(Message.YOUR_INVENTORY_ALMOST_FULL.translatePrefixed(sender.name()));
             excess.giveContent(sender);
         });
 
         // Send notification
-        // TODO Fix this after the component situation with Message enum is resolved.
-        String giftDetails = ComponentUtils.toLegacyText(gift.getDetails());
-        sender.sendMessage(Message.GIFT_SENT.translatePrefixed(target.getName(), giftDetails));
-        target.sendMessage(Message.GIFT_RECEIVED.translatePrefixed(sender.getName(), giftDetails));
-        if (message != null) {
-            sender.sendMessage(Message.MESSAGE_SENT.translate(message));
-            target.sendMessage(Message.MESSAGE_RECEIVED.translate(message));
+        Component giftDetails = gift.getDetails();
+        sender.sendMessage(Message.GIFT_SENT.translatePrefixed(target.name(), giftDetails));
+        target.sendMessage(Message.GIFT_RECEIVED.translatePrefixed(sender.name(), giftDetails));
+        if (giftMessage != null) {
+            sender.sendMessage(Message.MESSAGE_SENT.translate(giftMessage));
+            target.sendMessage(Message.MESSAGE_RECEIVED.translate(giftMessage));
         }
-        final Component spyNotification = Message.GIFT_LOGGED.translatePrefixed(sender.getName(), target.getName(), giftDetails);
-        final Component spyMessage = Message.MESSAGE_LOGGED.translate(sender.getName(), message);
+        final Component spyNotification = Message.GIFT_LOGGED.translatePrefixed(sender.name(), target.name(), giftDetails);
+        final Component spyMessage = giftMessage != null ? Message.MESSAGE_LOGGED.translate(sender.name(), giftMessage) : null;
         for (final Player player : Bukkit.getOnlinePlayers()) {
             if (player == sender || player == target) continue;
             if (plugin.getPlayerDataManager().getData(player).isSpy()) {
                 player.sendMessage(spyNotification);
-                if (message != null) player.sendMessage(spyMessage);
+                if (spyMessage != null) player.sendMessage(spyMessage);
             }
         }
         plugin.getLogger().info(ComponentUtils.toPlainText(spyNotification));
-        if (message != null) plugin.getLogger().info(ComponentUtils.toPlainText(spyMessage));
+        if (spyMessage != null) plugin.getLogger().info(ComponentUtils.toPlainText(spyMessage));
     }
 
     private int getPlayerCooldownTime(final Player player) {

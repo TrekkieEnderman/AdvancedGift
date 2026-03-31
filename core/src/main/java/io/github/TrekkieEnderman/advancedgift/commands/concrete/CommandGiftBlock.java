@@ -20,6 +20,7 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -51,11 +52,11 @@ public class CommandGiftBlock extends SimpleCommand {
             return false;
         }
         if (!targetPlayer.hasPlayedBefore()) {
-            sender.sendMessage(Message.PLAYER_NOT_FOUND.translatePrefixed(args[0]));
+            sender.sendMessage(Message.PLAYER_NOT_FOUND.translatePrefixed(Component.text(args[0])));
             return false;
         }
 
-        final String targetName = targetPlayer.getName();
+        final Component targetName = Component.text(targetPlayer.getName());
         if (plugin.getPlayerDataManager().getData(sender).blockPlayer(targetPlayer.getUniqueId())) {
             sender.sendMessage(Message.BLOCK_OTHER.translatePrefixed(targetName));
         } else {

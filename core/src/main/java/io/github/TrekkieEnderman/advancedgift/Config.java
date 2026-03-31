@@ -18,7 +18,7 @@
 package io.github.TrekkieEnderman.advancedgift;
 
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
-import io.github.TrekkieEnderman.advancedgift.locale.Translation;
+import io.github.TrekkieEnderman.advancedgift.locale.TranslationManager;
 import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -43,7 +43,7 @@ public class Config {
     @Getter
     private boolean metricsEnabled = true;
     @Getter
-    private Locale locale = Translation.DEFAULT_LOCALE;
+    private Locale locale = TranslationManager.DEFAULT_LOCALE;
     @Getter
     private boolean cooldownEnabled = false;
     @Getter
@@ -72,10 +72,9 @@ public class Config {
         final Configuration config = plugin.getConfig();
         version = config.isSet("version") ? config.getInt("version") : -1;
         outdated = version != config.getDefaults().getInt("version");
-        prefix = ComponentUtils.fromLegacyText(config.getString("prefix"));
+        prefix = ComponentUtils.fromMiniMessage(config.getString("prefix"));
         metricsEnabled = config.getBoolean("enable-metrics");
-        Locale newLocale = Translation.parseLocale(config.getString("locale"));
-        if (newLocale != null) locale = newLocale;
+        locale = TranslationManager.parseLocale(config.getString("locale"), locale);
         cooldownEnabled = config.getBoolean("cooldown.enabled");
         cooldownDuration = config.getLong("cooldown.duration");
         giftMessageEnabled = config.getBoolean("allow-gift-message");
@@ -103,7 +102,7 @@ public class Config {
             worldGroups.clear();
             worldGroups.putAll(map);
         }
-        Translation.updateLocale(locale);
+        plugin.getLocalization().reload(locale);
         Message.setPrefix(prefix);
         plugin.getLogger().info(ComponentUtils.toPlainText(Message.CONFIG_LOADED.translate()));
     }

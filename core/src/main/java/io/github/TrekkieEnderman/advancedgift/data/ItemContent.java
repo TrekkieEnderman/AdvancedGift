@@ -18,7 +18,7 @@
 package io.github.TrekkieEnderman.advancedgift.data;
 
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
-import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
+import io.github.TrekkieEnderman.advancedgift.locale.TranslationManager;
 import io.github.TrekkieEnderman.advancedgift.util.ItemUtils;
 import io.github.TrekkieEnderman.advancedgift.util.PlayerUtils;
 import net.kyori.adventure.text.Component;
@@ -65,28 +65,25 @@ public class ItemContent implements GiftContent {
     }
 
     public Component getDetails() {
-        /*
-         TODO GlobalTranslator has render() for translating materials. Use this
-            after the component situation with Messages enum is resolved.
-         */
-        String itemDetails = ItemUtils.getPrettyMaterialName(itemStack);
+        Component itemDetails = TranslationManager.render(itemStack.getType().translationKey());
         final boolean hasItemMeta = itemStack.hasItemMeta();
         final ItemMeta meta = itemStack.getItemMeta();
 
         // Add prefix
         if (hasItemMeta && meta.hasEnchants()) {
-            itemDetails = Message.ENCHANTED_ITEM.translateRaw(itemDetails);
+            itemDetails = Message.ENCHANTED_ITEM.translate(itemDetails);
         }
         if (ItemUtils.isPatternedBanner(itemStack)) {
-            itemDetails = Message.PATTERNED_ITEM.translateRaw(itemDetails);
+            itemDetails = Message.PATTERNED_ITEM.translate(itemDetails);
         }
 
         // Add suffix
-        if (hasItemMeta && meta.hasDisplayName()) {
-            // TODO revise this later. I prefer to add the display name as a component without converting it
-            itemDetails = Message.NAMED_ITEM.translateRaw(itemDetails, ComponentUtils.toLegacyText(meta.displayName()));
+        if (hasItemMeta && meta.hasCustomName()) {
+            //noinspection DataFlowIssue
+            itemDetails = Message.NAMED_ITEM.translate(itemDetails, meta.customName());
         }
 
-        return Message.ITEM_DETAILS_BASE.translatePrefixed(getAmount(), itemDetails).hoverEvent(itemStack.asHoverEvent());
+        return Message.ITEM_DETAILS_BASE.translate(Component.text(getAmount()), itemDetails)
+                .hoverEvent(itemStack.asHoverEvent());
     }
 }

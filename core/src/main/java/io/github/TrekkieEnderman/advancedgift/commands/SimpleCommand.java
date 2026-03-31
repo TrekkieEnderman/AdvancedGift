@@ -21,6 +21,7 @@ import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -78,7 +79,7 @@ public abstract class SimpleCommand implements CommandExecutor {
         }
 
         if (!run(sender, label, args)) {
-            sender.sendMessage(Message.COMMAND_USAGE_TIP.translatePrefixed(name));
+            sender.sendMessage(Message.COMMAND_USAGE_TIP.translatePrefixed(Component.text(name)));
         }
         return true;
     }

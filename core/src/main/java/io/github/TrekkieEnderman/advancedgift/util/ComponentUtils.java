@@ -19,6 +19,7 @@ package io.github.TrekkieEnderman.advancedgift.util;
 
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 public class ComponentUtils {
     private final static PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER = PlainTextComponentSerializer.plainText();
     private final static LegacyComponentSerializer LEGACY_TEXT_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
+    private final static MiniMessage MM = MiniMessage.miniMessage();
 
     /**
      * Converts a component to a plain text, stripping it of all chat formatting as the result.
@@ -66,5 +68,25 @@ public class ComponentUtils {
     public static @Nullable String toLegacyText(@Nullable Component component) {
         if (component == null) return null;
         return LEGACY_TEXT_SERIALIZER.serialize(component);
+    }
+
+    /**
+     * Converts a MiniMessage-formatted string to Adventure {@link Component}.
+     * @param string string.
+     * @return component.
+     */
+    public static @Nullable Component fromMiniMessage(@Nullable String string) {
+        if (string == null || string.isBlank()) return null;
+        return MM.deserialize(string);
+    }
+
+    /**
+     * Converts a Component to a MiniMessage-formatted string.
+     * @param component component.
+     * @return string.
+     */
+    public static @Nullable String toMiniMessage(@Nullable Component component) {
+        if (component == null) return null;
+        return MM.serialize(component);
     }
 }

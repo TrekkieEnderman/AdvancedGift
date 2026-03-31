@@ -20,6 +20,7 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -45,10 +46,11 @@ public class CommandGiftUnblock extends SimpleCommand {
         }
 
         final OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+        Component targetName = Component.text(target.getName());
         if (plugin.getPlayerDataManager().getData(sender).unblockPlayer(target.getUniqueId())) {
-            sender.sendMessage(Message.UNBLOCK_OTHER.translatePrefixed(target.getName()));
+            sender.sendMessage(Message.UNBLOCK_OTHER.translatePrefixed(targetName));
         } else {
-            sender.sendMessage(Message.OTHER_UNBLOCKED_ALREADY.translatePrefixed(target.getName()));
+            sender.sendMessage(Message.OTHER_UNBLOCKED_ALREADY.translatePrefixed(targetName));
         }
         return true;
     }

@@ -21,6 +21,7 @@ import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
 import io.github.TrekkieEnderman.advancedgift.data.PlayerData;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +50,7 @@ public class CommandSpy extends SimpleCommand {
         } else if (arg.equalsIgnoreCase("false") || arg.equalsIgnoreCase("off") || arg.equalsIgnoreCase("disable")) {
             toggle(sender, false);
         } else {
-            sender.sendMessage(Message.ARGUMENT_NOT_RECOGNIZED.translatePrefixed(arg));
+            sender.sendMessage(Message.ARGUMENT_NOT_RECOGNIZED.translatePrefixed(Component.text(arg)));
             return false;
         }
         return true;
