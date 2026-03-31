@@ -30,6 +30,7 @@ import me.Fupery.ArtMap.ArtMap;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -53,7 +54,8 @@ public class AdvancedGift extends JavaPlugin {
             getDataFolder().mkdirs();
         }
         localization = new TranslationManager(this);
-        configuration = new Config(this);
+        configuration = new Config(getLogger());
+        reloadConfiguration();
         if (configuration.isOutdated()) {
             getLogger().warning(ComponentUtils.toPlainText(Message.OUTDATED_CONFIG.translate()));
         }
@@ -82,6 +84,16 @@ public class AdvancedGift extends JavaPlugin {
     private void startMetrics() {
         Metrics metrics = new Metrics(this, 13627);
         metrics.addCustomChart(new SingleLineChart("gifts_sent", giftCounter::collect));
+    }
+
+    public void reloadConfiguration() {
+        saveDefaultConfig();
+        reloadConfig();
+        final Configuration data = getConfig();
+        configuration.load(data);
+        localization.reload(configuration.getLocale());
+        Message.setPrefix(configuration.getPrefix());
+        getLogger().info(ComponentUtils.toPlainText(Message.CONFIG_LOADED.translate()));
     }
 
     public boolean hasArtMap() {

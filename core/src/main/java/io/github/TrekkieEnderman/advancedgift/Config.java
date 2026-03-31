@@ -17,7 +17,6 @@
 
 package io.github.TrekkieEnderman.advancedgift;
 
-import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.locale.TranslationManager;
 import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import lombok.Getter;
@@ -29,10 +28,11 @@ import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 @NullMarked
 public class Config {
-    private final AdvancedGift plugin;
+    private final Logger logger;
 
     @Getter
     private int version = 2;
@@ -60,16 +60,11 @@ public class Config {
     private boolean interworldGiftRestricted = false;
     private final Map<String, Integer> worldGroups = new HashMap<>();
 
-    public Config(AdvancedGift plugin) {
-        this.plugin = plugin;
-        reload();
+    public Config(Logger logger) {
+        this.logger = logger;
     }
 
-    @SuppressWarnings("DataFlowIssue")
-    public void reload() {
-        plugin.saveDefaultConfig();
-        plugin.reloadConfig();
-        final Configuration config = plugin.getConfig();
+    void load(Configuration config) {
         version = config.isSet("version") ? config.getInt("version") : -1;
         outdated = version != config.getDefaults().getInt("version");
         prefix = ComponentUtils.fromMiniMessage(config.getString("prefix"));
@@ -102,9 +97,6 @@ public class Config {
             worldGroups.clear();
             worldGroups.putAll(map);
         }
-        plugin.getLocalization().reload(locale);
-        Message.setPrefix(prefix);
-        plugin.getLogger().info(ComponentUtils.toPlainText(Message.CONFIG_LOADED.translate()));
     }
 
     public Map<String, Integer> getWorldGroups() {
@@ -117,6 +109,6 @@ public class Config {
 
     private void logParseFailure(final String path) {
         String message = "Could not parse '%s' in config.yml! Is it misconfigured?";
-        plugin.getLogger().warning(message.formatted(path));
+        logger.warning(message.formatted(path));
     }
 }

@@ -36,7 +36,7 @@ public class CommandReload extends SimpleCommand {
 
     @Override
     public boolean run(@NotNull final CommandSender sender, @NotNull final String label,  @NotNull final String[] args) {
-        plugin.getConfiguration().reload();
+        plugin.reloadConfiguration();
         sender.sendMessage(Message.CONFIG_RELOADED.translatePrefixed());
         return true;
     }
