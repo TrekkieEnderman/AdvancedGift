@@ -19,7 +19,7 @@ package io.github.TrekkieEnderman.advancedgift.commands.concrete;
 
 import io.github.TrekkieEnderman.advancedgift.AdvancedGift;
 import io.github.TrekkieEnderman.advancedgift.commands.SimpleCommand;
-import io.github.TrekkieEnderman.advancedgift.data.ItemContent;
+import io.github.TrekkieEnderman.advancedgift.gift.ItemContent;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.util.PlayerUtils;
 import net.kyori.adventure.text.Component;

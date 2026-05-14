@@ -18,8 +18,8 @@
 package io.github.TrekkieEnderman.advancedgift;
 
 import io.github.TrekkieEnderman.advancedgift.commands.concrete.*;
-import io.github.TrekkieEnderman.advancedgift.data.PlayerDataManager;
-import io.github.TrekkieEnderman.advancedgift.data.StandardDataManager;
+import io.github.TrekkieEnderman.advancedgift.player.PlayerDataManager;
+import io.github.TrekkieEnderman.advancedgift.player.StandardDataManager;
 import io.github.TrekkieEnderman.advancedgift.listener.PlayerJoinListener;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.locale.TranslationManager;

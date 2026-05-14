@@ -17,8 +17,8 @@
 
 package io.github.TrekkieEnderman.advancedgift;
 
-import io.github.TrekkieEnderman.advancedgift.data.GiftContent;
-import io.github.TrekkieEnderman.advancedgift.data.PlayerData;
+import io.github.TrekkieEnderman.advancedgift.gift.GiftContent;
+import io.github.TrekkieEnderman.advancedgift.player.PlayerData;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import net.kyori.adventure.text.Component;
