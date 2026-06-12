@@ -17,51 +17,50 @@
 
 package io.github.TrekkieEnderman.advancedgift.player;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.jspecify.annotations.NullMarked;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 @NullMarked
-@RequiredArgsConstructor
 public class PlayerData {
-    private final PlayerDataManager manager;
-    private final UUID uuid;
+    @Getter
+    @Setter
+    private boolean giftEnabled = true;
+    @Getter
+    @Setter
+    private boolean spy = false;
+    private Set<UUID> blocked = new HashSet<>();
 
-    public void setGiftEnabled(boolean enabled) {
-        manager.setGiftDisabled(uuid, !enabled);
-    }
+    public PlayerData() {}
 
-    public boolean isGiftEnabled() {
-        return !manager.isGiftDisabled(uuid);
-    }
-
-    public void setSpy(boolean enabled) {
-        manager.setSpy(uuid, enabled);
-    }
-
-    public boolean isSpy() {
-        return manager.isSpy(uuid);
+    public PlayerData(boolean giftEnabled, boolean spy, Set<UUID> blocked) {
+        this.giftEnabled = giftEnabled;
+        this.spy = spy;
+        this.blocked = blocked;
     }
 
     public boolean blockPlayer(UUID other) {
-        return manager.blockPlayer(uuid, other);
+        return blocked.add(other);
     }
 
     public boolean unblockPlayer(UUID other) {
-        return manager.unblockPlayer(uuid, other);
+        return blocked.remove(other);
     }
 
     public boolean hasPlayerBlocked(UUID other) {
-        return manager.hasPlayerBlocked(uuid, other);
+        return blocked.contains(other);
     }
 
     public Set<UUID> getBlockList() {
-        return Set.copyOf(manager.getBlockList(uuid));
+        return Set.copyOf(blocked);
     }
 
     public void clearBlockList() {
-        manager.clearBlockList(uuid);
+        if (blocked.isEmpty()) return;
+        blocked.clear();
     }
 }

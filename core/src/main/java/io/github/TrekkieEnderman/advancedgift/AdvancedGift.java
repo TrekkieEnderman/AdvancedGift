@@ -18,12 +18,12 @@
 package io.github.TrekkieEnderman.advancedgift;
 
 import io.github.TrekkieEnderman.advancedgift.commands.concrete.*;
-import io.github.TrekkieEnderman.advancedgift.player.PlayerDataManager;
-import io.github.TrekkieEnderman.advancedgift.player.StandardDataManager;
+import io.github.TrekkieEnderman.advancedgift.player.*;
 import io.github.TrekkieEnderman.advancedgift.listener.PlayerJoinListener;
 import io.github.TrekkieEnderman.advancedgift.locale.Message;
 import io.github.TrekkieEnderman.advancedgift.locale.TranslationManager;
 import io.github.TrekkieEnderman.advancedgift.metrics.GiftCounter;
+import io.github.TrekkieEnderman.advancedgift.storage.PlayerInfoStorage;
 import io.github.TrekkieEnderman.advancedgift.util.ComponentUtils;
 import lombok.Getter;
 import me.Fupery.ArtMap.ArtMap;
@@ -59,8 +59,8 @@ public class AdvancedGift extends JavaPlugin {
         if (configuration.isOutdated()) {
             getLogger().warning(ComponentUtils.toPlainText(Message.OUTDATED_CONFIG.translate()));
         }
-        playerDataManager = new StandardDataManager(this);
-        this.getPlayerDataManager().load();
+        playerDataManager = new PlayerDataManager(new PlayerInfoStorage(this));
+        this.getPlayerDataManager().init();
         giftManager = new GiftManager(this);
         this.getCommand("gift").setExecutor(new CommandGift(this));
         this.getCommand("togglegift").setExecutor(new CommandGiftToggle(this));
@@ -78,7 +78,7 @@ public class AdvancedGift extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        this.getPlayerDataManager().save();
+        this.getPlayerDataManager().shutdown();
     }
 
     private void startMetrics() {

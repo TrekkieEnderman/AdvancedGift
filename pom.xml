@@ -74,6 +74,16 @@
             <artifactId>adventure-text-serializer-legacy</artifactId>
             <version>4.26.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>configurate-yaml</artifactId>
+            <version>4.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>configurate-jackson</artifactId>
+            <version>4.2.0</version>
+        </dependency>
     </dependencies>
 
 </project>
