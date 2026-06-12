@@ -62,7 +62,13 @@ public class TranslationManager {
         this.plugin = plugin;
         this.defaultBundle = getEmbeddedBundle(DEFAULT_LOCALE);
         // TODO Need to add a way to handle or migrate translation files with legacy formatting
-        reload(DEFAULT_LOCALE);
+        // TODO reevaluate the load logic
+        // Duplicated part of the reload logic because translation store is null during init.
+        exportTranslation(serverLocale);
+        store = MiniMessageTranslationStore.create(Key.key("advancedgift", "main"));
+        store.defaultLocale(DEFAULT_LOCALE);
+        registerTranslation(DEFAULT_LOCALE, defaultBundle);
+        GlobalTranslator.translator().addSource(store);
     }
 
     /**
