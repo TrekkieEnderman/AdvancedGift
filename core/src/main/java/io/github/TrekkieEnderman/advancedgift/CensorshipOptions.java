@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 TrekkieEnderman
+ * Copyright (c) 2026 TrekkieEnderman
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.TrekkieEnderman.advancedgift.metrics;
+package io.github.TrekkieEnderman.advancedgift;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-public class GiftCounter {
-    private final AtomicInteger counter = new AtomicInteger();
-
-    public void increment() {
-        counter.incrementAndGet();
-    }
-
-    public int collect() {
-        return counter.getAndSet(0);
-    }
+public enum CensorshipOptions {
+    CENSOR,
+    REMOVE,
+    DENY
 }

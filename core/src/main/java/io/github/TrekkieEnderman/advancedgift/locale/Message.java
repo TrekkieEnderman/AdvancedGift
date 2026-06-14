@@ -1,23 +1,29 @@
 /*
- * Copyright (c) 2025 TrekkieEnderman
+ * Copyright (c) 2025-2026 TrekkieEnderman
  *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package io.github.TrekkieEnderman.advancedgift.locale;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
 
 public enum Message {
     COMMAND_NO_PERMISSION("commandNoPermission"),
@@ -90,6 +96,7 @@ public enum Message {
     MESSAGE_RECEIVED("messageReceived"),
     GIFT_LOGGED("giftLogged"),
     MESSAGE_LOGGED("messageLogged"),
+    ITEM_DETAILS_BASE("itemDetailsBase"),
     ENCHANTED_ITEM("enchantedItem"),
     PATTERNED_ITEM("patternedItem"),
     NAMED_ITEM("namedItem"),
@@ -99,14 +106,65 @@ public enum Message {
     COMMAND_TRANSLATE_DESCRIPTION("translateCommandDescription"),
     COMMAND_TRANSLATE_USAGE("translateCommandUsage");
 
-
+    private static final Component NO_PREFIX = Component.text("");
+    private static Component prefix = NO_PREFIX;
     private final String key;
 
     Message(final @NotNull String key) {
         this.key = key;
     }
 
-    public String translate(Object... objects) {
-        return Translation.translate(Translation.getServerLocale(), key, objects);
+    public static void setPrefix(@Nullable Component newPrefix) {
+        if (newPrefix == null) {
+            prefix = NO_PREFIX;
+            return;
+        }
+        prefix = newPrefix.appendSpace();
+    }
+
+    private TranslatableComponent getTranslatable(@NotNull ComponentLike @NotNull... args) {
+        return Component.translatable(key, args);
+    }
+
+    /**
+     * Gets a translation component with all chat formatting applied and placeholders replaced.
+     * @param args component arguments.
+     * @return translated message.
+     */
+    public Component translate(@NotNull ComponentLike @NotNull... args) {
+        return TranslationManager.render(getTranslatable(args));
+    }
+
+    /**
+     * Gets a translation component with all chat formatting applied and placeholders replaced.
+     * @param locale translation locale
+     * @param args component arguments.
+     * @return translated message.
+     */
+    public Component translate(@NotNull Locale locale, @NotNull ComponentLike @NotNull... args) {
+        return TranslationManager.render(getTranslatable(args), locale);
+    }
+
+    /**
+     * Does the same thing as {@link #translate(ComponentLike...)}, but appends the plugin prefix to the beginning of the message.
+     * @param args component arguments.
+     * @return translated message.
+     */
+    public Component translatePrefixed(@NotNull ComponentLike @NotNull... args) {
+        return prefix.append(translate(args));
+    }
+
+    /**
+     * Does the same thing as {@link #translate(Locale, ComponentLike...)}, but appends the plugin prefix to the beginning of the message.
+     * @param locale translation locale
+     * @param args component arguments.
+     * @return translated message.
+     */
+    public Component translatePrefixed(@NotNull Locale locale, @NotNull ComponentLike @NotNull... args) {
+        return prefix.append(translate(locale, args));
+    }
+
+    public String translationKey() {
+        return key;
     }
 }

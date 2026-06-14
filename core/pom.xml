@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2025 TrekkieEnderman
+  ~ Copyright (c) 2025-2026 TrekkieEnderman
   ~
-  ~     This program is free software: you can redistribute it and/or modify
-  ~     it under the terms of the GNU General Public License as published by
-  ~     the Free Software Foundation, either version 3 of the License, or
-  ~     (at your option) any later version.
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
   ~
-  ~     This program is distributed in the hope that it will be useful,
-  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~     GNU General Public License for more details.
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
   ~
-  ~     You should have received a copy of the GNU General Public License
-  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>advancedgift-core</artifactId>
-    <version>1.13.1</version>
+    <version>2.0</version>
     <build>
         <directory>../target</directory>
         <finalName>AdvancedGift-${project.version}</finalName>
@@ -35,7 +35,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.3</version>
+                <version>3.6.1</version>
                 <configuration>
                     <relocations>
                         <relocation>
@@ -81,15 +81,16 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.15.2-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.meowj</groupId>
-            <artifactId>LangUtils</artifactId>
-            <version>1.9</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.11-R0.1-SNAPSHOT</version>
+            <exclusions>
+                <!-- Screw you Maven, stop picking this over PaperMC! -->
+                <exclusion>
+                    <groupId>org.spigotmc</groupId>
+                    <artifactId>spigot-api</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -104,115 +105,11 @@
             <version>3.0.0</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-api</artifactId>
-            <version>API</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-reflection</artifactId>
-            <version>1.21</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_8_R3</artifactId>
-            <version>1_8_R3</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_9_R2</artifactId>
-            <version>1_9_R2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_10_R1</artifactId>
-            <version>1_10_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_11_R1</artifactId>
-            <version>1_11_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_12_R1</artifactId>
-            <version>1_12_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_13_R2</artifactId>
-            <version>1_13_R2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_14_R1</artifactId>
-            <version>1_14_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_15_R1</artifactId>
-            <version>1_15_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_16_R3</artifactId>
-            <version>1_16_R3</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_17_R1</artifactId>
-            <version>1_17_R1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_18_R2</artifactId>
-            <version>1_18_R2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_19_R2</artifactId>
-            <version>1_19_R2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_20_R3</artifactId>
-            <version>1_20_R3</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_20_R4</artifactId>
-            <version>parent</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_21_R1</artifactId>
-            <version>parent</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_21_R2</artifactId>
-            <version>parent</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_21_R3</artifactId>
-            <version>parent</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_21_R4</artifactId>
-            <version>parent</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.TrekkieEnderman</groupId>
-            <artifactId>advancedgift-1_21_R5</artifactId>
-            <version>parent</version>
-        </dependency>
+        <!-- ArtMap has to be compiled locally -->
         <dependency>
             <groupId>com.gitlab.blockstack</groupId>
             <artifactId>ArtMap</artifactId>
-            <version>3.8.1</version>
+            <version>3.9.24</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
